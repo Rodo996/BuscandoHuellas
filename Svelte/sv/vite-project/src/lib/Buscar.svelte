@@ -70,34 +70,30 @@
 </script>
 
 <div class="app-container">
-    <header class="header">
-    
-        <div class="logo-title">
-            <span class="buscando">Buscando</span><span class="huellas">Huellas</span>
-        </div>
-        <div class="header-top">
-            <h1>Resultados</h1>
-            <button class="close-btn" on:click={() => dispatch('volver')}>
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M1.4 14L0 12.6L5.6 7L0 1.4L1.4 0L7 5.6L12.6 0L14 1.4L8.4 7L14 12.6L12.6 14L7 8.4L1.4 14Z" fill="#FFFFFF"/>
-                </svg>
-            </button>
-        </div>
-    </header>
+    <div class="top-brand-header">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L2 10.5H5V20H19V10.5H22L12 2Z" stroke="#F4D35E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="12" cy="12" r="3" fill="#F4D35E"/>
+      </svg>
+      <span class="text-white">Buscando</span><span class="text-yellow">Huellas</span>
+    </div>
+
+    <div class="resultados-header">
+        <h1>Resultados</h1>
+        <button class="close-btn-clean" on:click={() => dispatch('volver')}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0D3B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+    </div>
 
     <section class="search-section">
         <div class="search-bar">
             <div class="input-wrapper">
-                <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M13.83 15L8.58 9.75C8.16 10.08 7.68 10.34 7.14 10.54C6.6 10.73 6.02 10.83 5.41 10.83C3.9 10.83 2.62 10.3 1.57 9.26C0.52 8.21 0 6.93 0 5.41C0 3.9 0.52 2.62 1.57 1.57C2.62 0.52 3.9 0 5.41 0C6.93 0 8.21 0.52 9.26 1.57C10.3 2.62 10.83 3.9 10.83 5.41C10.83 6.02 10.73 6.6 10.54 7.14C10.34 7.68 10.08 8.16 9.75 8.58L15 13.83L13.83 15ZM5.41 9.16C6.45 9.16 7.34 8.8 8.07 8.07C8.8 7.34 9.16 6.45 9.16 5.41C9.16 4.37 8.8 3.48 8.07 2.76C7.34 2.03 6.45 1.66 5.41 1.66C4.37 1.66 3.48 2.03 2.76 2.76C2.03 3.48 1.66 4.37 1.66 5.41C1.66 6.45 2.03 7.34 2.76 8.07C3.48 8.8 4.37 9.16 5.41 9.16Z" fill="#6B6B47"/>
-                </svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                 <input type="text" bind:value={searchQuery} placeholder="Buscar...">
             </div>
             
             <button class="filter-icon-btn" on:click={() => mostrarFiltros = !mostrarFiltros}>
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M8 18V12H10V14H18V16H10V18H8ZM0 16V14H6V16H0ZM4 12V10H0V8H4V6H6V12H4ZM8 10V8H18V10H8ZM12 6V0H14V2H18V4H14V6H12ZM0 4V2H10V4H0Z" fill="#1C1C0D"/>
-                </svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1C1C0D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
             </button>
         </div>
         
@@ -132,16 +128,12 @@
                     <h3>Tamaño</h3>
                     <label class="custom-checkbox">
                         <input type="checkbox" bind:checked={filtroTamanos.pequeno}>
-                        <span class="checkmark">
-                            {#if filtroTamanos.pequeno}<svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>{/if}
-                        </span>
+                        <span class="checkmark">{#if filtroTamanos.pequeno}<svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>{/if}</span>
                         Pequeño
                     </label>
                     <label class="custom-checkbox">
                         <input type="checkbox" bind:checked={filtroTamanos.mediano}>
-                        <span class="checkmark">
-                            {#if filtroTamanos.mediano}<svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>{/if}
-                        </span>
+                        <span class="checkmark">{#if filtroTamanos.mediano}<svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>{/if}</span>
                         Mediano
                     </label>
                 </div>
@@ -150,16 +142,12 @@
                     <h3>Sexo</h3>
                     <label class="custom-checkbox">
                         <input type="checkbox" bind:checked={filtroSexos.macho}>
-                        <span class="checkmark">
-                            {#if filtroSexos.macho}<svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>{/if}
-                        </span>
+                        <span class="checkmark">{#if filtroSexos.macho}<svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>{/if}</span>
                         Macho
                     </label>
                     <label class="custom-checkbox">
                         <input type="checkbox" bind:checked={filtroSexos.hembra}>
-                        <span class="checkmark">
-                            {#if filtroSexos.hembra}<svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>{/if}
-                        </span>
+                        <span class="checkmark">{#if filtroSexos.hembra}<svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>{/if}</span>
                         Hembra
                     </label>
                 </div>
@@ -174,10 +162,12 @@
 
     <section class="results-grid" style="padding-top: 0;">
         {#each mascotasFiltradas as mascota (mascota.id)}
-            <div class="pet-card" on:click={() => abrirPublicacion(mascota)} style="cursor: pointer;">
+            <div class="pet-card" on:click={() => abrirPublicacion(mascota)}>
                 <div class="pet-image-wrapper">
                     <img src={mascota.img} alt="Mascota">
-                    <div class="status-badge">{mascota.estado}</div>
+                    <div class="status-badge" class:bg-extraviado={mascota.estado==='Extraviado'} class:bg-alojado={mascota.estado!=='Extraviado'}>
+                        {mascota.estado}
+                    </div>
                 </div>
                 <div class="pet-info">
                     <div class="pet-info-icon">
@@ -189,220 +179,97 @@
                 </div>
             </div>
         {/each}
-        
         {#if mascotasFiltradas.length === 0}
-            <div style="grid-column: span 2; text-align: center; color: #9CA3AF; padding: 20px; font-family: 'Poppins', sans-serif; font-size: 14px;">
-                No se encontraron mascotas con esos filtros.
-            </div>
+            <div style="grid-column: span 2; text-align: center; color: #9CA3AF; padding: 20px; font-size: 14px;">No se encontraron mascotas con esos filtros.</div>
         {/if}
     </section>
 
     <nav class="bottom-nav">
-        <a href="#" class="nav-item" on:click|preventDefault={() => dispatch('volver')}>
-            <svg width="16" height="18" viewBox="0 0 16 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M2 16H5V10H11V16H14V7L8 2.5L2 7V16ZM0 18V6L8 0L16 6V18H9V12H7V18H0Z" fill="#9CA3AF"/>
-            </svg>
-            Inicio
-        </a>
-        <a href="#" class="nav-item active">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M16.6 18L10.3 11.7C9.8 12.1 9.225 12.4167 8.575 12.65C7.925 12.8833 7.23333 13 6.5 13C4.68333 13 3.14583 12.3708 1.8875 11.1125C0.629167 9.85417 0 8.31667 0 6.5C0 4.68333 0.629167 3.14583 1.8875 1.8875C3.14583 0.629167 4.68333 0 6.5 0C8.31667 0 9.85417 0.629167 11.1125 1.8875C12.3708 3.14583 13 4.68333 13 6.5C13 7.23333 12.8833 7.925 12.65 8.575C12.4167 9.225 12.1 9.8 11.7 10.3L18 16.6L16.6 18ZM6.5 11C7.75 11 8.8125 10.5625 9.6875 9.6875C10.5625 8.8125 11 7.75 11 6.5C11 5.25 10.5625 4.1875 9.6875 3.3125C8.8125 2.4375 7.75 2 6.5 2C5.25 2 4.1875 2.4375 3.3125 3.3125C2.4375 4.1875 2 5.25 2 6.5C2 7.75 2.4375 8.8125 3.3125 9.6875C4.1875 10.5625 5.25 11 6.5 11Z" fill="#FBBF24"/>
-            </svg>
-            Buscar
-        </a>
-        <div class="nav-fab">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7.5 10H0V7.5H7.5V0H10V7.5H17.5V10H10V17.5H7.5V10Z" fill="#111827"/>
-            </svg>
+        <div class="nav-item" on:click={() => dispatch('volver')} style="cursor:pointer;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+          <span>Inicio</span>
         </div>
-        <a href="#" class="nav-item">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M0 20V2C0 1.45 0.195 0.979 0.587 0.587C0.979 0.195 1.45 0 2 0H18C18.55 0 19.02 0.195 19.41 0.587C19.8 0.979 20 1.45 20 2V14C20 14.55 19.8 15.02 19.41 15.41C19.02 15.8 18.55 16 18 16H4L0 20ZM3.15 14H18V2H2V15.12L3.15 14ZM2 14V2V14Z" fill="#9CA3AF"/>
-            </svg>
-            Chats
-        </a>
-        <a href="#" class="nav-item">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M8 8C6.9 8 5.958 7.608 5.175 6.825C4.391 6.041 4 5.1 4 4C4 2.9 4.391 1.958 5.175 1.175C5.958 0.391 6.9 0 8 0C9.1 0 10.04 0.391 10.82 1.175C11.60 1.958 12 2.9 12 4C12 5.1 11.60 6.041 10.82 6.825C10.04 7.608 9.1 8 8 8ZM0 16V13.2C0 12.63 0.145 12.11 0.437 11.63C0.729 11.16 1.116 10.8 1.6 10.55C2.633 10.03 3.683 9.645 4.75 9.387C5.816 9.129 6.9 9 8 9C9.1 9 10.18 9.129 11.25 9.387C12.31 9.645 13.36 10.03 14.4 10.55C14.88 10.8 15.27 11.16 15.56 11.63C15.85 12.11 16 12.63 16 13.2V16H0ZM8 6C8.55 6 9.02 5.804 9.412 5.412C9.804 5.02 10 4.55 10 4C10 3.45 9.804 2.979 9.412 2.587C9.02 2.195 8.55 2 8 2C7.45 2 6.979 2.195 6.587 2.587C6.195 2.979 6 3.45 6 4C6 4.55 6.195 5.02 6.587 5.412C6.979 5.804 7.45 6 8 6Z" fill="#9CA3AF"/>
-            </svg>
-            Perfil
-        </a>
+        <div class="nav-item active">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <span>Buscar</span>
+        </div>
+        <div class="nav-fab">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#111827" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </div>
+        <div class="nav-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          <span>Chats</span>
+        </div>
+        <div class="nav-item">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          <span>Perfil</span>
+        </div>
     </nav>
 </div>
 
 <style>
-    /* ... Tus estilos anteriores se mantienen iguales hasta aquí ... */
     :global(body) { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #F3F4F6; display: flex; justify-content: center; margin: 0; padding: 0; }
     * { box-sizing: border-box; }
     .app-container { width: 100%; max-width: 400px; background-color: #FFFFFF; min-height: 100vh; position: relative; padding-bottom: 90px; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); overflow-x: hidden; }
-    .header { background-color: #0D3B66; padding: 24px 20px; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px; color: white; }
-    .logo-title { text-align: center; font-family: 'Poppins', sans-serif; font-size: 24px; font-weight: 700; margin-bottom: 20px; }
-    .logo-title .buscando { color: #F4D35E; }
-    .logo-title .huellas { color: #FAF0CA; }
-    .header-top { display: flex; justify-content: space-between; align-items: center; }
-    .header-top h1 { font-size: 20px; font-weight: 700; }
-    .close-btn { background: rgba(255,255,255,0.1); border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-    .search-section { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+    
+    /* Header Azul y Cabecera Blanca */
+    .top-brand-header { background: #0D3B66; display: flex; justify-content: center; align-items: center; gap: 8px; padding: 20px 0; font-size: 22px; font-weight: 700; font-family: 'Poppins', sans-serif; }
+    .text-white { color: #FFFFFF; } .text-yellow { color: #F4D35E; }
+    
+    .resultados-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px 4px 20px; background: white; }
+    .resultados-header h1 { font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 700; color: #0D3B66; margin: 0; }
+    .close-btn-clean { background: none; border: none; cursor: pointer; padding: 4px; }
+
+    /* Barra Búsqueda */
+    .search-section { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
     .search-bar { display: flex; gap: 10px; }
-    .input-wrapper { flex: 1; display: flex; align-items: center; background: #FFFFFF; border: 1px solid #E8E8CE; border-radius: 12px; padding: 10px 16px; box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05); }
-    .input-wrapper input { border: none; outline: none; width: 100%; margin-left: 10px; font-family: 'Plus Jakarta Sans', sans-serif; color: #1C1C0D; }
-    .filter-icon-btn { background: #FFFFFF; border: 1px solid #E8E8CE; border-radius: 12px; padding: 10px; box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05); display: flex; align-items: center; justify-content: center; cursor: pointer; }
-    .filter-pills { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+    .input-wrapper { flex: 1; display: flex; align-items: center; background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 10px 16px; }
+    .input-wrapper input { border: none; outline: none; width: 100%; margin-left: 10px; font-family: 'Plus Jakarta Sans', sans-serif; color: #111827; }
+    .filter-icon-btn { background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 10px 14px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    
+    .filter-pills { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; }
     .filter-pills::-webkit-scrollbar { display: none; }
-    .pill { background: #FFFFFF; border: 1px solid #E8E8CE; border-radius: 20px; padding: 6px 16px; font-size: 14px; font-weight: 500; color: #1C1C0D; white-space: nowrap; display: flex; align-items: center; gap: 6px; cursor: pointer; transition: all 0.2s ease; }
-    .pill.active { background: #F4D35E; border-color: #F4D35E; }
+    .pill { background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 20px; padding: 8px 16px; font-size: 13px; font-family: 'Poppins', sans-serif; font-weight: 500; color: #111827; white-space: nowrap; display: flex; align-items: center; cursor: pointer; transition: all 0.2s ease; }
+    .pill.active { background: #F4D35E; border-color: #F4D35E; font-weight: 600; }
 
-    /* --- NUEVOS ESTILOS DEL PANEL DE FILTROS --- */
-    .filtros-panel {
-        background: #FFFFFF;
-        border: 1px solid #E8E8CE;
-        border-radius: 16px;
-        padding: 20px;
-        margin-top: 4px;
-        margin-bottom: 12px;
-        box-shadow: 0px 4px 10px rgba(0,0,0,0.05);
-    }
-    
-    .filtros-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-    }
-    .filtros-header h2 {
-        font-size: 18px;
-        font-weight: 700;
-        color: #111827;
-        margin: 0;
-    }
-    .limpiar-btn {
-        background: none;
-        border: none;
-        color: #FBBF24;
-        font-weight: 600;
-        font-size: 14px;
-        cursor: pointer;
-    }
+    /* Panel de Filtros */
+    .filtros-panel { background: #FFFFFF; border: 1px solid #E8E8CE; border-radius: 16px; padding: 20px; margin-top: 4px; margin-bottom: 12px; box-shadow: 0px 4px 10px rgba(0,0,0,0.05); }
+    .filtros-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .filtros-header h2 { font-size: 16px; font-family: 'Poppins', sans-serif; font-weight: 700; color: #111827; margin: 0; }
+    .limpiar-btn { background: none; border: none; color: #FBBF24; font-weight: 600; font-size: 12px; cursor: pointer; }
+    .slider-section { margin-bottom: 24px; }
+    .slider-labels { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 13px; color: #6B7280; }
+    .slider-value { font-weight: 700; color: #111827; }
+    .custom-slider { -webkit-appearance: none; width: 100%; height: 6px; background: #E5E7EB; border-radius: 5px; outline: none; }
+    .custom-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #0D3B66; cursor: pointer; }
+    .slider-minmax { display: flex; justify-content: space-between; margin-top: 8px; font-size: 11px; color: #9CA3AF; }
+    .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+    .checkbox-column h3 { font-size: 14px; font-weight: 600; color: #111827; margin-bottom: 12px; }
+    .custom-checkbox { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; cursor: pointer; font-size: 13px; color: #6B7280; }
+    .custom-checkbox input { display: none; }
+    .checkmark { width: 18px; height: 18px; border-radius: 4px; border: 2px solid #E5E7EB; display: flex; justify-content: center; align-items: center; transition: all 0.2s ease; }
+    .custom-checkbox input:checked + .checkmark { background-color: #F4D35E; border-color: #F4D35E; }
+    .aplicar-btn { width: 100%; background-color: #F4D35E; color: #111827; font-weight: 700; font-family: 'Poppins', sans-serif; font-size: 14px; padding: 14px 0; border: none; border-radius: 12px; cursor: pointer; }
 
-    .slider-section {
-        margin-bottom: 24px;
-    }
-    .slider-labels {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 12px;
-        font-size: 14px;
-        color: #6B7280;
-    }
-    .slider-value {
-        font-weight: 700;
-        color: #111827;
-    }
-    
-    /* Input Range Custom (Slider) */
-    .custom-slider {
-        -webkit-appearance: none;
-        width: 100%;
-        height: 6px;
-        background: #E5E7EB;
-        border-radius: 5px;
-        outline: none;
-    }
-    .custom-slider::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        background: #1E3A8A; /* Color azul oscuro simulando la imagen */
-        cursor: pointer;
-    }
-    .custom-slider::-moz-range-thumb {
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        background: #1E3A8A;
-        cursor: pointer;
-    }
-    
-    .slider-minmax {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 8px;
-        font-size: 12px;
-        color: #9CA3AF;
-    }
-
-    .checkbox-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-        margin-bottom: 24px;
-    }
-    .checkbox-column h3 {
-        font-size: 14px;
-        font-weight: 600;
-        color: #111827;
-        margin-bottom: 12px;
-    }
-    
-    /* Checkbox Customizados */
-    .custom-checkbox {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 12px;
-        cursor: pointer;
-        font-size: 14px;
-        color: #6B7280;
-    }
-    .custom-checkbox input {
-        display: none; /* Ocultamos el checkbox real */
-    }
-    .checkmark {
-        width: 20px;
-        height: 20px;
-        border-radius: 6px;
-        border: 2px solid #E5E7EB;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        transition: all 0.2s ease;
-    }
-    .custom-checkbox input:checked + .checkmark {
-        background-color: #F4D35E;
-        border-color: #F4D35E;
-    }
-
-    /* Botón Aplicar */
-    .aplicar-btn {
-        width: 100%;
-        background-color: #F4D35E;
-        color: #111827;
-        font-weight: 600;
-        font-size: 14px;
-        padding: 14px 0;
-        border: none;
-        border-radius: 12px;
-        cursor: pointer;
-        transition: opacity 0.2s ease;
-    }
-    .aplicar-btn:active {
-        opacity: 0.8;
-    }
-
-    /* --- ESTILOS DE LA GRILLA (SE MANTIENEN IGUALES) --- */
+    /* Grilla Resultados */
     .results-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; padding: 16px; }
-    .pet-card { background: #D9D9D9; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; position: relative; }
+    .pet-card { background: white; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; position: relative; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08); border: 2px solid transparent; cursor: pointer; transition: transform 0.2s; }
+    .pet-card:hover { transform: scale(1.02); border-color: #E5E7EB;}
     .pet-image-wrapper { width: 100%; aspect-ratio: 1 / 1; position: relative; }
-    .pet-image-wrapper img { width: 100%; height: 100%; object-fit: cover; background-color: #E5E7EB; }
-    .status-badge { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); background: rgba(13, 59, 102, 0.5); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.2); color: #FFFFFF; font-size: 12px; font-weight: 600; padding: 4px 16px; border-radius: 20px; }
-    .pet-info { background: rgba(217, 217, 217, 0.95); padding: 8px; font-family: 'Poppins', sans-serif; font-size: 9px; font-weight: 500; color: #000; line-height: 1.4; display: flex; align-items: center; gap: 6px; }
-    .pet-info-icon { width: 16px; height: 16px; background-color: #9CA3AF; border-radius: 50%; flex-shrink: 0; }
-    .pet-info-icon img { width: 100%; height: 100%; border-radius: 50%; }
+    .pet-image-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+    
+    /* Estilos correctos del Badge superior izquierdo */
+    .status-badge { position: absolute; top: 10px; left: 10px; color: #FFFFFF; font-size: 11px; font-family: 'Poppins', sans-serif; font-weight: 600; padding: 4px 12px; border-radius: 20px; backdrop-filter: blur(4px); }
+    .bg-extraviado { background: rgba(13, 59, 102, 0.7); } /* Azul oscuro transparente */
+    .bg-alojado { background: rgba(156, 163, 175, 0.7); } /* Gris transparente */
 
-    .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 400px; background: #FFFEFC; border-top: 1px solid #E5E7EB; display: flex; justify-content: space-around; align-items: center; padding: 12px 0 20px 0; z-index: 100; }
-    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; text-decoration: none; color: #9CA3AF; font-family: 'Poppins', sans-serif; font-size: 10px; font-weight: 500; transition: color 0.2s ease; }
+    .pet-info { background: #F3F4F6; padding: 10px; font-family: 'Poppins', sans-serif; font-size: 9px; font-weight: 600; color: #111827; line-height: 1.4; display: flex; align-items: flex-start; gap: 8px; flex: 1; }
+    .pet-info-icon { width: 22px; height: 22px; background-color: #D1D5DB; border-radius: 50%; display: flex; justify-content: center; align-items: center; flex-shrink: 0; }
+    .pet-info-icon img { width: 14px; height: 14px; object-fit: contain; }
+
+    /* Nav Inferior - Mismo estilo que Inicio */
+    .bottom-nav { position: absolute; bottom: 0; width: 100%; background: #FFFEFC; border-top: 1px solid #E5E7EB; display: flex; justify-content: space-around; align-items: center; padding: 12px 0 20px 0; z-index: 100; border-radius: 20px 20px 0 0; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #9CA3AF; font-size: 10px; font-weight: 500; transition: color 0.2s ease; }
     .nav-item.active { color: #FBBF24; }
-    .nav-fab { background: #FBBF24; width: 58px; height: 58px; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 4px solid #FFFFFF; transform: translateY(-20px); box-shadow: 0px 4px 10px rgba(0,0,0,0.1); text-decoration: none; }
+    .nav-fab { background: #FBBF24; width: 56px; height: 56px; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 4px solid #FFFFFF; transform: translateY(-25px); box-shadow: 0px 4px 10px rgba(0,0,0,0.15); cursor: pointer; }
 </style>

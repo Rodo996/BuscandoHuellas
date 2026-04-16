@@ -1,9 +1,21 @@
 <script>
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, onMount } from 'svelte';
   const dispatch = createEventDispatcher();
-
+  let mascotas = []; // Ahora empieza vacío
   let activePill = 'Tipo';
   let searchQuery = '';
+
+  // Función para traer datos del backend
+  onMount(async () => {
+    try {
+      const response = await fetch('http://localhost:3000/api/mascotas');
+      if (response.ok) {
+        mascotas = await response.json();
+      }
+    } catch (error) {
+      console.error("No se pudieron cargar las mascotas:", error);
+    }
+  });
   
   // --- ESTADO DEL MENÚ DE FILTROS ---
   let mostrarFiltros = false;
@@ -37,6 +49,7 @@
   };
 
   // Base de datos simulada enriquecida
+  /*
   const mascotas = [
     { id: 1, raza: 'Bernés de la montaña', sexo: 'Macho', tiempo: 'Visto hace 2 días', ubicacion: 'Plaza Patria', img: '/Img-Buscar/bernesbuscar.jpg', estado: 'Extraviado', tieneEtiqueta: true, tamano: 'Gigante', color: 'Negro, café, blanco', especie: 'Perro', cruza: 'No', discapacidades: 'No', cola: 'Sí', dueno: 'Laura García', duenoTiempo: 'Registrado hace 1 año' },
     { id: 2, raza: 'Golden Retriever', sexo: 'Macho', tiempo: 'Visto ayer', ubicacion: 'Paseo Chapultepec', img: '/Img-Buscar/golden.png', estado: 'Alojado', tieneEtiqueta: true, tamano: 'Grande', color: 'Dorado', especie: 'Perro', cruza: 'No', discapacidades: 'No', cola: 'Sí', dueno: 'Carlos Pérez', duenoTiempo: 'Registrado hace 3 meses' },
@@ -45,24 +58,27 @@
     { id: 5, raza: 'Gato europeo', sexo: 'Macho', tiempo: 'Visto hace 1 mes', ubicacion: 'Santa Anita', img: '/Img-Buscar/gatomacho.jpg', estado: 'Alojado', tieneEtiqueta: true, tamano: 'Mediano', color: 'Naranja', especie: 'Gato', cruza: 'No', discapacidades: 'No', cola: 'No', dueno: 'Sofía Ramírez', duenoTiempo: 'Registrado hace 1 mes' },
     { id: 6, raza: 'Maltes', sexo: 'Hembra', tiempo: 'Visto hace 1 mes', ubicacion: 'Bugambilias', img: '/Img-Buscar/malte.jpg', estado: 'Avistado', tieneEtiqueta: true, tamano: 'Pequeño', color: 'Blanco', especie: 'Perro', cruza: 'No', discapacidades: 'No', cola: 'Sí', dueno: 'Mariana López', duenoTiempo: 'Registrado hace 4 años' }
   ];
+  */
 
   // --- LÓGICA DE FILTRADO COMBINADO ---
-  $: mascotasFiltradas = mascotas.filter(mascota => {
-    // 1. Filtro de búsqueda por texto
+    $: mascotasFiltradas = mascotas.filter(mascota => {
     const termino = searchQuery.toLowerCase();
-    const coincideTexto = mascota.raza.toLowerCase().includes(termino) ||
-                          mascota.ubicacion.toLowerCase().includes(termino) ||
-                          mascota.estado.toLowerCase().includes(termino);
-                          
-    // 2. Filtro de Sexo (Si ninguno está seleccionado, mostramos todos)
-    let coincideSexo = true;
-    if (filtroSexos.macho || filtroSexos.hembra) {
-      coincideSexo = (filtroSexos.macho && mascota.sexo === 'Macho') || 
-                     (filtroSexos.hembra && mascota.sexo === 'Hembra');
-    }
+    const coincideTexto = (mascota.name?.toLowerCase().includes(termino)) ||
+                          (mascota.raza?.toLowerCase().includes(termino)) ||
+                          (mascota.ubicacion?.toLowerCase().includes(termino));
+    
+    // Filtrado por Sexo
+    const coincideSexo = (filtroSexos.macho && mascota.sexo === 'Macho') || 
+                         (filtroSexos.hembra && mascota.sexo === 'Hembra') ||
+                         (!filtroSexos.macho && !filtroSexos.hembra); // Si ninguno está marcado, muestra todos
 
-    return coincideTexto && coincideSexo;
-  });
+    // Filtrado por Tamaño (Asegúrate de que en la DB guardes 'Pequeño' o 'Mediano')
+    const coincideTamano = (filtroTamanos.pequeno && mascota.tamano === 'Pequeño') ||
+                           (filtroTamanos.mediano && mascota.tamano === 'Mediano') ||
+                           (!filtroTamanos.pequeno && !filtroTamanos.mediano);
+
+    return coincideTexto && coincideSexo && coincideTamano;
+});
   // FUNCIÓN PARA VER DETALLE
   const abrirPublicacion = (mascota) => {
     dispatch('verPublicacion', mascota);
@@ -175,7 +191,7 @@
                             <img src="/Img-Buscar/etiqueta.png" alt="Etiqueta">
                         {/if}
                     </div>
-                    <span>{mascota.raza} | {mascota.sexo} | {mascota.tiempo} | {mascota.ubicacion}</span>
+                    <span>{mascota.raza} | {mascota.sexo} | {mascota.ubicacion}</span>
                 </div>
             </div>
         {/each}
@@ -255,7 +271,14 @@
     .results-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; padding: 16px; }
     .pet-card { background: white; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; position: relative; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08); border: 2px solid transparent; cursor: pointer; transition: transform 0.2s; }
     .pet-card:hover { transform: scale(1.02); border-color: #E5E7EB;}
-    .pet-image-wrapper { width: 100%; aspect-ratio: 1 / 1; position: relative; }
+    /* Borra esta línea o cámbiala así: */
+    /* .pet-image-wrapper { width: 100%; aspect-ratio: 1 / 1; position: relative; } */
+    .pet-image-wrapper { 
+        width: 100%; 
+        aspect-ratio: 1 / 1; 
+        position: relative; 
+        background-color: #E5E7EB; /* Un gris claro para que se vea el cuadro aunque no haya imagen */
+    }
     .pet-image-wrapper img { width: 100%; height: 100%; object-fit: cover; }
     
     /* Estilos correctos del Badge superior izquierdo */

@@ -1,104 +1,58 @@
 <script>
-  import Inicio from './lib/Inicio.svelte'; 
-  import Buscar from './lib/Buscar.svelte';
-  import Publicacion from './lib/Publicacion.svelte';
-  import Publicar from './lib/Publicar.svelte';
+  // ... tus otras importaciones
   import IniciarSesion from './lib/Iniciar_sesion.svelte';
+  import CrearCuenta from './lib/Crear_cuenta.svelte';
+  import EditarPerfil from './lib/Editar_perfil.svelte';
   import Navbar from './lib/Navbar.svelte';
 
-  let vistaActual = window.location.pathname.replace('/', '') || 'inicio';
+  // Modificamos la lógica para detectar subrutas
+  let path = window.location.pathname;
+  let vistaActual = path.split('/')[1] || 'inicio'; 
+  let subVista = path.split('/')[2] || ''; // Captura lo que sigue de /perfil/
+
   let mascotaSeleccionada = null;
 
-  function navegar(vista) {
+  function navegar(vista, sub = '') {
     vistaActual = vista;
-    history.pushState({}, '', `/${vista}`);
+    subVista = sub;
+    const url = sub ? `/${vista}/${sub}` : `/${vista}`;
+    history.pushState({}, '', url);
   }
 
-  const irAInicio   = () => navegar('inicio');
-  const irABuscar   = () => navegar('buscar');
-  const irAPublicar = () => navegar('publicar');
-  const irAPerfil   = () => navegar('perfil');
-
-  const irAPublicacion = (event) => {
-    mascotaSeleccionada = event.detail;
-    navegar('publicacion');
-  };
+  // Helpers de navegación
+  const irAInicio = () => navegar('inicio');
+  const irABuscar = () => navegar('buscar');
+  const irAPerfil = () => navegar('perfil', 'iniciar_sesion'); // Por defecto va a login
 
   window.onpopstate = () => {
-    vistaActual = window.location.pathname.replace('/', '') || 'inicio';
+    const p = window.location.pathname.split('/');
+    vistaActual = p[1] || 'inicio';
+    subVista = p[2] || '';
   };
 </script>
 
 <main>
   <div class="app-container">
-
-    {#if vistaActual === 'inicio'}
-      <Inicio 
-        on:irABuscar={irABuscar} 
-        on:irAPublicar={irAPublicar} 
-      />
-
-    {:else if vistaActual === 'buscar'}
-      <Buscar 
-        on:volver={irAInicio} 
-        on:verPublicacion={irAPublicacion} 
-        on:irAPublicar={irAPublicar} 
-      />
-
-    {:else if vistaActual === 'publicacion'}
-      <Publicacion 
-        mascota={mascotaSeleccionada} 
-        on:volver={irABuscar} 
-      />
-
-    {:else if vistaActual === 'publicar'}
-      <Publicar on:volver={irAInicio} />
-
-    {:else if vistaActual === 'perfil'}
-      <IniciarSesion on:volver={irAInicio} />
+    {#if vistaActual === 'perfil'}
+      {#if subVista === 'crear_cuenta'}
+        <CrearCuenta on:irALogin={() => navegar('perfil', 'iniciar_sesion')} />
+      
+      {:else if subVista === 'editar_perfil'}
+        <EditarPerfil on:volver={irAPerfil} />
+      
+      {:else}
+        <IniciarSesion 
+          on:irARegistro={() => navegar('perfil', 'crear_cuenta')}
+          on:loginExitoso={() => navegar('perfil', 'editar_perfil')} 
+        />
+      {/if}
     {/if}
-
   </div>
 
-  <!-- Navbar global -->
   <Navbar 
     vistaActiva={vistaActual}
     on:irAInicio={irAInicio}
     on:irABuscar={irABuscar}
-    on:irAPublicar={irAPublicar}
     on:irAPerfil={irAPerfil}
   />
 </main>
-
-<style>
-  :global(html), :global(body) {
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    min-height: 100dvh;
-    font-family: 'Poppins', sans-serif;
-    background-color: #F3F4F6;
-  }
-
-  :global(*) {
-    box-sizing: border-box;
-  }
-
-  :global(.app-container) {
-    width: 100%;
-    max-width: 400px;
-    margin-inline: auto;
-    background: #FFFFFF;
-    min-height: 100vh;
-    position: relative;
-    padding-bottom: 90px;
-    box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
-    overflow-x: hidden;
-  }
-
-  @media (max-width: 400px) {
-    :global(.app-container) {
-      box-shadow: none;
-    }
-  }
-</style>

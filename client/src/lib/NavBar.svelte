@@ -2,10 +2,12 @@
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher();
 
-  export let vistaActiva = 'inicio'; // 'inicio' | 'buscar'
+  export let vistaActiva = 'inicio';
 </script>
 
 <nav class="bottom-nav">
+
+  <!-- Inicio -->
   <button
     class="nav-item"
     class:active={vistaActiva === 'inicio'}
@@ -13,13 +15,14 @@
     type="button"
   >
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      stroke-width="2">
       <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
       <polyline points="9 22 9 12 15 12 15 22"/>
     </svg>
     <span>Inicio</span>
   </button>
 
+  <!-- Buscar -->
   <button
     class="nav-item"
     class:active={vistaActiva === 'buscar'}
@@ -27,40 +30,50 @@
     type="button"
   >
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      stroke-width="2">
+      <circle cx="11" cy="11" r="8"/>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"/>
     </svg>
     <span>Buscar</span>
   </button>
 
+  <!-- Publicar -->
   <button
     class="nav-fab"
     on:click={() => dispatch('irAPublicar')}
     type="button"
-    aria-label="Hacer publicación"
   >
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#111827"
-      stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      stroke-width="2.5">
+      <line x1="12" y1="5" x2="12" y2="19"/>
+      <line x1="5" y1="12" x2="19" y2="12"/>
     </svg>
   </button>
 
+  <!-- Chats (sin lógica aún) -->
   <button class="nav-item" type="button">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      stroke-width="2">
       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
     </svg>
     <span>Chats</span>
   </button>
 
-  <button class="nav-item" type="button">
+  <!-- Perfil -->
+  <button
+    class="nav-item"
+    class:active={vistaActiva === 'perfil'}
+    on:click={() => dispatch('irAPerfil')}
+    type="button"
+  >
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      stroke-width="2">
       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
       <circle cx="12" cy="7" r="4"/>
     </svg>
     <span>Perfil</span>
   </button>
+
 </nav>
 
 <style>
@@ -79,22 +92,34 @@
     z-index: 100;
     border-radius: 20px 20px 0 0;
   }
+
   .nav-item {
-    display: flex; flex-direction: column;
-    align-items: center; gap: 4px;
-    color: #9ca3af; font-size: 10px; font-weight: 500;
-    background: none; border: none; cursor: pointer;
-    transition: color 0.2s ease;
-    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: #9ca3af;
+    font-size: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
   }
-  .nav-item.active { color: #fbbf24; }
+
+  .nav-item.active {
+    color: #fbbf24;
+  }
+
   .nav-fab {
-    background: #fbbf24; width: 56px; height: 56px;
-    border-radius: 50%; display: flex;
-    justify-content: center; align-items: center;
+    background: #fbbf24;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     border: 4px solid #ffffff;
     transform: translateY(-25px);
     box-shadow: 0px 4px 10px rgba(0,0,0,0.15);
-    cursor: pointer; padding: 0; outline: none;
+    cursor: pointer;
   }
 </style>

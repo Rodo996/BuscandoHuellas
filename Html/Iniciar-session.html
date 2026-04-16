@@ -1,0 +1,192 @@
+<script>
+  import { createEventDispatcher } from 'svelte';
+  const dispatch = createEventDispatcher();
+
+  const irACrearCuenta = () => dispatch('irACrearCuenta');
+  const login = () => dispatch('loginExitoso');
+</script>
+
+<div class="page-container">
+  <div data-layer="Iniciar sesión" class="iniciar-sesin">
+    
+    <div data-layer="Rectangle 1" class="rectangle-1"></div>
+    
+    <div data-layer="Ellipse 5" class="ellipse-5"></div>
+    
+    <div data-layer="Rectangle 2" class="rectangle-2"></div>
+    
+    <img data-layer="Rectangle 10" class="rectangle-10" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAYgAAAExCAYAAABmhjWbAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAOdEVYdFNvZnR3YXJlAEZpZ21hnrGWYwADzNJJREFUeAHs/VmwZVt2HYbNvffpm9u32edr6lW9h2qAKpIgCEIFECTYibREg7L04QhRtiR3n3aE7XCQtH4d/rTsT4fCHyJpUSYti1IQBESBaAqsKqCqXr3+ZfMy8/b9vaffe3uMMdfa52TiVRUofTAUwVuRlfnuPfecvddeazZjjjmm2b/gV1mWSfw7/Pulv1/9/t/6W38r5Z+f9Pr4vcXv89/xdz/vZ6++5tWf/bg/i+/3ee8br33xd/jfn/..." alt="img" />
+
+    <div data-layer="Iniciar Sesión" class="titulo-principal">Iniciar Sesión</div>
+
+    <div class="field-group" style="top: 510px;">
+      <label>Correo electrónico*</label>
+      <div class="input-falso">Ej. juan@gmail.com</div>
+    </div>
+
+    <div class="field-group" style="top: 600px;">
+      <label>Contraseña*</label>
+      <div class="input-falso">Ej. ************</div>
+    </div>
+
+    <div class="olvidaste">¿Olvidaste tu contraseña?</div>
+
+    <button class="btn-entrar" on:click={login}>
+      ENTRAR
+    </button>
+
+    <button class="btn-registro" on:click={irACrearCuenta}>
+      ¿No tienes cuenta? <strong>Registrate</strong>
+    </button>
+
+    <div data-layer="Rectangle 11" class="rectangle-11"></div>
+
+  </div>
+</div>
+
+<style>
+  /* ELIMINA EL "OUTLINE" GRIS: Forzamos el blanco total */
+  .page-container {
+    width: 100%;
+    min-height: 100vh; /* Ocupa todo el alto disponible */
+    background-color: #FFFFFF; /* Fondo blanco total */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  .iniciar-sesin {
+    width: 393px;
+    height: 852px; /* Mantenemos la proporción de Figma */
+    background: #FFFFFF;
+    position: relative; /* Cambiado de absolute a relative para que fluya con el padre */
+  }
+
+  /* ESTILOS DE CAPAS (Mantenidos de tu Figma) */
+  .rectangle-1 {
+    width: 393px;
+    height: 382px;
+    left: 0px;
+    top: 0px;
+    position: absolute;
+    background: #0D3B66;
+  }
+
+  .ellipse-5 {
+    width: 531px;
+    height: 429px;
+    left: -69px;
+    top: 247px;
+    position: absolute;
+    background: #FFFFFF;
+    border-radius: 9999px;
+  }
+
+  /* Este rectángulo blanco ahora es más largo para "rellenar" si el cel es grande */
+  .rectangle-2 {
+    width: 393px;
+    height: 600px;
+    left: 0px;
+    top: 494px;
+    position: absolute;
+    background: #FFFFFF;
+  }
+
+  .rectangle-10 {
+    width: 393px;
+    height: 305px;
+    left: 0px;
+    top: 0px;
+    position: absolute;
+  }
+
+  .titulo-principal {
+    left: 0; right: 0;
+    top: 457px;
+    position: absolute;
+    color: #0D3B66;
+    font-size: 26px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .field-group {
+    position: absolute;
+    left: 31px;
+    width: 331px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .field-group label {
+    font-size: 14px;
+    color: #4B5563;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .input-falso {
+    width: 100%;
+    height: 44px;
+    background: #F3F4F6;
+    border-radius: 8px;
+    padding-left: 15px;
+    display: flex;
+    align-items: center;
+    color: #9CA3AF;
+    font-size: 13px;
+  }
+
+  .olvidaste {
+    position: absolute;
+    top: 665px;
+    left: 31px;
+    font-size: 12px;
+    color: #0D3B66;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .btn-entrar {
+    position: absolute;
+    top: 705px;
+    left: 31px;
+    width: 331px;
+    height: 48px;
+    background: #FBBF24;
+    border-radius: 9999px;
+    border: none;
+    color: #0D3B66;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .btn-registro {
+    position: absolute;
+    top: 765px;
+    width: 100%;
+    text-align: center;
+    background: none;
+    border: none;
+    color: #0D3B66;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+  }
+
+  /* BARRA AZUL FINAL */
+  .rectangle-11 {
+    width: 393px;
+    height: 80px;
+    left: 0px;
+    bottom: 0px; /* IMPORTANTE: Pegado al fondo del diseño */
+    position: absolute;
+    background: #0D3B66;
+  }
+
+  /* OCULTAMOS LA NAV VIEJA QUE FIGMA EXPORTA POR ERROR */
+  :global(.nav_01) {
+    display: none !important;
+  }
+</style>

@@ -3,6 +3,8 @@
   import Buscar from './lib/Buscar.svelte';
   import Publicacion from './lib/Publicacion.svelte';
   import Publicar from './lib/Publicar.svelte';
+  import IniciarSesion from './lib/Iniciar_sesion.svelte';
+  import Navbar from './lib/Navbar.svelte';
 
   let vistaActual = window.location.pathname.replace('/', '') || 'inicio';
   let mascotaSeleccionada = null;
@@ -12,10 +14,11 @@
     history.pushState({}, '', `/${vista}`);
   }
 
-  const irAInicio     = () => navegar('inicio');
-  const irABuscar     = () => navegar('buscar');
-  const irAPublicar   = () => navegar('publicar');
-  
+  const irAInicio   = () => navegar('inicio');
+  const irABuscar   = () => navegar('buscar');
+  const irAPublicar = () => navegar('publicar');
+  const irAPerfil   = () => navegar('perfil');
+
   const irAPublicacion = (event) => {
     mascotaSeleccionada = event.detail;
     navegar('publicacion');
@@ -27,15 +30,44 @@
 </script>
 
 <main>
-  {#if vistaActual === 'inicio'}
-    <Inicio on:irABuscar={irABuscar} on:irAPublicar={irAPublicar} />
-  {:else if vistaActual === 'buscar'}
-    <Buscar on:volver={irAInicio} on:verPublicacion={irAPublicacion} on:irAPublicar={irAPublicar} />
-  {:else if vistaActual === 'publicacion'}
-    <Publicacion mascota={mascotaSeleccionada} on:volver={irABuscar} />
-  {:else if vistaActual === 'publicar'}
-    <Publicar on:volver={irAInicio} />
-  {/if}
+  <div class="app-container">
+
+    {#if vistaActual === 'inicio'}
+      <Inicio 
+        on:irABuscar={irABuscar} 
+        on:irAPublicar={irAPublicar} 
+      />
+
+    {:else if vistaActual === 'buscar'}
+      <Buscar 
+        on:volver={irAInicio} 
+        on:verPublicacion={irAPublicacion} 
+        on:irAPublicar={irAPublicar} 
+      />
+
+    {:else if vistaActual === 'publicacion'}
+      <Publicacion 
+        mascota={mascotaSeleccionada} 
+        on:volver={irABuscar} 
+      />
+
+    {:else if vistaActual === 'publicar'}
+      <Publicar on:volver={irAInicio} />
+
+    {:else if vistaActual === 'perfil'}
+      <IniciarSesion on:volver={irAInicio} />
+    {/if}
+
+  </div>
+
+  <!-- Navbar global -->
+  <Navbar 
+    vistaActiva={vistaActual}
+    on:irAInicio={irAInicio}
+    on:irABuscar={irABuscar}
+    on:irAPublicar={irAPublicar}
+    on:irAPerfil={irAPerfil}
+  />
 </main>
 
 <style>
@@ -52,11 +84,10 @@
     box-sizing: border-box;
   }
 
-  /* Clase reutilizable para TODAS las vistas */
   :global(.app-container) {
     width: 100%;
     max-width: 400px;
-    margin-inline: auto;           /* ← el centrado real */
+    margin-inline: auto;
     background: #FFFFFF;
     min-height: 100vh;
     position: relative;
@@ -65,16 +96,9 @@
     overflow-x: hidden;
   }
 
-  /* Responsive: sin sombra en móvil pequeño */
   @media (max-width: 400px) {
     :global(.app-container) {
       box-shadow: none;
-    }
-  }
-
-  @media (min-width: 401px) {
-    :global(body) {
-      background-color: #f3f4f6;
     }
   }
 </style>

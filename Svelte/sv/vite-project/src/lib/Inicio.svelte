@@ -1,6 +1,6 @@
 <script>
   import { createEventDispatcher } from "svelte";
-  import NavBar from "./NavBar.svelte";
+  import NavBar from "./Navbar.svelte";
   const dispatch = createEventDispatcher();
 </script>
 

@@ -72,7 +72,7 @@
     <form class="auth-form" on:submit|preventDefault={login}>
       
       <div class="field-container">
-        <label for="email">Ingresa tu correo electrónico*</label>
+        <label for="email">Correo electrónico*</label>
         <div class="input-box">
           <input type="email" id="email" bind:value={email} placeholder="Ej. laura.garcia@gmail.com" required />
           <span class="icon-suffix">
@@ -84,7 +84,7 @@
       </div>
 
       <div class="field-container">
-        <label for="password">Ingresa tu contraseña*</label>
+        <label for="password">Contraseña*</label>
         <div class="input-box">
           <input type="password" id="password" bind:value={password} placeholder="Ej. ************" required />
           <span class="icon-suffix">

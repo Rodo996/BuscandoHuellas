@@ -738,16 +738,6 @@
   display: inline-flex;
 }
 
-.nav {
-  width: 393px;
-  height: 112px;
-  left: 0px;
-  top: 800px;
-  position: absolute;
-  background: #FFFEFC;
-  border-top: 1px #E5E7EB solid;
-}
-
 .logositioweb-2 {
   left: 26px;
   top: 35px;
@@ -824,16 +814,6 @@
   justify-content: flex-start;
   align-items: flex-start;
   display: inline-flex;
-}
-
-.nav_01 {
-  width: 393px;
-  height: 112px;
-  left: 0px;
-  top: 800px;
-  position: absolute;
-  background: #FFFEFC;
-  border-top: 1px #E5E7EB solid;
 }
 
 .rectangle-1 {

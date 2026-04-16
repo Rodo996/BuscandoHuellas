@@ -120,84 +120,6 @@
     <path d="M16.9071 26.885C16.7109 25.5724 16.3804 24.1744 17.1948 23.0216C17.7146 22.2855 18.694 21.1382 19.629 21.0257C20.4207 20.9307 20.898 21.1724 21.4873 21.6498C22.2573 22.2736 23.1664 23.0092 23.5581 23.9321C24.1577 25.3453 24.554 27.3515 23.6526 28.709C23.3947 29.0983 23.1089 29.2512 22.7961 29.5475C22.101 30.2048 21.6834 30.8171 20.582 30.7222C20.2719 30.6956 20.2607 30.5863 20.0622 30.5102C19.4609 30.2797 19.1358 30.3839 18.5955 29.8576C17.7482 29.0327 17.0859 28.0807 16.9071 26.8847V26.885ZM12.5118 34.6325C11.9163 33.9195 11.3895 32.2746 11.1648 31.3564C10.7407 29.6204 12.0924 27.6625 13.8887 27.4593C15.8486 27.238 17.3025 28.7653 17.7853 30.5145C18.1614 31.8762 18.4217 33.3313 17.5814 34.5807C16.4225 36.3031 13.7747 36.1447 12.511 34.6321H12.5114L12.5118 34.6325ZM25.7241 29.0481C25.3607 28.1351 25.1093 27.2388 25.2739 26.2463C25.3522 25.7736 25.5697 25.3392 25.6836 24.8837C25.7458 24.6343 25.7567 24.3767 25.8211 24.135C26.0219 23.3789 26.836 23.0104 27.3998 22.5546C28.202 21.9058 28.7052 21.2096 29.8394 21.1034C31.4962 20.9473 32.7579 23.3378 32.886 24.7374C32.9692 25.6434 32.5907 27.8297 32.1866 28.6511C31.7518 29.5355 31.1625 29.9375 30.2538 30.2623C28.1498 31.0145 26.7036 31.5042 25.7249 29.0481H25.7241ZM33.8809 39.3061C34.3018 40.5924 34.7081 41.3541 33.6982 42.53C32.7409 43.645 31.9947 44.1084 30.5334 44.4118C29.5099 44.6243 29.3864 44.4049 28.519 44.0898C28.2155 43.9794 27.8775 43.923 27.5636 43.8125C26.5213 43.446 25.1935 42.8242 24.086 42.8954C23.4692 42.9351 22.6964 43.1185 22.1037 43.3017C20.1166 43.9145 19.3682 44.8421 17.2377 43.6213C16.5773 43.243 15.8393 42.8057 15.5535 42.0697C15.243 41.2714 15.1178 39.1562 15.3183 38.3266C15.5229 37.4805 16.1942 36.7772 16.9407 36.3661C17.9992 35.7821 18.4472 35.7582 19.1539 34.6493C19.6749 33.8315 20.5682 32.2477 21.3371 31.709C21.8174 31.3722 23.7427 30.6829 24.33 30.6179C24.9352 30.5515 25.2279 30.7886 25.749 30.8732C26.3355 30.9682 26.9067 30.8465 27.4014 31.3011C27.5648 31.4513 27.6725 31.69 27.8235 31.8418C28.3658 32.3871 29.1115 32.7562 29.6158 33.4015C30.0464 33.9527 30.1168 34.3864 30.3805 34.9869C30.7203 35.7612 31.0127 35.7507 31.6325 36.2007C33.1046 37.2685 33.3194 37.5855 33.8828 39.3057H33.8817L33.8809 39.3061ZM39.0172 30.7825C38.9295 32.0287 38.005 32.8736 37.3504 33.8157C36.6449 34.8317 36.4151 35.4831 35.048 35.7898C33.1421 36.2169 31 34.6084 31.1953 32.5922C31.2443 32.0843 32.2036 30.2947 32.5123 29.7869C33.0904 28.8353 34.8119 27.7014 35.925 27.5752C37.6335 27.3809 39.1323 29.1416 39.0172 30.7829V30.7825Z" fill="#0D3B66"/>
     </svg>
   </div>
-  <div data-layer="Nav" class="nav">
-    <div data-layer="Link" class="link">
-      <div data-svg-wrapper data-layer="Container">
-        <svg width="16" height="18" viewBox="0 0 16 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M2 16H5V10H11V16H14V7L8 2.5L2 7V16ZM0 18V6L8 0L16 6V18H9V12H7V18H0Z" fill="#FBBF24"/>
-        </svg>
-      </div>
-      <div data-layer="Container" class="container_13">
-        <div data-layer="Text" class="text"><span class="text_span">Inicio</span></div>
-      </div>
-    </div>
-    <div data-layer="Link" class="link_01">
-      <div data-svg-wrapper data-layer="Container">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M16.6 18L10.3 11.7C9.8 12.1 9.225 12.4167 8.575 12.65C7.925 12.8833 7.23333 13 6.5 13C4.68333 13 3.14583 12.3708 1.8875 11.1125C0.629167 9.85417 0 8.31667 0 6.5C0 4.68333 0.629167 3.14583 1.8875 1.8875C3.14583 0.629167 4.68333 0 6.5 0C8.31667 0 9.85417 0.629167 11.1125 1.8875C12.3708 3.14583 13 4.68333 13 6.5C13 7.23333 12.8833 7.925 12.65 8.575C12.4167 9.225 12.1 9.8 11.7 10.3L18 16.6L16.6 18ZM6.5 11C7.75 11 8.8125 10.5625 9.6875 9.6875C10.5625 8.8125 11 7.75 11 6.5C11 5.25 10.5625 4.1875 9.6875 3.3125C8.8125 2.4375 7.75 2 6.5 2C5.25 2 4.1875 2.4375 3.3125 3.3125C2.4375 4.1875 2 5.25 2 6.5C2 7.75 2.4375 8.8125 3.3125 9.6875C4.1875 10.5625 5.25 11 6.5 11Z" fill="#9CA3AF"/>
-        </svg>
-      </div>
-      <div data-layer="Container" class="container_15">
-        <div data-layer="Text" class="text_01"><span class="text_01_span">Buscar</span></div>
-      </div>
-    </div>
-    <div data-layer="Link" class="link_02">
-      <div data-svg-wrapper data-layer="Container">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M0 20V2C0 1.45 0.195833 0.979167 0.5875 0.5875C0.979167 0.195833 1.45 0 2 0H18C18.55 0 19.0208 0.195833 19.4125 0.5875C19.8042 0.979167 20 1.45 20 2V14C20 14.55 19.8042 15.0208 19.4125 15.4125C19.0208 15.8042 18.55 16 18 16H4L0 20ZM3.15 14H18V2H2V15.125L3.15 14ZM2 14V2V14Z" fill="#9CA3AF"/>
-        </svg>
-      </div>
-      <div data-layer="Container" class="container_17">
-        <div data-layer="Text" class="text_02"><span class="text_02_span">Chats</span></div>
-      </div>
-    </div>
-    <div data-layer="Link" class="link_03">
-      <div data-svg-wrapper data-layer="Container">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M8 8C6.9 8 5.95833 7.60833 5.175 6.825C4.39167 6.04167 4 5.1 4 4C4 2.9 4.39167 1.95833 5.175 1.175C5.95833 0.391667 6.9 0 8 0C9.1 0 10.0417 0.391667 10.825 1.175C11.6083 1.95833 12 2.9 12 4C12 5.1 11.6083 6.04167 10.825 6.825C10.0417 7.60833 9.1 8 8 8ZM0 16V13.2C0 12.6333 0.145833 12.1125 0.4375 11.6375C0.729167 11.1625 1.11667 10.8 1.6 10.55C2.63333 10.0333 3.68333 9.64583 4.75 9.3875C5.81667 9.12917 6.9 9 8 9C9.1 9 10.1833 9.12917 11.25 9.3875C12.3167 9.64583 13.3667 10.0333 14.4 10.55C14.8833 10.8 15.2708 11.1625 15.5625 11.6375C15.8542 12.1125 16 12.6333 16 13.2V16H0ZM2 14H14V13.2C14 13.0167 13.9542 12.85 13.8625 12.7C13.7708 12.55 13.65 12.4333 13.5 12.35C12.6 11.9 11.6917 11.5625 10.775 11.3375C9.85833 11.1125 8.93333 11 8 11C7.06667 11 6.14167 11.1125 5.225 11.3375C4.30833 11.5625 3.4 11.9 2.5 12.35C2.35 12.4333 2.22917 12.55 2.1375 12.7C2.04583 12.85 2 13.0167 2 13.2V14ZM8 6C8.55 6 9.02083 5.80417 9.4125 5.4125C9.80417 5.02083 10 4.55 10 4C10 3.45 9.80417 2.97917 9.4125 2.5875C9.02083 2.19583 8.55 2 8 2C7.45 2 6.97917 2.19583 6.5875 2.5875C6.19583 2.97917 6 3.45 6 4C6 4.55 6.19583 5.02083 6.5875 5.4125C6.97917 5.80417 7.45 6 8 6Z" fill="#9CA3AF"/>
-        </svg>
-      </div>
-      <div data-layer="Container" class="container_19">
-        <div data-layer="Text" class="text_03"><span class="text_03_span">Perfil</span></div>
-      </div>
-    </div>
-    <div data-layer="Container" class="container_20">
-      <div data-layer="Button" class="button_02">
-        <div data-svg-wrapper data-layer="Button:shadow" class="buttonshadow">
-          <svg width="82" height="82" viewBox="0 0 82 82" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <g filter="url(#filter0_dd_355_416)">
-          <rect x="12" y="2" width="58" height="58" rx="29" fill="white" fill-opacity="0.01" shape-rendering="crispEdges"/>
-          </g>
-          <defs>
-          <filter id="filter0_dd_355_416" x="0" y="0" width="82" height="82" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-          <feFlood flood-opacity="0" result="BackgroundImageFix"/>
-          <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
-          <feMorphology radius="4" operator="erode" in="SourceAlpha" result="effect1_dropShadow_355_416"/>
-          <feOffset dy="4"/>
-          <feGaussianBlur stdDeviation="3"/>
-          <feComposite in2="hardAlpha" operator="out"/>
-          <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0"/>
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_355_416"/>
-          <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
-          <feMorphology radius="3" operator="erode" in="SourceAlpha" result="effect2_dropShadow_355_416"/>
-          <feOffset dy="10"/>
-          <feGaussianBlur stdDeviation="7.5"/>
-          <feComposite in2="hardAlpha" operator="out"/>
-          <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0"/>
-          <feBlend mode="normal" in2="effect1_dropShadow_355_416" result="effect2_dropShadow_355_416"/>
-          <feBlend mode="normal" in="SourceGraphic" in2="effect2_dropShadow_355_416" result="shape"/>
-          </filter>
-          </defs>
-          </svg>
-        </div>
-        <div data-svg-wrapper data-layer="Container">
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M7.5 10H0V7.5H7.5V0H10V7.5H17.5V10H10V17.5H7.5V10Z" fill="#111827"/>
-          </svg>
-        </div>
-      </div>
-    </div>
-  </div>
   <div data-layer="Container" class="container_22">
     <div data-layer="Header" class="header">
       <div data-layer="Heading 1:margin" class="heading-1margin">
@@ -925,16 +847,6 @@
   justify-content: flex-start;
   align-items: flex-start;
   display: inline-flex;
-}
-
-.nav {
-  width: 393px;
-  height: 112px;
-  left: -3px;
-  top: 882px;
-  position: absolute;
-  background: #FFFEFC;
-  border-top: 1px #E5E7EB solid;
 }
 
 .button_03 {

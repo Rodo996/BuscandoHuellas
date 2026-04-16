@@ -1,5 +1,6 @@
 <script>
   import { createEventDispatcher } from "svelte";
+  import NavBar from "./NavBar.svelte";
   const dispatch = createEventDispatcher();
 </script>
 
@@ -252,102 +253,11 @@
     </p>
   </footer>
 
-  <nav class="bottom-nav">
-    <div class="nav-item active">
-      <svg
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        ><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
-        ></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg
-      >
-      <span>Inicio</span>
-    </div>
-    <div
-      class="nav-item"
-      on:click={() => dispatch("irABuscar")}
-      style="cursor: pointer;"
-    >
-      <svg
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        ><circle cx="11" cy="11" r="8"></circle><line
-          x1="21"
-          y1="21"
-          x2="16.65"
-          y2="16.65"
-        ></line></svg
-      >
-      <span>Buscar</span>
-    </div>
-    <button
-      class="nav-fab"
-      on:click={() => dispatch("irAPublicar")}
-      type="button"
-      aria-label="Hacer publicación"
-    >
-      <svg
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="#111827"
-        stroke-width="2.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        ><line x1="12" y1="5" x2="12" y2="19"></line><line
-          x1="5"
-          y1="12"
-          x2="19"
-          y2="12"
-        ></line></svg
-      >
-    </button>
-    <div class="nav-item">
-      <svg
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        ><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
-        ></path></svg
-      >
-      <span>Chats</span>
-    </div>
-    <div class="nav-item">
-      <svg
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        ><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle
-          cx="12"
-          cy="7"
-          r="4"
-        ></circle></svg
-      >
-      <span>Perfil</span>
-    </div>
-  </nav>
+  <NavBar
+    vistaActiva="inicio"
+    on:irABuscar={() => dispatch("irABuscar")}
+    on:irAPublicar={() => dispatch("irAPublicar")}
+  />
 </div>
 
 <style>
@@ -618,63 +528,9 @@
     margin: 0;
   }
 
-  /* Nav Inferior - ¡Con el FAB arreglado! */
-  .bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    margin: 0 auto;
-    width: 100%;
-    max-width: 400px;
-    background: #fffefc;
-    border-top: 1px solid #e5e7eb;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    padding: 12px 0 20px 0;
-    z-index: 100;
-    border-radius: 20px 20px 0 0;
-  }
-  .nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    color: #9ca3af;
-    font-size: 10px;
-    font-weight: 500;
-    transition: color 0.2s ease;
-  }
-
-  .nav-item.active {
-    color: #fbbf24;
-  }
-
-  .nav-fab {
-    background: #fbbf24;
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: 4px solid #ffffff;
-    transform: translateY(-25px);
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
-    cursor: pointer;
-    padding: 0;
-    outline: none;
-  }
-
-  /* En pantallas menores a 400px, el contenedor ocupa todo el ancho */
   @media (max-width: 400px) {
-    .app-container {
-      box-shadow: none; /* sin sombra cuando es full-width */
-    }
-
     .hero-content h2 {
-      font-size: 24px; /* reduce el título en pantallas chicas */
+      font-size: 24px;
     }
 
     .report-img {
@@ -684,13 +540,6 @@
 
     .report-info h3 {
       font-size: 13px;
-    }
-  }
-
-  /* En pantallas de 401px+ (tablet/desktop), centra con estilo */
-  @media (min-width: 401px) {
-    :global(body) {
-      background-color: #f3f4f6;
     }
   }
 </style>

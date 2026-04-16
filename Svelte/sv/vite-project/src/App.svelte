@@ -71,4 +71,10 @@
       box-shadow: none;
     }
   }
+
+  @media (min-width: 401px) {
+    :global(body) {
+      background-color: #f3f4f6;
+    }
+  }
 </style>

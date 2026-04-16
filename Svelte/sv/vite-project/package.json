@@ -15,5 +15,10 @@
   },
   "dependencies": {
     "leaflet": "^1.9.4"
-  }
+  },
+  "description": "This template should help get you started developing with Svelte in Vite.",
+  "main": "Backend.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }

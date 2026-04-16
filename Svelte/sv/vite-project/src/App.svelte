@@ -58,7 +58,6 @@
     <Chat contacto={contactoActivo} on:volver={() => navegar('chats')} />
   {/if}
 </main>
-
 <style>
   :global(html), :global(body) {
     width: 100%;

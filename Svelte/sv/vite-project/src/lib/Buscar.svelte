@@ -523,6 +523,7 @@
         vistaActiva="buscar"
         on:irAInicio={() => dispatch("volver")}
         on:irAPublicar={() => dispatch("irAPublicar")}
+        on:irAChats={() => dispatch("irAChats")}
     />
 </div>
 

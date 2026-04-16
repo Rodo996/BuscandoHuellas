@@ -108,7 +108,7 @@
                 <h4>{mascota.dueno}</h4>
                 <p>Dueño • {mascota.duenoTiempo}</p>
             </div>
-            <button class="contact-btn">
+            <button class="contact-btn"on:click={() => dispatch("irAChat")}>
                 <svg
                     width="20"
                     height="20"

@@ -257,6 +257,7 @@
     vistaActiva="inicio"
     on:irABuscar={() => dispatch("irABuscar")}
     on:irAPublicar={() => dispatch("irAPublicar")}
+    on:irAChats={() => dispatch("irAChats")}
   />
 </div>
 

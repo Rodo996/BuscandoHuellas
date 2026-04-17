@@ -7,6 +7,7 @@
   import CrearCuenta from './lib/Crear_cuenta.svelte';
   import EditarPerfil from './lib/Editar_perfil.svelte';
   import Navbar from './lib/Navbar.svelte';
+  // --- IMPORTACIONES DE CHAT (AÑADIDAS) ---
   import Chats from './lib/Chats.svelte'; 
   import Chat from './lib/Chat.svelte';
 

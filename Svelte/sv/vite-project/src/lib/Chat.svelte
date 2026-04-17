@@ -35,10 +35,33 @@
     ];
 
     // Cargar la conversación dependiendo del nombre del contacto
-    $: mensajes = baseMensajes[infoContacto.nombre] || msgsDefault;
+    let mensajes = [];
+
+    $: {
+        mensajes = [...(baseMensajes[infoContacto.nombre] || msgsDefault)];
+    }
 
     function volver() { dispatch('volver'); }
-    function accion(tipo) { alert(`Acción seleccionada: ${tipo}`); }
+    function accion(tipo) {
+        let texto = '';
+
+        if (tipo === 'Prueba de propiedad') {
+            texto = 'Solicito prueba de propiedad';
+        } else if (tipo === 'Acordar encuentro') {
+            texto = 'Propongo acordar un encuentro';
+        } else if (tipo === 'Validar prueba') {
+            texto = 'Voy a validar la prueba enviada';
+        }
+
+        mensajes = [
+            ...mensajes,
+            {
+                tipo: 'me',
+                texto,
+                hora: 'Ahora'
+            }
+        ];
+    }
 </script>
 
 <div class="app-container">

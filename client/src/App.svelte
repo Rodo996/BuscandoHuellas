@@ -7,6 +7,8 @@
   import CrearCuenta from './lib/Crear_cuenta.svelte';
   import EditarPerfil from './lib/Editar_perfil.svelte';
   import Navbar from './lib/Navbar.svelte';
+  import Chats from './lib/Chats.svelte'; 
+  import Chat from './lib/Chat.svelte';
 
   // --- LÓGICA DE RUTAS UNIFICADA ---
   let path = window.location.pathname;
@@ -14,12 +16,14 @@
   
   let vistaActual = partes[0] || 'inicio'; 
   let subVista = partes[1] || ''; 
-  let vistaAnterior = "inicio"; // De la versión de tu compañero
+  let vistaAnterior = "inicio"; 
 
   let mascotaSeleccionada = null;
+  // --- ESTADO DEL CHAT (AÑADIDO) ---
+  let contactoActivo = null; 
 
   function navegar(vista, sub = '') {
-    vistaAnterior = vistaActual; // Guardamos dónde estábamos antes de cambiar
+    vistaAnterior = vistaActual; 
     vistaActual = vista;
     subVista = sub;
     
@@ -32,13 +36,25 @@
   const irAInicio   = () => navegar('inicio');
   const irABuscar   = () => navegar('buscar');
   
-  // Modificada para usar la lógica de "volver" de tu compañero
   const irAPublicar = () => {
     vistaAnterior = vistaActual;
     navegar('publicar');
   };
 
   const irAPerfil   = () => navegar('perfil', 'iniciar_sesion');
+
+  // --- NAVEGACIÓN DE CHATS (AÑADIDA) ---
+  const irAChats = () => navegar('chats');
+
+  const irAChat = (event) => {
+    // Si viene de la lista de chats tiene detalle, si no (desde ficha mascota) es genérico
+    if (event && event.detail) {
+        contactoActivo = event.detail;
+    } else {
+        contactoActivo = { nombre: "Dueño", color: "#F4D35E" };
+    }
+    navegar('chat');
+  };
 
   const irAPublicacion = (event) => {
     mascotaSeleccionada = event.detail;
@@ -60,6 +76,7 @@
       <Inicio 
         on:irABuscar={irABuscar} 
         on:irAPublicar={irAPublicar} 
+        on:irAChats={irAChats}
       />
 
     {:else if vistaActual === 'buscar'}
@@ -67,12 +84,14 @@
         on:volver={irAInicio} 
         on:verPublicacion={irAPublicacion} 
         on:irAPublicar={irAPublicar} 
+        on:irAChats={irAChats}
       />
 
     {:else if vistaActual === 'publicacion'}
       <Publicacion 
         mascota={mascotaSeleccionada} 
         on:volver={irABuscar} 
+        on:irAChat={irAChat}
       />
 
     {:else if vistaActual === 'publicar'}
@@ -80,6 +99,12 @@
         on:volver={() => navegar(vistaAnterior)} 
         on:publicado={irAInicio}
       />
+
+    {:else if vistaActual === 'chats'}
+      <Chats on:volver={irAInicio} on:abrirChat={irAChat} />
+
+    {:else if vistaActual === 'chat'}
+      <Chat contacto={contactoActivo} on:volver={irAChats} />
 
     {:else if vistaActual === 'perfil'}
         {#if subVista === 'crear_cuenta'}
@@ -103,11 +128,12 @@
     on:irABuscar={irABuscar}
     on:irAPublicar={irAPublicar}
     on:irAPerfil={irAPerfil}
+    on:irAChats={irAChats} 
   />
 </main>
 
 <style>
-  /* ESTILOS UNIFICADOS (Combinando ambas versiones) */
+  /* ESTILOS UNIFICADOS (Tus estilos originales de 151 líneas) */
   @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
 
   :global(html), :global(body) {
@@ -126,7 +152,7 @@
   :global(.app-container) {
     width: 100%;
     max-width: 400px;
-    margin-inline: auto; /* Centrado horizontal */
+    margin-inline: auto; 
     background: #FFFFFF;
     min-height: 100vh;
     position: relative;
@@ -135,14 +161,12 @@
     overflow-x: hidden;
   }
 
-  /* Responsive: sin sombra en móvil pequeño */
   @media (max-width: 400px) {
     :global(.app-container) {
       box-shadow: none;
     }
   }
 
-  /* Mejora visual de fondo para pantallas grandes (de tu compañero) */
   @media (min-width: 401px) {
     :global(body) {
       background-color: #f3f4f6;

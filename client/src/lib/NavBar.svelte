@@ -7,7 +7,6 @@
 
 <nav class="bottom-nav">
 
-  <!-- Inicio -->
   <button
     class="nav-item"
     class:active={vistaActiva === 'inicio'}
@@ -22,7 +21,6 @@
     <span>Inicio</span>
   </button>
 
-  <!-- Buscar -->
   <button
     class="nav-item"
     class:active={vistaActiva === 'buscar'}
@@ -37,7 +35,6 @@
     <span>Buscar</span>
   </button>
 
-  <!-- Publicar -->
   <button
     class="nav-fab"
     on:click={() => dispatch('irAPublicar')}
@@ -50,8 +47,12 @@
     </svg>
   </button>
 
-  <!-- Chats (sin lógica aún) -->
-  <button class="nav-item" type="button">
+  <button 
+    class="nav-item" 
+    class:active={vistaActiva === 'chats' || vistaActiva === 'chat'} 
+    on:click={() => dispatch('irAChats')}
+    type="button"
+  >
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
       stroke-width="2">
       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -59,7 +60,6 @@
     <span>Chats</span>
   </button>
 
-  <!-- Perfil -->
   <button
     class="nav-item"
     class:active={vistaActiva === 'perfil'}

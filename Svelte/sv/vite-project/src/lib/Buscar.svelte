@@ -22,12 +22,13 @@
   
   // Variables reactivas para los filtros
   let radioBusqueda = 1;
-  let filtroTamanos = { pequeno: true, mediano: true };
+  let filtroTamanos = { pequeno: true, mediano: true, grande: true};
   let filtroSexos = { macho: true, hembra: true };
 
   // Calculamos cuántos filtros están activos (para el botón)
   $: cantidadFiltros = (filtroTamanos.pequeno ? 1 : 0) + 
                        (filtroTamanos.mediano ? 1 : 0) + 
+                       (filtroTamanos.grande ? 1 : 0) + 
                        (filtroSexos.macho ? 1 : 0) + 
                        (filtroSexos.hembra ? 1 : 0) + 
                        (radioBusqueda > 0 ? 1 : 0);
@@ -75,7 +76,8 @@
     // Filtrado por Tamaño (Asegúrate de que en la DB guardes 'Pequeño' o 'Mediano')
     const coincideTamano = (filtroTamanos.pequeno && mascota.tamano === 'Pequeño') ||
                            (filtroTamanos.mediano && mascota.tamano === 'Mediano') ||
-                           (!filtroTamanos.pequeno && !filtroTamanos.mediano);
+                           (filtroTamanos.grande && mascota.tamano === 'Grande') ||
+                           (!filtroTamanos.pequeno && !filtroTamanos.mediano && !filtroTamanos.grande);
 
     return coincideTexto && coincideSexo && coincideTamano;
 });
@@ -152,6 +154,11 @@
                         <span class="checkmark">{#if filtroTamanos.mediano}<svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>{/if}</span>
                         Mediano
                     </label>
+                    <label class="custom-checkbox">
+                    <input type="checkbox" bind:checked={filtroTamanos.grande}>
+                    <span class="checkmark">{#if filtroTamanos.grande}<svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>{/if}</span>
+                    Grande
+                </label>
                 </div>
                 
                 <div class="checkbox-column">
@@ -240,7 +247,7 @@
     .search-section { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
     .search-bar { display: flex; gap: 10px; }
     .input-wrapper { flex: 1; display: flex; align-items: center; background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 10px 16px; }
-    .input-wrapper input { border: none; outline: none; width: 100%; margin-left: 10px; font-family: 'Plus Jakarta Sans', sans-serif; color: #111827; }
+    .input-wrapper input { border: none; outline: none; width: 100%; margin-left: 10px; font-family: 'Plus Jakarta Sans', sans-serif; color: #111827 !important; background: transparent !important;}
     .filter-icon-btn { background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 10px 14px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
     
     .filter-pills { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; }

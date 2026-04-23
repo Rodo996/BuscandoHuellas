@@ -1,5 +1,5 @@
 <script>
-  import { createEventDispatcher, onMount } from "svelte";
+  import { createEventDispatcher, onMount, onDestroy } from "svelte";
   const dispatch = createEventDispatcher();
 
   const API = "http://localhost:3000/api";
@@ -45,10 +45,18 @@
     } finally {
       cargando = false;
     }
+    document.addEventListener("click", cerrarDropdown);
   });
+
+  function cerrarDropdown(e) {
+    if (!e.target.closest(".color-dropdown-wrapper")) {
+      dropdownColorAbierto = false;
+    }
+  }
 
   // Cargar razas cuando cambia la especie
   async function cargarRazas(species_id) {
+    console.log("species_id recibido:", species_id);
     razaSeleccionada = null;
     razasDisponibles = [];
     if (!species_id) return;
@@ -421,7 +429,7 @@
           on:click={() => (dropdownColorAbierto = !dropdownColorAbierto)}
         >
           {#if colorSeleccionado}
-            {#if colorSeleccionado.nombre === "Tricolor"}
+            {#if colorSeleccionado.color_name === "Tricolor"}
               <span
                 class="color-dot"
                 style="background: linear-gradient(135deg, #1a1a1a 33%, #d4a96a 33% 66%, #f5f5f5 66%);"
@@ -429,10 +437,12 @@
             {:else}
               <span
                 class="color-dot"
-                style="background: {colorSeleccionado.hex};"
+                style="background: {colorSeleccionado.hex_code};"
               ></span>
             {/if}
-            <span class="color-trigger-label">{colorSeleccionado.nombre}</span>
+            <span class="color-trigger-label"
+              >{colorSeleccionado.color_name}</span
+            >
           {:else}
             <span class="color-dot color-dot-empty"></span>
             <span class="color-trigger-placeholder">Seleccionar</span>
@@ -492,7 +502,6 @@
           <option value="" disabled>Seleccionar</option>
           <option>Macho</option>
           <option>Hembra</option>
-          <option>Desconocido</option>
         </select>
         <svg
           class="select-arrow"
@@ -786,7 +795,6 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
-    padding-bottom: 100px;
   }
 
   /* Tipo */
@@ -1066,16 +1074,11 @@
   }
 
   .publish-footer {
-    position: fixed;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 400px;
     background: white;
     padding: 16px 20px;
     box-shadow: 0px -4px 6px rgba(0, 0, 0, 0.05);
   }
+
   .publish-btn {
     width: 100%;
     background: #f4d35e;

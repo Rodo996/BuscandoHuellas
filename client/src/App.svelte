@@ -157,7 +157,7 @@
     background: #FFFFFF;
     min-height: 100vh;
     position: relative;
-    padding-bottom: 90px;
+    padding-bottom: 50px;
     box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
     overflow-x: hidden;
   }

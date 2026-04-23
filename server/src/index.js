@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import pool from './db.js';
@@ -19,6 +20,7 @@ pool.getConnection()
 
 app.use('/api/posts', postsRouter);
 app.use('/api/catalogs', catalogsRouter);
+app.use('/api/mascotas', reportSheetRouter);
 
 
 app.listen(process.env.PORT, () =>

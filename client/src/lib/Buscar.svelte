@@ -1,37 +1,45 @@
 <script>
-    import { createEventDispatcher } from "svelte";
+    import { createEventDispatcher, onMount } from "svelte";
     import NavBar from "./Navbar.svelte";
 
     const dispatch = createEventDispatcher();
 
+    let mascotas = [];
     let activePill = "Tipo";
     let searchQuery = "";
 
-    // --- ESTADO DEL MENÚ DE FILTROS ---
-    let mostrarFiltros = false;
+    onMount(async () => {
+        try {
+            const response = await fetch("http://localhost:3000/api/mascotas");
+            if (response.ok) {
+                mascotas = await response.json();
+            }
+        } catch (error) {
+            console.error("No se pudieron cargar las mascotas:", error);
+        }
+    });
 
-    // Variables reactivas para los filtros
+    let mostrarFiltros = false;
     let radioBusqueda = 1;
-    let filtroTamanos = { pequeno: true, mediano: true };
+    let filtroTamanos = { pequeno: true, mediano: true, grande: true };
     let filtroSexos = { macho: true, hembra: true };
 
-    // Calculamos cuántos filtros están activos (para el botón)
     $: cantidadFiltros =
         (filtroTamanos.pequeno ? 1 : 0) +
         (filtroTamanos.mediano ? 1 : 0) +
+        (filtroTamanos.grande ? 1 : 0) +
         (filtroSexos.macho ? 1 : 0) +
         (filtroSexos.hembra ? 1 : 0) +
         (radioBusqueda > 0 ? 1 : 0);
 
-    // Funciones manejadoras
     const selectPill = (pillName) => {
         activePill = pillName;
-        mostrarFiltros = true; // Abrimos el panel al tocar un filtro
+        mostrarFiltros = true;
     };
 
     const limpiarFiltros = () => {
         radioBusqueda = 1;
-        filtroTamanos = { pequeno: false, mediano: false };
+        filtroTamanos = { pequeno: false, mediano: false, grande: false };
         filtroSexos = { macho: false, hembra: false };
     };
 
@@ -39,138 +47,29 @@
         mostrarFiltros = false;
     };
 
-    // Base de datos simulada enriquecida
-    const mascotas = [
-        {
-            id: 1,
-            raza: "Bernés de la montaña",
-            sexo: "Macho",
-            tiempo: "Visto hace 2 días",
-            ubicacion: "Plaza Patria",
-            img: "/Img-Buscar/bernesbuscar.jpg",
-            estado: "Extraviado",
-            tieneEtiqueta: true,
-            tamano: "Gigante",
-            color: "Negro, café, blanco",
-            especie: "Perro",
-            cruza: "No",
-            discapacidades: "No",
-            cola: "Sí",
-            dueno: "Laura García",
-            duenoTiempo: "Registrado hace 1 año",
-        },
-        {
-            id: 2,
-            raza: "Golden Retriever",
-            sexo: "Macho",
-            tiempo: "Visto ayer",
-            ubicacion: "Paseo Chapultepec",
-            img: "/Img-Buscar/golden.png",
-            estado: "Alojado",
-            tieneEtiqueta: true,
-            tamano: "Grande",
-            color: "Dorado",
-            especie: "Perro",
-            cruza: "No",
-            discapacidades: "No",
-            cola: "Sí",
-            dueno: "Carlos Pérez",
-            duenoTiempo: "Registrado hace 3 meses",
-        },
-        {
-            id: 3,
-            raza: "Chihuahua",
-            sexo: "Macho",
-            tiempo: "Visto hace 1 sem",
-            ubicacion: "Glorieta Chapalita",
-            img: "/Img-Buscar/chihuahua.png",
-            estado: "Extraviado",
-            tieneEtiqueta: false,
-            tamano: "Pequeño",
-            color: "Café claro",
-            especie: "Perro",
-            cruza: "Sí",
-            discapacidades: "No",
-            cola: "Sí",
-            dueno: "Ana Gómez",
-            duenoTiempo: "Registrado hace 2 años",
-        },
-        {
-            id: 4,
-            raza: "Gato europeo",
-            sexo: "Hembra",
-            tiempo: "Visto hace 1 mes",
-            ubicacion: "Mercado Santa Tere",
-            img: "/Img-Buscar/gato.png",
-            estado: "Avistado",
-            tieneEtiqueta: true,
-            tamano: "Mediano",
-            color: "Gris atigrado",
-            especie: "Gato",
-            cruza: "No",
-            discapacidades: "Falta de visión",
-            cola: "Sí",
-            dueno: "Luis Hernández",
-            duenoTiempo: "Registrado hace 5 meses",
-        },
-        {
-            id: 5,
-            raza: "Gato europeo",
-            sexo: "Macho",
-            tiempo: "Visto hace 1 mes",
-            ubicacion: "Santa Anita",
-            img: "/Img-Buscar/gatomacho.jpg",
-            estado: "Alojado",
-            tieneEtiqueta: true,
-            tamano: "Mediano",
-            color: "Naranja",
-            especie: "Gato",
-            cruza: "No",
-            discapacidades: "No",
-            cola: "No",
-            dueno: "Sofía Ramírez",
-            duenoTiempo: "Registrado hace 1 mes",
-        },
-        {
-            id: 6,
-            raza: "Maltes",
-            sexo: "Hembra",
-            tiempo: "Visto hace 1 mes",
-            ubicacion: "Bugambilias",
-            img: "/Img-Buscar/malte.jpg",
-            estado: "Avistado",
-            tieneEtiqueta: true,
-            tamano: "Pequeño",
-            color: "Blanco",
-            especie: "Perro",
-            cruza: "No",
-            discapacidades: "No",
-            cola: "Sí",
-            dueno: "Mariana López",
-            duenoTiempo: "Registrado hace 4 años",
-        },
-    ];
-
-    // --- LÓGICA DE FILTRADO COMBINADO ---
     $: mascotasFiltradas = mascotas.filter((mascota) => {
-        // 1. Filtro de búsqueda por texto
         const termino = searchQuery.toLowerCase();
         const coincideTexto =
-            mascota.raza.toLowerCase().includes(termino) ||
-            mascota.ubicacion.toLowerCase().includes(termino) ||
-            mascota.estado.toLowerCase().includes(termino);
+            mascota.name?.toLowerCase().includes(termino) ||
+            mascota.raza?.toLowerCase().includes(termino) ||
+            mascota.ubicacion?.toLowerCase().includes(termino);
 
-        // 2. Filtro de Sexo (Si ninguno está seleccionado, mostramos todos)
-        let coincideSexo = true;
-        if (filtroSexos.macho || filtroSexos.hembra) {
-            coincideSexo =
-                (filtroSexos.macho && mascota.sexo === "Macho") ||
-                (filtroSexos.hembra && mascota.sexo === "Hembra");
-        }
+        const coincideSexo =
+            (filtroSexos.macho && mascota.sexo === "Macho") ||
+            (filtroSexos.hembra && mascota.sexo === "Hembra") ||
+            (!filtroSexos.macho && !filtroSexos.hembra);
 
-        return coincideTexto && coincideSexo;
+        const coincideTamano =
+            (filtroTamanos.pequeno && mascota.tamano === "Pequeño") ||
+            (filtroTamanos.mediano && mascota.tamano === "Mediano") ||
+            (filtroTamanos.grande && mascota.tamano === "Grande") ||
+            (!filtroTamanos.pequeno &&
+                !filtroTamanos.mediano &&
+                !filtroTamanos.grande);
+
+        return coincideTexto && coincideSexo && coincideTamano;
     });
-    // FUNCIÓN PARA VER DETALLE
+
     const abrirPublicacion = (mascota) => {
         dispatch("verPublicacion", mascota);
     };
@@ -424,8 +323,29 @@
                             >
                             Mediano
                         </label>
+                        <label class="custom-checkbox">
+                            <input
+                                type="checkbox"
+                                bind:checked={filtroTamanos.grande}
+                            />
+                            <span class="checkmark"
+                                >{#if filtroTamanos.grande}<svg
+                                        width="12"
+                                        height="10"
+                                        viewBox="0 0 12 10"
+                                        fill="none"
+                                        ><path
+                                            d="M1 5L4.5 8.5L11 1"
+                                            stroke="white"
+                                            stroke-width="2"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                        /></svg
+                                    >{/if}</span
+                            >
+                            Grande
+                        </label>
                     </div>
-
                     <div class="checkbox-column">
                         <h3>Sexo</h3>
                         <label class="custom-checkbox">

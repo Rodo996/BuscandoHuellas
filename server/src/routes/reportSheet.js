@@ -1,9 +1,8 @@
 import { Router } from "express";
-import pool from "../db.js"; 
+import pool from "../db.js";
 
 const router = Router();
 
-// GET /api/mascotas
 router.get("/", async (req, res) => {
     try {
         const sql = `

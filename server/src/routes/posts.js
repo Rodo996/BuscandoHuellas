@@ -61,10 +61,10 @@ router.post("/", async (req, res) => {
   } catch (err) {
     await conn.rollback();
     console.error(err);
-    res.status(500).json({ 
-        error: "Error al crear la publicación",
-        detail: err.message,
-        code: err.code
+    res.status(500).json({
+      error: "Error al crear la publicación",
+      detail: err.message,
+      code: err.code
     });
   } finally {
     conn.release();

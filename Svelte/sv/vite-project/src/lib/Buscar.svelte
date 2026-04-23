@@ -8,7 +8,7 @@
   // Función para traer datos del backend
   onMount(async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/mascotas');
+      const response = await fetch('http://localhost:5173/api/mascotas');
       if (response.ok) {
         mascotas = await response.json();
       }

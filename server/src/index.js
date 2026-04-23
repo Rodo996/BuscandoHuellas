@@ -3,6 +3,7 @@ import cors from 'cors';
 import pool from './db.js';
 import postsRouter from './routes/posts.js';
 import catalogsRouter from './routes/catalogs.js';
+import reportSheetRouter from './routes/reportSheet.js';
 
 const app = express();
 
@@ -18,6 +19,7 @@ pool.getConnection()
 
 app.use('/api/posts', postsRouter);
 app.use('/api/catalogs', catalogsRouter);
+
 
 app.listen(process.env.PORT, () =>
   console.log(`Server corriendo en http://localhost:${process.env.PORT}`)

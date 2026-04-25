@@ -5,6 +5,7 @@ import pool from './db.js';
 import postsRouter from './routes/posts.js';
 import catalogsRouter from './routes/catalogs.js';
 import reportSheetRouter from './routes/reportSheet.js';
+import crearCuentaRouter from './routes/crearCuenta.js';
 
 const app = express();
 
@@ -21,6 +22,7 @@ pool.getConnection()
 app.use('/api/posts', postsRouter);
 app.use('/api/catalogs', catalogsRouter);
 app.use('/api/mascotas', reportSheetRouter);
+app.use('/api/crear-cuenta', crearCuentaRouter);
 
 
 app.listen(process.env.PORT, () =>

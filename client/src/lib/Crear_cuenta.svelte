@@ -3,7 +3,24 @@
   const dispatch = createEventDispatcher();
 
   const volver = () => dispatch('volver');
-  const registrar = () => dispatch('registroExitoso');
+  const registrar = async () => {
+    // Asegúrate de usar el puerto correcto de tu backend si no usas proxy en Vite
+    const res = await fetch('http://localhost:3000/api/crear-cuenta', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, name, password })
+    });
+
+    if (res.ok) {
+      dispatch('registroExitoso');
+    }
+  };
+
+  let email;
+  let name;
+  let password;
 </script>
 
 <div class="mobile-container">
@@ -69,7 +86,7 @@
       <div class="input-group">
         <label for="nombre">Nombre de usuario*</label>
         <div class="input-wrapper">
-          <input type="text" id="nombre" placeholder="Ej. Laura García" required />
+          <input type="text" id="nombre" placeholder="Ej. Laura García" required bind:value={name} />
           <span class="input-icon-right">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
@@ -81,7 +98,7 @@
       <div class="input-group">
         <label for="correo">Correo electrónico*</label>
         <div class="input-wrapper">
-          <input type="email" id="correo" placeholder="Ej. a01849028@tec.mx" required />
+          <input type="email" id="correo" placeholder="Ej. a01849028@tec.mx" required bind:value={email} />
           <span class="input-icon-right">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
@@ -93,7 +110,7 @@
       <div class="input-group">
         <label for="password">Contraseña*</label>
         <div class="input-wrapper">
-          <input type="password" id="password" placeholder="Ej. ************" required />
+          <input type="password" id="password" placeholder="Ej. ************" required bind:value={password} />
           <span class="input-icon-right">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>

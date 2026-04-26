@@ -87,6 +87,8 @@
     return Object.keys(errores).length === 0;
   }
 
+  let imagenSeleccionada = null;
+
   async function handlePublicar() {
     intentoEnvio = true;
     if (!validar()) return;
@@ -126,6 +128,17 @@
         body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error("Error del servidor");
+      const { post_id } = await res.json();
+
+      if (imagenSeleccionada && post_id) {
+        const formData = new FormData();
+        formData.append("image", imagenSeleccionada);
+        await fetch(`${API}/images/upload/${post_id}`, {
+          method: "POST",
+          body: formData,
+        });
+      }
+
       dispatch("publicado");
     } catch (err) {
       console.error(err);
@@ -580,30 +593,48 @@
     </div>
 
     <!-- Fotografías -->
-    <div class="section-heading">
-      <svg width="22" height="20" viewBox="0 0 22 20" fill="none">
-        <path
-          d="M2 20C1.45 20 0.979167 19.8042 0.5875 19.4125C0.195833 19.0208 0 18.55 0 18V6C0 5.45 0.195833 4.97917 0.5875 4.5875C0.979167 4.19583 1.45 4 2 4H5.15L7 2H13V4H7.875L6.05 6H2V18H18V9H20V18C20 18.55 19.8042 19.0208 19.4125 19.4125C19.0208 19.8042 18.55 20 18 20H2ZM18 6V4H16V2H18V0H20V2H22V4H20V6H18ZM10 16.5C11.25 16.5 12.3125 16.0625 13.1875 15.1875C14.0625 14.3125 14.5 13.25 14.5 12C14.5 10.75 14.0625 9.6875 13.1875 8.8125C12.3125 7.9375 11.25 7.5 10 7.5C8.75 7.5 7.6875 7.9375 6.8125 8.8125C5.9375 9.6875 5.5 10.75 5.5 12C5.5 13.25 5.9375 14.3125 6.8125 15.1875C7.6875 16.0625 8.75 16.5 10 16.5Z"
-          fill="#F4D35E"
-        />
-      </svg>
-      <span>Fotografías</span>
-    </div>
-
     <div class="photos-area">
-      <div class="photo-thumbs">
-        <div class="photo-thumb"></div>
-        <div class="photo-thumb"></div>
-      </div>
-      <div class="photo-upload">
-        <svg width="27" height="27" viewBox="0 0 27 27" fill="none">
-          <path
-            d="M3 27C2.175 27 1.46875 26.7062 0.88125 26.1187C0.29375 25.5312 0 24.825 0 24V3C0 2.175 0.29375 1.46875 0.88125 0.88125C1.46875 0.29375 2.175 0 3 0H24C24.825 0 25.5312 0.29375 26.1187 0.88125C26.7062 1.46875 27 2.175 27 3V24C27 24.825 26.7062 25.5312 26.1187 26.1187C25.5312 26.7062 24.825 27 24 27H3ZM3 24H24V3H3V24ZM4.5 21H22.5L16.875 13.5L12.375 19.5L9 15L4.5 21Z"
-            fill="#F4D35E"
+      <!-- Preview de imagen seleccionada -->
+      {#if imagenSeleccionada}
+        <div class="photo-preview">
+          <img
+            src={URL.createObjectURL(imagenSeleccionada)}
+            alt="Preview"
+            class="photo-preview-img"
           />
-        </svg>
-        <span class="upload-label">Image Placeholder - Subir fotos aquí</span>
-      </div>
+          <button
+            type="button"
+            class="photo-remove"
+            on:click={() => (imagenSeleccionada = null)}>✕</button
+          >
+        </div>
+      {:else}
+        <label
+          class="photo-upload"
+          on:dragover|preventDefault
+          on:drop|preventDefault={(e) => {
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith("image/"))
+              imagenSeleccionada = file;
+          }}
+        >
+          <input
+            type="file"
+            accept="image/*"
+            style="display:none"
+            on:change={(e) => (imagenSeleccionada = e.target.files[0])}
+          />
+          <svg width="27" height="27" viewBox="0 0 27 27" fill="none">
+            <path
+              d="M3 27C2.175 27 1.46875 26.7062 0.88125 26.1187C0.29375 25.5312 0 24.825 0 24V3C0 2.175 0.29375 1.46875 0.88125 0.88125C1.46875 0.29375 2.175 0 3 0H24C24.825 0 25.5312 0.29375 26.1187 0.88125C26.7062 1.46875 27 2.175 27 3V24C27 24.825 26.7062 25.5312 26.1187 26.1187C25.5312 26.7062 24.825 27 24 27H3ZM3 24H24V3H3V24ZM4.5 21H22.5L16.875 13.5L12.375 19.5L9 15L4.5 21Z"
+              fill="#F4D35E"
+            />
+          </svg>
+          <span class="upload-label"
+            >Arrastra una foto o toca para seleccionar</span
+          >
+        </label>
+      {/if}
     </div>
 
     <!-- Ubicación y Fecha -->
@@ -1203,5 +1234,33 @@
     font-size: 13px;
     font-weight: 500;
     color: #0d3b66;
+  }
+  .photo-preview {
+    position: relative;
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .photo-preview-img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 12px;
+  }
+  .photo-remove {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 </style>

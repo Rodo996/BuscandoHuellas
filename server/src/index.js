@@ -6,6 +6,7 @@ import postsRouter from './routes/posts.js';
 import catalogsRouter from './routes/catalogs.js';
 import reportSheetRouter from './routes/reportSheet.js';
 import crearCuentaRouter from './routes/crearCuenta.js';
+import imagesRouter from './routes/images.js'
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use('/api/posts', postsRouter);
 app.use('/api/catalogs', catalogsRouter);
 app.use('/api/mascotas', reportSheetRouter);
 app.use('/api/crear-cuenta', crearCuentaRouter);
+app.use('/api/images', imagesRouter);
 
 
 app.listen(process.env.PORT, () =>

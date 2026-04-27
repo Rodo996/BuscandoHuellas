@@ -1,5 +1,5 @@
 <script>
-  import { createEventDispatcher, onMount, onDestroy } from "svelte";
+  import { createEventDispatcher, onMount } from "svelte";
   import MapPicker from "../lib/MapPicker.svelte";
 
   const dispatch = createEventDispatcher();
@@ -72,11 +72,73 @@
 
   $: if (especieSeleccionada) cargarRazas(especieSeleccionada.species_id);
 
+  const tamanosPorEspecie = {
+    perro: [
+      { value: "Extra Small", label: "Extra Pequeño", range: "<4 kg" },
+      { value: "Small", label: "Pequeño", range: "4-10 kg" },
+      { value: "Medium", label: "Mediano", range: "11-25 kg" },
+      { value: "Large", label: "Grande", range: "25-44 kg" },
+      { value: "Giant", label: "Gigante", range: ">45 kg" },
+    ],
+    gato: [
+      { value: "Small", label: "Pequeño", range: "<4.5 kg" },
+      { value: "Medium", label: "Mediano", range: "4.5-7 kg" },
+      { value: "Large", label: "Grande", range: ">7 kg" },
+    ],
+    default: [
+      { value: "Small", label: "Pequeño", range: "" },
+      { value: "Medium", label: "Mediano", range: "" },
+      { value: "Large", label: "Grande", range: "" },
+    ],
+  };
+
+  $: opcionesTamano = (() => {
+    if (!especieSeleccionada) return tamanosPorEspecie.default;
+    const key = especieSeleccionada.species_name.toLowerCase();
+    return tamanosPorEspecie[key] ?? tamanosPorEspecie.default;
+  })();
+
+  $: if (
+    especieSeleccionada &&
+    tamano &&
+    !opcionesTamano.find((o) => o.value === tamano)
+  ) {
+    tamano = "";
+  }
+
   function onUbicacion(e) {
     cp = e.detail.postcode;
     direccion = e.detail.address;
     lat = e.detail.lat;
     lng = e.detail.lng;
+  }
+
+  let obteniendoUbicacion = false;
+
+  async function usarUbicacionActual() {
+    if (!navigator.geolocation) return;
+    obteniendoUbicacion = true;
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        lat = pos.coords.latitude;
+        lng = pos.coords.longitude;
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
+            { headers: { "Accept-Language": "es" } },
+          );
+          const data = await res.json();
+          direccion = data.display_name ?? "";
+          cp = data.address?.postcode ?? "";
+        } catch {
+          /* queda vacío */
+        }
+        obteniendoUbicacion = false;
+      },
+      () => {
+        obteniendoUbicacion = false;
+      },
+    );
   }
 
   // --- Validación ---
@@ -111,13 +173,8 @@
       name: nombreMascota,
       breed_id: razaSeleccionada.breed_id,
       is_mixed_breed: esMestizo,
-      sex: sexo === "Macho" ? "Male" : sexo === "Hembra" ? "Female" : "Unknown",
-      size:
-        tamano === "Pequeño"
-          ? "Small"
-          : tamano === "Mediano"
-            ? "Medium"
-            : "Large",
+      sex: sexo === "Macho" ? "Male" : "Female",
+      size: tamano,
       has_tail: tieneCola === "Sí",
       distinctive_features: rasgosDistintivos,
       color_ids: [colorSeleccionado.color_id],
@@ -405,9 +462,11 @@
         >
           <select class="select-native" bind:value={tamano}>
             <option value="" disabled>Seleccionar</option>
-            <option>Pequeño</option>
-            <option>Mediano</option>
-            <option>Grande</option>
+            {#each opcionesTamano as op}
+              <option value={op.value}>
+                {op.label}{op.range ? ` (${op.range})` : ""}
+              </option>
+            {/each}
           </select>
           <svg
             class="select-arrow"
@@ -699,7 +758,36 @@
         Dirección donde se perdió <span class="req">*</span>
       </label>
 
-      <MapPicker on:ubicacion={onUbicacion} />
+      <!-- Botón de ubicación actual -->
+      <button
+        type="button"
+        class="ubicacion-actual-btn"
+        on:click={usarUbicacionActual}
+        disabled={obteniendoUbicacion}
+        style="margin-bottom: 8px;"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="3" fill="currentColor" />
+          <path
+            d="M12 2v3M12 19v3M2 12h3M19 12h3"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+          <circle
+            cx="12"
+            cy="12"
+            r="7"
+            stroke="currentColor"
+            stroke-width="2"
+          />
+        </svg>
+        {obteniendoUbicacion
+          ? "Obteniendo ubicación..."
+          : "Usar mi ubicación actual"}
+      </button>
+
+      <MapPicker on:ubicacion={onUbicacion} bind:lat bind:lng />
 
       <div class="direccion-display" style="margin-top: 8px;">
         {#if direccion}
@@ -1370,5 +1458,32 @@
   .textarea-field:hover {
     border-color: #0d3b66;
     box-shadow: 0 0 0 3px rgba(13, 59, 102, 0.08);
+  }
+  .ubicacion-actual-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 14px;
+    background: #eef2ff;
+    border: 1.5px solid #c7d2fe;
+    border-radius: 10px;
+    font-family: "Poppins", sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: #0d3b66;
+    cursor: pointer;
+    transition:
+      background 0.2s,
+      border-color 0.2s;
+    width: 100%;
+    justify-content: center;
+  }
+  .ubicacion-actual-btn:hover {
+    background: #e0e7ff;
+    border-color: #a5b4fc;
+  }
+  .ubicacion-actual-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 </style>

@@ -32,6 +32,21 @@
                 "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
         });
 
+        if (!readonly && navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    lat = pos.coords.latitude;
+                    lng = pos.coords.longitude;
+                    map.setView([lat, lng], zoom);
+                    marker.setLatLng([lat, lng]);
+                    emitir(lat, lng);
+                },
+                () => {
+                    // Si el usuario niega el permiso, queda con las coordenadas default
+                },
+            );
+        }
+
         map = L.map(mapEl).setView([lat, lng], zoom);
 
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -50,13 +65,18 @@
                 emitir(newLat, newLng);
             });
 
-            // Arrastrar el pin también emite
+            // Arrastrar el pin también lo mueve
             marker.on("dragend", () => {
                 const { lat: newLat, lng: newLng } = marker.getLatLng();
                 emitir(newLat, newLng);
             });
         }
     });
+
+    $: if (map && marker && lat && lng) {
+        map.setView([lat, lng], zoom);
+        marker.setLatLng([lat, lng]);
+    }
 
     async function emitir(latVal, lngVal) {
         // Reverse geocoding con Nominatim (dado un punto (lat, lng), te dice qué calle/lugar es ese punto)

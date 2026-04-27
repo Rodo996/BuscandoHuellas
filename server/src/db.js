@@ -11,6 +11,7 @@ const pool = mysql.createPool({
   ssl: {
     ca: fs.readFileSync(path.join(process.cwd(), process.env.DB_SSL_CERT))
   },
+  timezone: "-06:00",
   waitForConnections: true,
   connectionLimit: 10,
 });

@@ -1,5 +1,7 @@
 <script>
   import { createEventDispatcher, onMount, onDestroy } from "svelte";
+  import MapPicker from "../lib/MapPicker.svelte";
+
   const dispatch = createEventDispatcher();
 
   const API = "http://localhost:3000/api";
@@ -10,6 +12,7 @@
   let nombreMascota = "";
   let especieSeleccionada = null;
   let razaSeleccionada = null;
+  let esMestizo = false;
   let tamano = "";
   let tieneCola = "";
   let colorSeleccionado = null;
@@ -22,6 +25,9 @@
   let tuNombre = "";
   let telefono = "";
   let email = "";
+  let cp = "";
+  let lat = 20.6597;
+  let lng = -103.3496;
 
   // --- Catálogos desde API ---
   let especies = [];
@@ -66,6 +72,13 @@
 
   $: if (especieSeleccionada) cargarRazas(especieSeleccionada.species_id);
 
+  function onUbicacion(e) {
+    cp = e.detail.postcode;
+    direccion = e.detail.address;
+    lat = e.detail.lat;
+    lng = e.detail.lng;
+  }
+
   // --- Validación ---
   let intentoEnvio = false;
   let errores = {};
@@ -80,6 +93,7 @@
     if (!colorSeleccionado) errores.color = true;
     if (!sexo) errores.sexo = true;
     if (discapacidadesSeleccionadas.length === 0) errores.discapacidades = true;
+    if (!imagenSeleccionada) errores.imagen = true;
     if (!direccion.trim()) errores.direccion = true;
     if (!fecha) errores.fecha = true;
     if (!tuNombre.trim()) errores.tuNombre = true;
@@ -96,7 +110,7 @@
     const payload = {
       name: nombreMascota,
       breed_id: razaSeleccionada.breed_id,
-      is_mixed_breed: false,
+      is_mixed_breed: esMestizo,
       sex: sexo === "Macho" ? "Male" : sexo === "Hembra" ? "Female" : "Unknown",
       size:
         tamano === "Pequeño"
@@ -108,10 +122,10 @@
       distinctive_features: rasgosDistintivos,
       color_ids: [colorSeleccionado.color_id],
       disability_ids: discapacidadesSeleccionadas.map((d) => d.disability_id),
-      zip_code: "45010", // temporal hasta geocoding
+      zip_code: cp,
       street: direccion,
-      lat: 20.6597,
-      lng: -103.3496,
+      lat: lat,
+      lng: lng,
       user_id: 1, // temporal hasta auth
       type:
         tipoPublicacion === "Extraviado"
@@ -327,6 +341,8 @@
       </div>
       <div class="field-group">
         <label class="field-label">Raza <span class="req">*</span></label>
+
+        <!-- Selector raza PRIMERO -->
         <div class="select-wrapper" class:error={intentoEnvio && errores.raza}>
           <select
             class="select-native"
@@ -357,6 +373,25 @@
         {#if intentoEnvio && errores.raza}<span class="error-msg"
             >Obligatorio</span
           >{/if}
+
+        <!-- ¿Es cruza? DEBAJO, en una sola línea -->
+        <div class="cruza-toggle">
+          <span class="cruza-label">¿Es cruza?</span>
+          <div class="cruza-btns">
+            <button
+              type="button"
+              class="cruza-btn"
+              class:active={esMestizo}
+              on:click={() => (esMestizo = true)}>Sí</button
+            >
+            <button
+              type="button"
+              class="cruza-btn"
+              class:active={!esMestizo}
+              on:click={() => (esMestizo = false)}>No</button
+            >
+          </div>
+        </div>
       </div>
     </div>
 
@@ -593,47 +628,58 @@
     </div>
 
     <!-- Fotografías -->
-    <div class="photos-area">
-      <!-- Preview de imagen seleccionada -->
-      {#if imagenSeleccionada}
-        <div class="photo-preview">
-          <img
-            src={URL.createObjectURL(imagenSeleccionada)}
-            alt="Preview"
-            class="photo-preview-img"
-          />
-          <button
-            type="button"
-            class="photo-remove"
-            on:click={() => (imagenSeleccionada = null)}>✕</button
-          >
-        </div>
-      {:else}
-        <label
-          class="photo-upload"
-          on:dragover|preventDefault
-          on:drop|preventDefault={(e) => {
-            const file = e.dataTransfer.files[0];
-            if (file && file.type.startsWith("image/"))
-              imagenSeleccionada = file;
-          }}
-        >
-          <input
-            type="file"
-            accept="image/*"
-            style="display:none"
-            on:change={(e) => (imagenSeleccionada = e.target.files[0])}
-          />
-          <svg width="27" height="27" viewBox="0 0 27 27" fill="none">
-            <path
-              d="M3 27C2.175 27 1.46875 26.7062 0.88125 26.1187C0.29375 25.5312 0 24.825 0 24V3C0 2.175 0.29375 1.46875 0.88125 0.88125C1.46875 0.29375 2.175 0 3 0H24C24.825 0 25.5312 0.29375 26.1187 0.88125C26.7062 1.46875 27 2.175 27 3V24C27 24.825 26.7062 25.5312 26.1187 26.1187C25.5312 26.7062 24.825 27 24 27H3ZM3 24H24V3H3V24ZM4.5 21H22.5L16.875 13.5L12.375 19.5L9 15L4.5 21Z"
-              fill="#F4D35E"
+    <div class="field-group">
+      <label class="field-label">
+        Fotografía <span class="req">*</span>
+      </label>
+      <div class="photos-area">
+        {#if imagenSeleccionada}
+          <div class="photo-preview">
+            <img
+              src={URL.createObjectURL(imagenSeleccionada)}
+              alt="Preview"
+              class="photo-preview-img"
             />
-          </svg>
-          <span class="upload-label"
-            >Arrastra una foto o toca para seleccionar</span
+            <button
+              type="button"
+              class="photo-remove"
+              on:click={() => (imagenSeleccionada = null)}>✕</button
+            >
+          </div>
+        {:else}
+          <label
+            class="photo-upload"
+            class:error={intentoEnvio && errores.imagen}
+            on:dragover|preventDefault
+            on:drop|preventDefault={(e) => {
+              const file = e.dataTransfer.files[0];
+              if (file && file.type.startsWith("image/"))
+                imagenSeleccionada = file;
+            }}
           >
-        </label>
+            <input
+              type="file"
+              accept="image/*"
+              style="display:none"
+              on:change={(e) => {
+                const input = e.currentTarget;
+                imagenSeleccionada = input.files ? input.files[0] : null;
+              }}
+            />
+            <svg width="27" height="27" viewBox="0 0 27 27" fill="none">
+              <path
+                d="M3 27C2.175 27 1.46875 26.7062 0.88125 26.1187C0.29375 25.5312 0 24.825 0 24V3C0 2.175 0.29375 1.46875 0.88125 0.88125C1.46875 0.29375 2.175 0 3 0H24C24.825 0 25.5312 0.29375 26.1187 0.88125C26.7062 1.46875 27 2.175 27 3V24C27 24.825 26.7062 25.5312 26.1187 26.1187C25.5312 26.7062 24.825 27 24 27H3ZM3 24H24V3H3V24ZM4.5 21H22.5L16.875 13.5L12.375 19.5L9 15L4.5 21Z"
+                fill="#F4D35E"
+              />
+            </svg>
+            <span class="upload-label"
+              >Arrastra una foto o toca para seleccionar</span
+            >
+          </label>
+        {/if}
+      </div>
+      {#if intentoEnvio && errores.imagen}
+        <span class="error-msg">Tienes que subir una imagen de tu mascota</span>
       {/if}
     </div>
 
@@ -649,43 +695,24 @@
     </div>
 
     <div class="field-group">
-      <label class="field-label"
-        >Dirección donde se perdió <span class="req">*</span></label
-      >
-      <div class="input-row" class:error={intentoEnvio && errores.direccion}>
-        <!-- Lupa PRIMERO, luego el input -->
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          style="flex-shrink:0"
-        >
-          <circle
-            cx="10.5"
-            cy="10.5"
-            r="6.5"
-            stroke="#9C9C49"
-            stroke-width="2"
-          />
-          <path
-            d="M15.5 15.5L20 20"
-            stroke="#9C9C49"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-        <input
-          class="input-inner"
-          type="text"
-          placeholder="Buscar dirección o punto de referencia"
-          bind:value={direccion}
-        />
+      <label class="field-label">
+        Dirección donde se perdió <span class="req">*</span>
+      </label>
+
+      <MapPicker on:ubicacion={onUbicacion} />
+
+      <div class="direccion-display" style="margin-top: 8px;">
+        {#if direccion}
+          <span>{direccion}</span>
+        {:else}
+          <span class="direccion-placeholder"
+            >Dirección detectada automáticamente</span
+          >
+        {/if}
       </div>
-      {#if intentoEnvio && errores.direccion}<span class="error-msg"
-          >Campo obligatorio</span
-        >{/if}
+      {#if intentoEnvio && errores.direccion}
+        <span class="error-msg">Selecciona una ubicación en el mapa</span>
+      {/if}
     </div>
 
     <!-- Fecha + Hora -->
@@ -775,6 +802,7 @@
 </div>
 
 <style>
+  /* Header marca */
   .top-brand-header {
     background: #0d3b66;
     display: flex;
@@ -782,9 +810,9 @@
     align-items: center;
     gap: 8px;
     padding: 20px 0;
+    font-family: "Poppins", sans-serif;
     font-size: 22px;
     font-weight: 700;
-    font-family: "Poppins", sans-serif;
   }
   .text-white {
     color: #ffffff;
@@ -793,92 +821,83 @@
     color: #f4d35e;
   }
 
+  /* Header página */
   .page-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 16px 20px 12px 20px;
     background: white;
     border-bottom: 1px solid #f3f4f6;
-    position: sticky;
-    top: 0;
-    z-index: 10;
   }
   .page-title {
+    margin: 0;
     font-family: "Poppins", sans-serif;
     font-size: 16px;
     font-weight: 700;
     color: #0d3b66;
-    margin: 0;
   }
   .close-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
   }
 
+  /* Contenedor form */
   .form-body {
-    padding: 16px 20px;
     display: flex;
     flex-direction: column;
     gap: 16px;
+    padding: 16px 20px;
   }
-
-  /* Tipo */
-  .tipo-btns {
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .section-heading {
     display: flex;
-    justify-content: center;
-    gap: 10px;
-  }
-  .tipo-btn {
-    flex: 1;
-    border: 1.5px solid #e5e7eb;
-    border-radius: 20px;
-    padding: 12px 10px;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 0 6px 0;
+    margin-top: 4px;
+    border-top: 1px solid #e8e8ce;
     font-family: "Poppins", sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    color: #0d3b66;
-    background: white;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-align: center;
-  }
-  .tipo-btn.active {
-    background: #f4d35e;
-    border-color: #f4d35e;
+    font-size: 16px;
     font-weight: 700;
+    color: #1c1c0d;
   }
 
-  /* Labels y grupos */
-  .field-label {
-    display: block;
-    font-family: "Poppins", sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    color: #0d3b66;
-    margin-bottom: 6px;
-  }
-  .req {
-    color: #c0392b;
-    margin-left: 2px;
-  }
+  /* Labels y errores */
   .field-group {
     display: flex;
     flex-direction: column;
   }
-
-  /* Mensajes de error */
+  .field-label {
+    display: block;
+    margin-bottom: 6px;
+    font-family: "Poppins", sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #0d3b66;
+  }
+  .req {
+    margin-left: 2px;
+    color: #c0392b;
+  }
   .error-msg {
+    display: block;
+    margin-top: 4px;
     font-family: "Poppins", sans-serif;
     font-size: 11px;
     color: #c0392b;
-    margin-top: 4px;
-    display: block;
   }
   .error-msg.inline {
     display: inline;
@@ -886,59 +905,112 @@
     font-weight: 600;
   }
 
+  /* Input texto */
   .input-field {
     width: 100%;
+    padding: 12px 14px;
     background: #faf9f0;
     border: 1.5px solid #e8e8ce;
     border-radius: 10px;
-    padding: 12px 14px;
     font-family: "Poppins", sans-serif;
     font-size: 14px;
     color: #1c1c0d;
     outline: none;
-    transition: border-color 0.2s;
-  }
-  .input-field:focus {
-    border-color: #0d3b66;
+    transition:
+      border-color 0.2s,
+      box-shadow 0.2s;
   }
   .input-field::placeholder {
     color: rgba(156, 156, 73, 0.7);
+  }
+  .input-field:focus {
+    border-color: #0d3b66;
+    box-shadow: 0 0 0 3px rgba(13, 59, 102, 0.08);
   }
   .input-field.error {
     border-color: #c0392b;
     background: #fff8f8;
   }
 
-  /* Input row con ícono */
+  /* Input con ícono */
   .input-row {
     display: flex;
     align-items: center;
     gap: 8px;
+    padding: 10px 14px;
     background: #faf9f0;
     border: 1.5px solid #e8e8ce;
     border-radius: 10px;
-    padding: 10px 14px;
-    transition: border-color 0.2s;
+    transition:
+      border-color 0.2s,
+      box-shadow 0.2s;
   }
   .input-row:focus-within {
     border-color: #0d3b66;
+    box-shadow: 0 0 0 3px rgba(13, 59, 102, 0.08);
   }
   .input-row.error {
     border-color: #c0392b;
     background: #fff8f8;
   }
   .input-inner {
+    flex: 1;
+    min-width: 0;
     border: none;
     background: transparent;
     outline: none;
-    flex: 1;
     font-family: "Poppins", sans-serif;
     font-size: 14px;
     color: #1c1c0d;
-    min-width: 0;
   }
   .input-inner::placeholder {
     color: rgba(156, 156, 73, 0.7);
+  }
+
+  /* Dirección readonly */
+  .direccion-display {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 46px;
+    padding: 12px 14px;
+    background: #f3f3e8;
+    border: 1.5px solid #e8e8ce;
+    border-radius: 10px;
+    font-family: "Poppins", sans-serif;
+    font-size: 14px;
+    color: #1c1c0d;
+    overflow-x: auto;
+    white-space: nowrap;
+    cursor: default;
+  }
+  .direccion-placeholder {
+    color: rgba(156, 156, 73, 0.7);
+  }
+
+  /* Textarea */
+  .textarea-field {
+    width: 100%;
+    min-height: 80px;
+    padding: 12px 14px;
+    background: #faf9f0;
+    border: 1.5px solid #e8e8ce;
+    border-radius: 10px;
+    font-family: "Poppins", sans-serif;
+    font-size: 14px;
+    color: #1c1c0d;
+    resize: none;
+    outline: none;
+    transition:
+      border-color 0.2s,
+      box-shadow 0.2s;
+  }
+  .textarea-field::placeholder {
+    color: rgba(13, 59, 102, 0.5);
+  }
+  .textarea-field:focus {
+    border-color: #0d3b66;
+    box-shadow: 0 0 0 3px rgba(13, 59, 102, 0.08);
   }
 
   /* Select */
@@ -951,23 +1023,30 @@
     border-color: #c0392b;
     background: #fff8f8;
   }
+  .select-wrapper:focus-within .select-native {
+    border-color: #0d3b66;
+    box-shadow: 0 0 0 3px rgba(13, 59, 102, 0.08);
+  }
+  .select-wrapper:hover .select-native {
+    border-color: #0d3b66;
+    box-shadow: 0 0 0 3px rgba(13, 59, 102, 0.08);
+  }
   .select-native {
     width: 100%;
     appearance: none;
     -webkit-appearance: none;
+    padding: 12px 40px 12px 14px;
     background: #faf9f0;
     border: 1.5px solid #e8e8ce;
     border-radius: 10px;
-    padding: 12px 40px 12px 14px;
     font-family: "Poppins", sans-serif;
     font-size: 14px;
     color: #0d3b66;
     outline: none;
     cursor: pointer;
-    transition: border-color 0.2s;
-  }
-  .select-native:focus {
-    border-color: #0d3b66;
+    transition:
+      border-color 0.2s,
+      box-shadow 0.2s;
   }
   .select-native:disabled {
     opacity: 0.45;
@@ -979,191 +1058,110 @@
     pointer-events: none;
   }
 
-  /* Checkboxes como botones (sin :has()) */
-  .checkbox-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+  /* Botones tipo publicación */
+  .tipo-btns {
+    display: flex;
+    justify-content: center;
     gap: 10px;
   }
-  .error-box {
-    outline: 1.5px solid #c0392b;
-    border-radius: 10px;
-    padding: 6px;
-  }
-  .checkbox-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    background: #faf9f0;
-    border: 1.5px solid #e8e8ce;
-    border-radius: 10px;
-    padding: 10px 12px;
-    transition:
-      border-color 0.2s,
-      background 0.2s;
-    text-align: left;
-    font-family: "Poppins", sans-serif;
-  }
-  .checkbox-item.checked {
-    border-color: #0d3b66;
-    background: #eef2ff;
-  }
-  .checkbox-box {
-    width: 18px;
-    height: 18px;
-    min-width: 18px;
-    border-radius: 4px;
-    border: 2px solid #e8e8ce;
+  .tipo-btn {
+    flex: 1;
+    padding: 12px 10px;
     background: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition:
-      background 0.2s,
-      border-color 0.2s;
-  }
-  .checkbox-item.checked .checkbox-box {
-    background: #0d3b66;
-    border-color: #0d3b66;
-  }
-  .checkbox-label {
-    font-size: 12px;
-    color: #0d3b66;
-    font-weight: 500;
-    line-height: 1.3;
-  }
-
-  .textarea-field {
-    width: 100%;
-    background: #faf9f0;
-    border: 1.5px solid #e8e8ce;
-    border-radius: 10px;
-    padding: 12px 14px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 20px;
     font-family: "Poppins", sans-serif;
     font-size: 14px;
-    color: #1c1c0d;
-    resize: none;
-    min-height: 80px;
-    outline: none;
+    font-weight: 500;
+    color: #0d3b66;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s ease;
   }
-  .textarea-field::placeholder {
-    color: rgba(13, 59, 102, 0.5);
-  }
-
-  .two-col {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
+  .tipo-btn.active {
+    background: #f4d35e;
+    border-color: #f4d35e;
+    font-weight: 700;
   }
 
-  .section-heading {
+  /* Toggle ¿Es cruza? */
+  .cruza-toggle {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 8px;
-    padding: 14px 0 6px 0;
-    border-top: 1px solid #e8e8ce;
-    font-family: "Poppins", sans-serif;
-    font-size: 16px;
-    font-weight: 700;
-    color: #1c1c0d;
-    margin-top: 4px;
-  }
-
-  .photos-area {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .photo-thumbs {
-    display: flex;
-    gap: 10px;
-  }
-  .photo-thumb {
-    width: 72px;
-    height: 72px;
-    background: #f4f0c8;
+    margin-top: 8px;
+    padding: 10px 14px;
+    background: #faf9f0;
+    border: 1.5px solid #e8e8ce;
     border-radius: 10px;
   }
-  .photo-upload {
-    border: 1.5px dashed #e8e8ce;
-    border-radius: 12px;
-    background: #faf9f0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 24px;
-    cursor: pointer;
-  }
-  .upload-label {
+  .cruza-label {
     font-family: "Poppins", sans-serif;
     font-size: 13px;
-    color: #f4d35e;
     font-weight: 500;
+    color: #0d3b66;
+    white-space: nowrap;
   }
-
-  .publish-footer {
-    background: white;
-    padding: 16px 20px;
-    box-shadow: 0px -4px 6px rgba(0, 0, 0, 0.05);
-  }
-
-  .publish-btn {
-    width: 100%;
-    background: #f4d35e;
-    border: none;
-    border-radius: 14px;
-    padding: 16px;
-    font-family: "Poppins", sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    color: #111827;
-    cursor: pointer;
+  .cruza-btns {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: background 0.2s;
+    flex-shrink: 0;
+    gap: 6px;
   }
-  .publish-btn:hover {
-    background: #e6c84e;
+  .cruza-btn {
+    padding: 6px 18px;
+    background: white;
+    border: 1.5px solid #e8e8ce;
+    border-radius: 20px;
+    font-family: "Poppins", sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: #0d3b66;
+    cursor: pointer;
+    transition: all 0.2s;
   }
-  .publish-btn:active {
-    background: #d4b03a;
-    transform: scale(0.98);
+  .cruza-btn.active {
+    background: #f4d35e;
+    border-color: #f4d35e;
+    font-weight: 700;
   }
 
+  /* Dropdown color */
   .color-dot {
     width: 22px;
     height: 22px;
+    min-width: 22px;
     border-radius: 50%;
     flex-shrink: 0;
     border: 1.5px solid rgba(0, 0, 0, 0.1);
   }
-
-  /* Dropdown de color */
+  .color-dot-empty {
+    background: #e8e8ce;
+    border-style: dashed;
+  }
   .color-dropdown-wrapper {
     position: relative;
   }
   .color-trigger {
-    width: 100%;
     display: flex;
     align-items: center;
     gap: 10px;
+    width: 100%;
+    padding: 10px 14px;
     background: #faf9f0;
     border: 1.5px solid #e8e8ce;
     border-radius: 10px;
-    padding: 10px 14px;
-    cursor: pointer;
     font-family: "Poppins", sans-serif;
-    transition: border-color 0.2s;
+    cursor: pointer;
     text-align: left;
+    transition:
+      border-color 0.2s,
+      box-shadow 0.2s;
   }
   .color-trigger:focus,
   .color-trigger:hover {
     border-color: #0d3b66;
+    box-shadow: 0 0 0 3px rgba(13, 59, 102, 0.08);
   }
   .color-trigger.error {
     border-color: #c0392b;
@@ -1184,45 +1182,33 @@
     flex-shrink: 0;
     pointer-events: none;
   }
-  .color-dot {
-    width: 22px;
-    height: 22px;
-    min-width: 22px;
-    border-radius: 50%;
-    border: 1.5px solid rgba(0, 0, 0, 0.1);
-    flex-shrink: 0;
-  }
-  .color-dot-empty {
-    background: #e8e8ce;
-    border-style: dashed;
-  }
   .color-dropdown {
     position: absolute;
     top: calc(100% + 4px);
     left: 0;
     right: 0;
-    background: white;
-    border: 1.5px solid #e8e8ce;
-    border-radius: 10px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
     z-index: 50;
     max-height: 220px;
     overflow-y: auto;
     padding: 4px;
+    background: white;
+    border: 1.5px solid #e8e8ce;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
   }
   .color-dropdown-item {
-    width: 100%;
     display: flex;
     align-items: center;
     gap: 10px;
+    width: 100%;
     padding: 10px 12px;
-    border: none;
     background: transparent;
+    border: none;
     border-radius: 8px;
-    cursor: pointer;
     font-family: "Poppins", sans-serif;
-    transition: background 0.15s;
+    cursor: pointer;
     text-align: left;
+    transition: background 0.15s;
   }
   .color-dropdown-item:hover {
     background: #f3f4f6;
@@ -1234,6 +1220,90 @@
     font-size: 13px;
     font-weight: 500;
     color: #0d3b66;
+  }
+
+  /* Checkboxes discapacidades */
+  .checkbox-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .error-box {
+    outline: 1.5px solid #c0392b;
+    border-radius: 10px;
+    padding: 6px;
+  }
+  .checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: #faf9f0;
+    border: 1.5px solid #e8e8ce;
+    border-radius: 10px;
+    font-family: "Poppins", sans-serif;
+    cursor: pointer;
+    text-align: left;
+    transition:
+      border-color 0.2s,
+      background 0.2s;
+  }
+  .checkbox-item.checked {
+    border-color: #0d3b66;
+    background: #eef2ff;
+  }
+  .checkbox-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    background: white;
+    border: 2px solid #e8e8ce;
+    border-radius: 4px;
+    transition:
+      background 0.2s,
+      border-color 0.2s;
+  }
+  .checkbox-item.checked .checkbox-box {
+    background: #0d3b66;
+    border-color: #0d3b66;
+  }
+  .checkbox-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #0d3b66;
+    line-height: 1.3;
+  }
+
+  /* Fotos */
+  .photos-area {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .photo-upload {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 24px;
+    background: #faf9f0;
+    border: 1.5px dashed #e8e8ce;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+  .photo-upload.error {
+    border-color: #c0392b;
+    background: #fff8f8;
+  }
+  .upload-label {
+    font-family: "Poppins", sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: #f4d35e;
   }
   .photo-preview {
     position: relative;
@@ -1251,16 +1321,54 @@
     position: absolute;
     top: 8px;
     right: 8px;
-    background: rgba(0, 0, 0, 0.5);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 28px;
-    height: 28px;
-    font-size: 14px;
-    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: rgba(0, 0, 0, 0.5);
+    border: none;
+    border-radius: 50%;
+    font-size: 14px;
+    color: white;
+    cursor: pointer;
+  }
+
+  /* Botón publicar */
+  .publish-footer {
+    padding: 16px 20px;
+    background: white;
+    box-shadow: 0px -4px 6px rgba(0, 0, 0, 0.05);
+  }
+  .publish-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 16px;
+    background: #f4d35e;
+    border: none;
+    border-radius: 14px;
+    font-family: "Poppins", sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #111827;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .publish-btn:hover {
+    background: #e6c84e;
+  }
+  .publish-btn:active {
+    background: #d4b03a;
+    transform: scale(0.98);
+  }
+  .select-native:hover,
+  .input-field:hover,
+  .input-row:hover,
+  .textarea-field:hover {
+    border-color: #0d3b66;
+    box-shadow: 0 0 0 3px rgba(13, 59, 102, 0.08);
   }
 </style>

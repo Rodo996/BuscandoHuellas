@@ -10,7 +10,7 @@
   // --- IMPORTACIONES DE CHAT (AÑADIDAS) ---
   import Chats from './lib/Chats.svelte'; 
   import Chat from './lib/Chat.svelte';
-
+  import CasosExito from './lib/Caso_exito.svelte'; 
   // --- LÓGICA DE RUTAS UNIFICADA ---
   let path = window.location.pathname;
   let partes = path.split('/').filter(p => p !== ""); 
@@ -36,7 +36,7 @@
   // --- FUNCIONES DE NAVEGACIÓN ---
   const irAInicio   = () => navegar('inicio');
   const irABuscar   = () => navegar('buscar');
-  
+  const verCasosExito = () => navegar('casos_exito');
   const irAPublicar = () => {
     vistaAnterior = vistaActual;
     navegar('publicar');
@@ -78,8 +78,13 @@
         on:irABuscar={irABuscar} 
         on:irAPublicar={irAPublicar} 
         on:irAChats={irAChats}
+        on:verCasosExito={verCasosExito}
       />
-
+    {:else if vistaActual === 'casos_exito'}
+      <CasosExito 
+      on:volver={irAInicio} 
+      on:verCasosExito={verCasosExito}
+      />
     {:else if vistaActual === 'buscar'}
       <Buscar 
         on:volver={irAInicio} 

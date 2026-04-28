@@ -141,7 +141,9 @@
   <div class="success-section">
     <div class="success-header">
       <h2>Casos de éxito</h2>
-      <a href="#" class="view-all">Ver todos</a>
+      <button class="btn-ver-todos" on:click={() => dispatch('verCasosExito')}>
+        Ver todos
+      </button>   
     </div>
     <div class="success-grid">
       <div class="success-card">

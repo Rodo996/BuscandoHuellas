@@ -26,7 +26,7 @@ router.post("/", async (req, res) => {
     );
 
     const [[{ post_id }]] = await conn.execute(`SELECT @post_id AS post_id`);
-    const pet_id = rows[0][0]?.pet_id; // si lo retornas en el SP
+    const pet_id = rows[0][0]?.pet_id;
 
     // Colores y discapacidades
     for (const color_id of color_ids)

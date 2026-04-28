@@ -1,48 +1,51 @@
+
 <script>
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher();
 
-  // Variables para los campos solicitados
-  let nombreUsuario = "Laura García";
-  let correo = "laura.garcia@gmail.com";
-  let telefono = ""; 
-  let descripcion = "";
+  // Variables inicializadas completamente vacías
+  let name = "";
+  let email = "";
+  let phoneNumber = ""; 
+  let description = "";
 
   const volver = () => dispatch('volver');
   
-  function guardarCambios() {
-    console.log("Datos a guardar:", { nombreUsuario, correo, telefono, descripcion });
-    alert("Perfil actualizado correctamente");
+  async function guardarCambios() {
+    const datos = { name, email, phoneNumber, description };
+    console.log("Datos a enviar al backend:", datos);
+    
+    try {
+      const response = await fetch('http://localhost:3000/api/editar-perfil', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(datos)
+      });
+
+      const resServidor = await response.json();
+
+      if (response.ok) {
+        if (resServidor.cambios) {
+          alert("¡Perfil actualizado con éxito!");
+        } else {
+          alert("No se realizaron cambios (los datos ya eran iguales).");
+        }
+      } else {
+        alert("Error: " + resServidor.error);
+      }
+    } catch (error) {
+      console.error("Error de conexión:", error);
+      alert("No se pudo conectar con el servidor. ¿Está encendido el backend?");
+    }
   }
 </script>
 
 <div class="mobile-container">
   
   <header class="top-brand-header">
-    <svg
-      width="36"
-      height="36"
-      viewBox="0 0 36 36"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <polyline
-        points="2,17 18,4 34,17"
-        stroke="#F4D35E"
-        stroke-width="2.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      />
-      <rect
-        x="7"
-        y="16"
-        width="22"
-        height="16"
-        rx="1"
-        stroke="#F4D35E"
-        stroke-width="2.5"
-        fill="none"
-      />
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <polyline points="2,17 18,4 34,17" stroke="#F4D35E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="7" y="16" width="22" height="16" rx="1" stroke="#F4D35E" stroke-width="2.5" fill="none"/>
       <ellipse cx="12.5" cy="21" rx="1.3" ry="1.8" transform="rotate(-20 12.5 21)" fill="#F4D35E" />
       <ellipse cx="15.8" cy="19.5" rx="1.3" ry="1.8" transform="rotate(-6 15.8 19.5)" fill="#F4D35E" />
       <ellipse cx="19.2" cy="19.5" rx="1.3" ry="1.8" transform="rotate(6 19.2 19.5)" fill="#F4D35E" />
@@ -69,9 +72,9 @@
     <form class="profile-form" on:submit|preventDefault={guardarCambios}>
       
       <div class="input-group">
-        <label for="nombreUsuario">Nombre de usuario*</label>
+        <label for="name">Nombre de usuario*</label>
         <div class="input-wrapper">
-          <input type="text" id="nombreUsuario" bind:value={nombreUsuario} placeholder="Ej. Laura García" required />
+          <input type="text" id="name" bind:value={name} placeholder="Ej. Laura García" required />
           <span class="input-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
@@ -81,9 +84,9 @@
       </div>
 
       <div class="input-group">
-        <label for="correo">Correo electrónico*</label>
+        <label for="email">Correo electrónico*</label>
         <div class="input-wrapper">
-          <input type="email" id="correo" bind:value={correo} placeholder="Ej. a01849028@tec.mx" required />
+          <input type="email" id="email" bind:value={email} placeholder="Ej. a01849028@tec.mx" required />
           <span class="input-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
@@ -93,9 +96,9 @@
       </div>
 
       <div class="input-group">
-        <label for="telefono">Número telefónico</label>
+        <label for="phoneNumber">Número telefónico</label>
         <div class="input-wrapper">
-          <input type="tel" id="telefono" bind:value={telefono} placeholder="Ej. 55 1234 5678" />
+          <input type="tel" id="phoneNumber" bind:value={phoneNumber} placeholder="Ej. 55 1234 5678" />
           <span class="input-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
@@ -105,9 +108,9 @@
       </div>
 
       <div class="input-group">
-        <label for="descripcion">Descripción</label>
+        <label for="description">Descripción</label>
         <div class="input-wrapper">
-          <textarea id="descripcion" bind:value={descripcion} placeholder="Cuéntanos un poco sobre ti..." rows="4"></textarea>
+          <textarea id="description" bind:value={description} placeholder="Cuéntanos un poco sobre ti..." rows="4"></textarea>
           <span class="input-icon textarea-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
@@ -117,7 +120,7 @@
       </div>
 
       <div class="form-actions">
-        <button type="submit" class="btn-primary">Continuar</button>
+        <button type="submit" class="btn-primary">Confirmar cambios</button>
       </div>
 
     </form>

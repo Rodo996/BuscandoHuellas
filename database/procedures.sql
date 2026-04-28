@@ -14,7 +14,8 @@ CREATE PROCEDURE sp_crear_publicacion(
   IN p_lng              DECIMAL(9,6),
   IN p_user_id          INT,
   IN p_type             ENUM('Lost','Spotted','Sheltered'),
-  OUT p_post_id         INT
+  OUT p_post_id         INT,
+  OUT p_pet_id   INT
 )
 BEGIN
   DECLARE v_pet_id      INT;
@@ -30,6 +31,7 @@ BEGIN
     INSERT INTO Pets (breed_id, name, is_mixed_breed, sex, size, has_tail, distinctive_features)
     VALUES (p_breed_id, p_name, p_is_mixed_breed, p_sex, p_size, p_has_tail, p_distinctive_features);
     SET v_pet_id = LAST_INSERT_ID();
+    SET p_pet_id = v_pet_id;
 
     INSERT INTO Locations (zip_code, street, lat, lng)
     VALUES (p_zip_code, p_street, p_lat, p_lng);

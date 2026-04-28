@@ -19,21 +19,30 @@ router.post("/", async (req, res) => {
       );
     }
 
-    const [rows] = await conn.execute(
-      `CALL sp_crear_publicacion(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, @post_id)`,
+    await conn.execute(
+      `CALL sp_crear_publicacion(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, @post_id, @pet_id)`,
       [name, breed_id, is_mixed_breed, sex, size, has_tail,
         distinctive_features, zip_code, street, lat, lng, user_id, type]
     );
 
-    const [[{ post_id }]] = await conn.execute(`SELECT @post_id AS post_id`);
-    const pet_id = rows[0][0]?.pet_id;
+    const [[result]] = await conn.execute(
+      `SELECT @post_id AS post_id, @pet_id AS pet_id`
+    );
+    const post_id = result.post_id;
+    const pet_id = result.pet_id;
 
     // Colores y discapacidades
     for (const color_id of color_ids)
-      await conn.execute(`INSERT INTO Pet_Colors (pet_id, color_id) VALUES (?, ?)`, [pet_id, color_id]);
+      await conn.execute(
+        `INSERT INTO Pet_Colors (pet_id, color_id) VALUES (?, ?)`,
+        [pet_id, color_id]
+      );
 
     for (const disability_id of disability_ids)
-      await conn.execute(`INSERT INTO Pet_Disabilities (pet_id, disability_id) VALUES (?, ?)`, [pet_id, disability_id]);
+      await conn.execute(
+        `INSERT INTO Pet_Disabilities (pet_id, disability_id) VALUES (?, ?)`,
+        [pet_id, disability_id]
+      );
 
     res.status(201).json({ post_id });
 

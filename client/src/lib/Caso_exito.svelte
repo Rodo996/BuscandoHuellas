@@ -1,34 +1,38 @@
 <script>
+  import { onMount } from "svelte";
   import { createEventDispatcher } from "svelte";
   const dispatch = createEventDispatcher();
 
-  // Datos de prueba: Sustitúyelos más adelante con la llamada a tu API o base de datos.
-  let casosExito = [
-    {
-      id: 1,
-      nombre: "Max",
-      historia: "Gracias a la comunidad de Buscando Huellas, Max fue encontrado a 3 cuadras de su casa. Estaba un poco asustado pero ya está de vuelta con su familia.",
-      imagen: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60" 
-    },
-    {
-      id: 2,
-      nombre: "Luna",
-      historia: "Una vecina la reconoció por la publicación. Luna había estado escondida en un jardín cercano durante la tormenta.",
-      imagen: "https://images.unsplash.com/photo-1517849845537-4d257902454a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60"
-    },
-    {
-      id: 3,
-      nombre: "Simba",
-      historia: "Lo encontraron cerca del parque municipal. Alguien escaneó su plaquita y nos contactó inmediatamente.",
-      imagen: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60" 
+
+  let casosExito = [];
+  let cargando = true;
+  let errorMsg = "";
+
+  
+  // Función para obtener los datos del backend
+  const cargarCasos = async () => {
+    try {
+      const res = await fetch('http://localhost:3000/api/casos-exito');
+      if (res.ok) {
+        casosExito = await res.json();
+      } else {
+        errorMsg = "No se pudieron cargar los casos de éxito.";
+      }
+    } catch (e) {
+      errorMsg = "Error de conexión con el servidor.";
+    } finally {
+      cargando = false;
     }
-  ];
+  };
+
+  // Se ejecuta automáticamente al abrir la vista
+  onMount(cargarCasos);
 </script>
 
 <div class="casos-container">
   <header class="header">
     <button class="back-btn" on:click={() => dispatch('volver')}>
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M15 18l-6-6 6-6"/>
       </svg>
     </button>
@@ -36,17 +40,24 @@
   </header>
 
   <main class="casos-list">
-    {#each casosExito as caso}
-      <article class="caso-card">
-        <div class="img-container">
-          <img src={caso.imagen} alt="Foto de {caso.nombre} ya en casa" />
-        </div>
-        <div class="caso-info">
-          <h2>{caso.nombre}</h2>
-          <p>{caso.historia}</p>
-        </div>
-      </article>
-    {/each}
+    {#if cargando}
+      <p class="status-msg">Cargando historias...</p>
+    {:else if errorMsg}
+      <p class="status-msg error">{errorMsg}</p>
+    {:else if casosExito.length === 0}
+      <p class="status-msg">Aún no hay historias para mostrar.</p>
+    {:else}
+      {#each casosExito as caso}
+        <article class="caso-card">
+          <div class="img-container">
+            <img src={caso.image_url} alt={caso.name} class="main-image" />
+          </div>
+          <div class="caso-info">
+            <h2>{caso.name}</h2>
+          </div>
+        </article>
+      {/each}
+    {/if}
   </main>
 </div>
 
@@ -138,5 +149,13 @@
     font-size: 14px;
     color: #4B5563;
     line-height: 1.5;
+  }
+  .status-msg {
+    text-align: center;
+    padding: 20px;
+    color: #6b7280;
+  }
+  .error {
+    color: #ef4444;
   }
 </style>

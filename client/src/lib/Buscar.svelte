@@ -513,7 +513,8 @@
         width: 100%;
         margin-left: 10px;
         font-family: "Plus Jakarta Sans", sans-serif;
-        color: #111827;
+        color: #242711;
+        background: transparent;
     }
     .filter-icon-btn {
         background: #ffffff;

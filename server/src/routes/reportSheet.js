@@ -28,13 +28,21 @@ router.get("/", async (req, res) => {
                     ELSE 'Exitoso' 
                 END AS estado, 
                 loc.street AS ubicacion,
-                'https://placedog.net/500' AS img, 
+                MIN(pi.storage_url) AS img, -- Confirmado: el campo es storage_url
                 1 AS tieneEtiqueta
             FROM Pets p
             LEFT JOIN Breeds b ON p.breed_id = b.breed_id
             LEFT JOIN Posts post ON p.pet_id = post.pet_id
             LEFT JOIN Locations loc ON post.location_id = loc.location_id
-            GROUP BY p.pet_id, p.name, b.breed_name, p.sex, p.size, post.type, loc.street;
+            LEFT JOIN Images pi ON post.post_id = pi.post_id 
+            GROUP BY 
+                p.pet_id, 
+                p.name, 
+                b.breed_name, 
+                p.sex, 
+                p.size, 
+                post.type, 
+                loc.street;
         `;
 
         const [results] = await pool.query(sql);

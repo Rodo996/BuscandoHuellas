@@ -281,6 +281,7 @@
     font-size: 14px;
     text-align: center;
     box-sizing: border-box;
+    color: black;
   }
 
   .icon-suffix {

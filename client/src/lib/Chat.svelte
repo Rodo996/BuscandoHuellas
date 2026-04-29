@@ -1,14 +1,14 @@
 <script>
-  import { createEventDispatcher } from 'svelte';
-  import NavBar from './Navbar.svelte';
+    import { createEventDispatcher } from 'svelte';
+    import NavBar from './Navbar.svelte';
 
-  const dispatch = createEventDispatcher();
+    const dispatch = createEventDispatcher();
 
-  // 1. Recibimos la información del contacto desde App.svelte
-  export let contacto = null;
+    // 1. Recibimos la información del contacto desde App.svelte
+    export let contacto = null;
 
   // Aseguramos que haya un contacto por defecto por si acaso
-  $: infoContacto = contacto || { nombre: "Laura García", color: "#1A5C8C" };
+    $: infoContacto = contacto || { nombre: "Laura García", color: "#1A5C8C" };
 
   // 2. Base de datos simulada de mensajes dinámicos
   const baseMensajes = {
@@ -41,52 +41,60 @@
       mensajes = [...(baseMensajes[infoContacto.nombre] || msgsDefault)];
   }
 
-  function volver() { dispatch('volver'); }
-  function accion(tipo) {
-      let texto = '';
+    function volver() { dispatch('volver'); }
+    function accion(tipoAccion) {
+        if (tipoAccion === 'Prueba de propiedad') {
 
-      if (tipo === 'Prueba de propiedad') {
-          texto = 'Solicito prueba de propiedad';
-      } else if (tipo === 'Acordar encuentro') {
-          texto = 'Propongo acordar un encuentro';
-      } else if (tipo === 'Validar prueba') {
-          texto = 'Voy a validar la prueba enviada';
-      }
+            // mensaje que tú envías
+            mensajes = [...mensajes, {
+                tipo: 'me',
+                texto: 'Solicité prueba de propiedad',
+                hora: '10:30'
+            }];
 
-      mensajes = [
-          ...mensajes,
-          {
-              tipo: 'me',
-              texto,
-              hora: 'Ahora'
-          }
-      ];
-  }
+            // mensaje especial que recibe el otro (simulado)
+            setTimeout(() => {
+                mensajes = [...mensajes, {
+                    tipo: 'request_proof',
+                    from: 'other',
+                    hora: '10:31'
+                }];
+            }, 800);
+        }
+    }
+    // 🤖 Respuestas simuladas
+    function generarRespuesta(tipo) {
+        if (tipo === 'Prueba de propiedad') {
+            return 'Claro, te enviaré una prueba en breve 📸';
+        }
+
+        if (tipo === 'Acordar encuentro') {
+            return 'Perfecto, ¿qué día te queda mejor? 📅';
+        }
+
+        return 'Ok 👍';
+    }
+  
 </script>
 
 <div class="app-container">
   <div class="top-brand-header">
-      <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <polyline points="2,17 18,4 34,17" stroke="#F4D35E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+          <polyline points="2,17 18,4 34,17" stroke="#F4D35E" stroke-width="2.5" fill="none"/>
           <rect x="7" y="16" width="22" height="16" rx="1" stroke="#F4D35E" stroke-width="2.5" fill="none"/>
-          <ellipse cx="12.5" cy="21" rx="1.3" ry="1.8" transform="rotate(-20 12.5 21)" fill="#F4D35E"/>
-          <ellipse cx="15.8" cy="19.5" rx="1.3" ry="1.8" transform="rotate(-6 15.8 19.5)" fill="#F4D35E"/>
-          <ellipse cx="19.2" cy="19.5" rx="1.3" ry="1.8" transform="rotate(6 19.2 19.5)" fill="#F4D35E"/>
-          <ellipse cx="22.5" cy="21" rx="1.3" ry="1.8" transform="rotate(20 22.5 21)" fill="#F4D35E"/>
-          <ellipse cx="17.5" cy="25.5" rx="3.2" ry="2.4" fill="#F4D35E"/>
       </svg>
       <span class="text-white">Buscando</span><span class="text-yellow">Huellas</span>
   </div>
 
   <div class="contact-header">
       <button class="back-btn" on:click={volver}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0D3B66" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18L9 12L15 6"/></svg>
+          ←
       </button>
       
       <div class="user-info">
           <div class="avatar-container">
               <div class="avatar-img" style="border-color: {infoContacto.color}">
-                  <span style="color: {infoContacto.color}; font-weight: bold;">{infoContacto.nombre.charAt(0)}</span>
+                  <span>{infoContacto.nombre.charAt(0)}</span>
               </div>
               <div class="online-dot"></div>
           </div>
@@ -96,24 +104,20 @@
           </div>
       </div>
 
-      <button class="options-btn">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0D3B66" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
-      </button>
+      <button class="options-btn">⋮</button>
   </div>
 
+  <!-- ✅ CHAT REAL (ÚNICO) -->
   <div class="chat-body">
       <div class="date-pill">Hoy</div>
 
       {#each mensajes as msg}
           {#if msg.tipo === 'other'}
               <div class="message-row other">
-                  <div class="msg-avatar" style="border-color: {infoContacto.color}; background-color: #E2E8F0;">
-                      <span style="display:flex; justify-content:center; align-items:center; height:100%; font-size:10px; color:{infoContacto.color}">{infoContacto.nombre.charAt(0)}</span>
+                  <div class="msg-avatar" style="border-color: {infoContacto.color}">
+                      <span>{infoContacto.nombre.charAt(0)}</span>
                   </div>
                   <div class="msg-bubble light-yellow">
-                      {#if msg.img}
-                          <img src={msg.img} alt="Prueba" class="msg-image" />
-                      {/if}
                       <p>{msg.texto}</p>
                       <span class="time">{msg.hora}</span>
                   </div>
@@ -129,53 +133,41 @@
 
           {:else if msg.tipo === 'map'}
               <div class="message-row other">
-                  <div class="msg-avatar" style="border-color: {infoContacto.color}; background-color: #E2E8F0;"></div>
-                  <div class="msg-bubble light-yellow map-bubble">
-                      <div class="map-header">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E53E3E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                          <span>{msg.texto}</span>
-                      </div>
-                      <div class="map-image-container">
-                          <div class="map-placeholder">
-                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E53E3E" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                          </div>
-                      </div>
-                      <div class="map-footer">
-                          <span class="date-time-bold">{msg.cita}</span>
-                          <span class="time">{msg.hora}</span>
-                      </div>
+                  <div class="msg-bubble light-yellow">
+                      <p>{msg.texto}</p>
+                      <span class="time">{msg.hora}</span>
                   </div>
               </div>
 
           {:else if msg.tipo === 'system'}
               <div class="system-card">
-                  <div class="system-icon-wrapper">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#92400E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.78-.78a5.4 5.4 0 0 0-7.65 0C1.46 6.7 1.33 10.28 4 13l8 8 8-8c2.67-2.72 2.54-6.3.42-8.42z"></path></svg>
-                  </div>
-                  <p>¿Se ha resuelto el caso? Haz clic en Cerrar caso para publicar tu caso como historia de éxito.</p>
-                  <button class="btn-cerrar-caso">
-                      Cerrar caso 
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </button>
+                  <p>¿Se ha resuelto el caso?</p>
+                  <button class="btn-cerrar-caso">Cerrar caso</button>
               </div>
+              {:else if msg.tipo === 'request_proof'}
+        <div class="message-row other">
+            <div class="msg-bubble light-yellow proof-card">
+                <p><strong>Se te ha solicitado una prueba de propiedad</strong></p>
+                
+                <button class="btn-evidencia">
+                    Adjuntar evidencia
+                </button>
+
+                <span class="time">{msg.hora}</span>
+            </div>
+    </div>
           {/if}
       {/each}
   </div>
 
+  <!-- BOTONES -->
   <div class="action-chips-container">
       <button class="chip chip-blue" on:click={() => accion('Prueba de propiedad')}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="M9 12l2 2 4-4"></path></svg>
-          <span>Prueba de<br>propiedad</span>
+          Prueba de propiedad
       </button>
 
       <button class="chip chip-orange" on:click={() => accion('Acordar encuentro')}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-          <span>Acordar<br>encuentro</span>
-      </button>
-
-      <button class="chip chip-purple" on:click={() => accion('Validar prueba')}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-          <span>Validar<br>prueba</span>
+          Acordar encuentro
       </button>
   </div>
 
@@ -186,7 +178,6 @@
       on:irAPublicar={() => dispatch("irAPublicar")}
   />
 </div>
-
 <style>
   /* Estructura Base */
   .app-container {
@@ -198,6 +189,7 @@
       background-color: #ffffff;
       position: relative;
       overflow: hidden;
+      align-items: stretch;
   }
 
   /* Header Azul */
@@ -238,7 +230,7 @@
       align-items: center;
       gap: 12px;
       flex: 1;
-      justify-content: center;
+      justify-content: flex-start;
   }
   .avatar-container {
       position: relative;
@@ -266,21 +258,24 @@
   .name-container {
       display: flex;
       flex-direction: column;
+      align-items: flex-start;
   }
   .name-container h2 {
       margin: 0;
-      font-size: 16px;
+      font-size: 18px;
       color: #0D3B66;
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-family: 'Poppins', sans-serif;
       font-weight: 700;
       line-height: 1.2;
+      text-align: left;
   }
   .name-container p {
       margin: 0;
-      font-size: 11px;
+      font-size: 14px;
       color: #FBBF24;
       font-family: 'Poppins', sans-serif;
       font-weight: 600;
+      text-align: left;
   }
 
   /* Área de Chat (Scrollable) */
@@ -301,8 +296,8 @@
   .date-pill {
       align-self: center;
       background-color: #E5E7EB;
-      color: #4B5563;
-      font-size: 10px;
+      color: hsl(215, 14%, 34%);
+      font-size: 16px;
       font-weight: 600;
       font-family: 'Poppins', sans-serif;
       padding: 4px 12px;
@@ -344,7 +339,7 @@
 
   .msg-bubble p {
       margin: 0;
-      font-size: 13px;
+      font-size: 16px;
       color: #0D3B66;
       line-height: 1.4;
       font-weight: 500;
@@ -359,7 +354,7 @@
 
   .time {
       align-self: flex-end;
-      font-size: 9px;
+      font-size: 16px;
       color: #6B7280;
       font-weight: 500;
   }
@@ -374,7 +369,7 @@
       align-items: center;
       gap: 6px;
       color: #4B5563;
-      font-size: 11px;
+      font-size: 16px;
       font-weight: 700;
       margin-bottom: 8px;
   }
@@ -402,7 +397,7 @@
       padding: 0 4px;
   }
   .date-time-bold {
-      font-size: 11px;
+      font-size: 16px;
       font-weight: 700;
       color: #4B5563;
   }
@@ -417,7 +412,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      text-align: center;
+      text-align: left;
       gap: 12px;
   }
   .system-icon-wrapper {
@@ -427,7 +422,7 @@
   }
   .system-card p {
       margin: 0;
-      font-size: 13px;
+      font-size: 16px;
       color: #111827;
       font-family: 'Inter', sans-serif;
       font-weight: 500;
@@ -440,9 +435,9 @@
       width: 100%;
       padding: 12px;
       border-radius: 8px;
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-family: 'Poppins', sans-serif;
       font-weight: 700;
-      font-size: 14px;
+      font-size: 16px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -470,9 +465,9 @@
       gap: 8px;
       padding: 10px 16px;
       border-radius: 30px;
-      font-family: 'Inter', sans-serif;
+      font-family: 'Poppins', sans-serif;
       font-weight: 700;
-      font-size: 12px;
+      font-size: 14px;
       text-align: left;
       cursor: pointer;
       white-space: nowrap;
@@ -494,4 +489,25 @@
       border: 1.5px solid #DDD6FE;
       color: #6D28D9;
   }
+  .proof-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.btn-evidencia {
+    background-color: #F4D35E;
+    border: none;
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+.msg-bubble,
+.msg-bubble p,
+.proof-card,
+.proof-card p {
+    text-align: left;
+}
+
 </style>

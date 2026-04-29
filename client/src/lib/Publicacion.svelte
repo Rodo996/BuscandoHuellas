@@ -126,7 +126,7 @@
         <!-- Rasgos característicos — card completa -->
         {#if mascota.rasgos}
             <div class="info-card rasgos-card">
-                <span class="label">🐾 Rasgos característicos</span>
+                <span class="label">Rasgos característicos</span>
                 <p class="rasgos-text">{mascota.rasgos}</p>
             </div>
         {/if}

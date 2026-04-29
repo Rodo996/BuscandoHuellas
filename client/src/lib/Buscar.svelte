@@ -8,41 +8,43 @@
     let searchQuery = "";
 
     // ─── Estado de pills ───────────────────────────────────────────
-    let activePill = null; // null = ningún panel abierto
+    let activePill = null; // null = ningun panel abierto
 
-    // ─── Filtros por categoría ──────────────────────────────────────
+    // ─── Filtros por categoria ──────────────────────────────────────
     let filtroTipos    = { perro: false, gato: false, ave: false, otro: false };
     let filtroTamanos  = { pequeno: false, mediano: false, grande: false };
     let filtroSexos    = { macho: false, hembra: false };
 
     let filtroRazaBusqueda = "";
 
-    let filtroColores  = {
-        negro: false, blanco: false, cafe: false,
-        gris: false, dorado: false, naranja: false, mixto: false
+    let filtroColores = {
+        negro: false, blanco: false, gris: false,
+        cafe: false, cafeClaro: false, beige: false,
+        naranja: false, amarillo: false, rojo: false,
+        azul: false, verde: false
     };
     // Mas filtros
     let filtroEsCruza   = false;
     let filtroTieneCola = false;
 
-    // ─── Ubicación del usuario ─────────────────────────────────────
+    // ─── Ubicacion del usuario ─────────────────────────────────────
     let userLat = null;
     let userLng = null;
     let gpsEstado = "idle"; // "idle" | "cargando" | "ok" | "error"
 
-    // ─── Búsqueda de ubicación manual ─────────────────────────────
+    // ─── Busqueda de ubicación manual ─────────────────────────────
     let inputUbicacion = "";
     let buscandoUbicacion = false;
     let errorUbicacion = "";
 
     //Filtro fecha
     let ordenFecha = "reciente";
-    // ─── Filtro rango de fechas ────────────────────────────────────
+    // ── Filtro rango de fechas ────────────────────────────────────
     let filtroFechaDesde = "";
     let filtroFechaHasta = "";
     $: badgeFecha = (filtroFechaDesde || filtroFechaHasta) ? 1 : 0;
 
-    // Fórmula Haversine
+    // Formula Haversine
     function haversine(lat1, lng1, lat2, lng2) {
         const R = 6371;
         const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -79,7 +81,7 @@
                         inputUbicacion = data.display_name.split(",").slice(0, 3).join(",").trim();
                     }
                 } catch {
-                    // Si falla el reverse, no pasa nada, las coords ya están guardadas
+                    // Si falla el reverse, no pasa nada, las coords ya estan guardadas
                 }
             },
             () => { gpsEstado = "error"; }
@@ -133,7 +135,7 @@
         ordenFecha = nuevoOrden;
     };
 
-    // ─── Carga de mascotas ─────────────────────────────────────────
+    // ─── Carga de mascotas ───────────────────────────────
     onMount(async () => {
         try {
             const response = await fetch("http://localhost:3000/api/mascotas");
@@ -148,16 +150,21 @@
         activePill = activePill === pillName ? null : pillName;
     };
 
-    // ─── Limpiar por sección ───────────────────────────────────────
+    // ─── Limpiar por seccion ───────────────────────────────────────
     const limpiarTipo = () => {
         filtroTipos   = { perro: false, gato: false, ave: false, otro: false };
         filtroTamanos = { pequeno: false, mediano: false, grande: false };
         filtroSexos   = { macho: false, hembra: false };
     };
     const limpiarRaza      = () => { filtroRazaBusqueda = ""; };
-    const limpiarColor     = () => {
-        filtroColores = { negro: false, blanco: false, cafe: false,
-                         gris: false, dorado: false, naranja: false, mixto: false };
+
+    const limpiarColor = () => {
+        filtroColores = {
+            negro: false, blanco: false, gris: false,
+            cafe: false, cafeClaro: false, beige: false,
+            naranja: false, amarillo: false, rojo: false,
+            azul: false, verde: false
+        };
     };
     
     const limpiarUbicacion = () => {
@@ -203,15 +210,20 @@
             m.raza?.toLowerCase().includes(filtroRazaBusqueda.toLowerCase());
 
         const algunColorActivo = Object.values(filtroColores).some(Boolean);
+
         const coincideColor = !algunColorActivo || (
             Array.isArray(m.colores) && m.colores.some(c =>
-                (filtroColores.negro   && c.nombre === "Negro")      ||
-                (filtroColores.blanco  && c.nombre === "Blanco")     ||
-                (filtroColores.cafe    && (c.nombre === "Café" || c.nombre === "Café claro")) ||
-                (filtroColores.gris    && c.nombre === "Gris")       ||
-                (filtroColores.dorado  && (c.nombre === "Amarillo"   || c.nombre === "Beige/Crema")) ||
-                (filtroColores.naranja && c.nombre === "Naranja")    ||
-                (filtroColores.mixto   && c.nombre === "Tricolor")
+                (filtroColores.negro     && c.nombre === "Negro")      ||
+                (filtroColores.blanco    && c.nombre === "Blanco")     ||
+                (filtroColores.gris      && c.nombre === "Gris")       ||
+                (filtroColores.cafe      && c.nombre === "Café")       ||
+                (filtroColores.cafeClaro && c.nombre === "Café claro") ||
+                (filtroColores.beige     && c.nombre === "Beige/Crema")||
+                (filtroColores.naranja   && c.nombre === "Naranja")    ||
+                (filtroColores.amarillo  && c.nombre === "Amarillo")   ||
+                (filtroColores.rojo      && c.nombre === "Rojo")       ||
+                (filtroColores.azul      && c.nombre === "Azul")       ||
+                (filtroColores.verde     && c.nombre === "Verde")
             )
         );
 
@@ -230,7 +242,6 @@
         })();
 
         const coincideUbicacion = (() => {
-            // Si el radio está en mínimo (1km) o no hay GPS → no filtrar
             if (!userLat || !userLng) return true;
             if (!m.latitud || !m.longitud) return true; // sin coords → incluir
             const distancia = haversine(
@@ -245,13 +256,13 @@
             coincideCruza && coincideCola && coincideFecha && coincideUbicacion;
     });
 
-    // ─── Luego ordenamos por separado ─────────────────────────────
+    // ─── Luego ordenamos por separado ───────────────────────
     $: mascotasOrdenadas = [...mascotasFiltradas].sort((a, b) => {
         const fechaA = a.fecha ? new Date(a.fecha).getTime() : 0;
         const fechaB = b.fecha ? new Date(b.fecha).getTime() : 0;
         return ordenFecha === "reciente" ? fechaB - fechaA : fechaA - fechaB;
     });
-    // ─── Badge por pill ────────────────────────────────────────────
+    // ─── Badge por pill ───────────────────────────────────────────
     $: badgeTipo = [
         ...Object.values(filtroTipos),
         ...Object.values(filtroTamanos),
@@ -325,7 +336,7 @@
                 Color {badgeColor > 0 ? `(${badgeColor})` : "▼"}
             </button>
 
-            <!-- UBICACIÓN -->
+            <!-- UBICACION --->
             <button class="pill" class:active={activePill === "Ubicación"}
                 on:click={() => selectPill("Ubicación")}>
                 Ubicación {badgeUbic > 0 ? `(${badgeUbic})` : "▼"}
@@ -458,7 +469,7 @@
                         placeholder="Ej: Labrador, Siamés..." />
                 </div>
 
-                <!-- Sugerencias rápidas -->
+                <!-- Sugerencias rapidas -->
                 <h3 style="font-size:13px;font-weight:600;color:#111827;margin-bottom:10px;">
                     Razas frecuentes
                 </h3>
@@ -488,13 +499,17 @@
 
                 <div class="color-grid">
                     {#each [
-                        ["negro",  "#1C1C1E", "Negro"],
-                        ["blanco", "#F5F5F0", "Blanco"],
-                        ["cafe",   "#8B5E3C", "Café"],
-                        ["gris",   "#9CA3AF", "Gris"],
-                        ["dorado", "#F4D35E", "Dorado"],
-                        ["naranja","#F97316", "Naranja"],
-                        ["mixto",  "linear-gradient(135deg,#8B5E3C 50%,#F5F5F0 50%)", "Mixto"]
+                        ["negro",   "#1a1a1a", "Negro"],
+                        ["blanco",  "#f5f5f5", "Blanco"],
+                        ["gris",    "#9e9e9e", "Gris"],
+                        ["cafe",    "#795548", "Café"],
+                        ["cafeClaro","#d4a96a","Café claro"],
+                        ["beige",   "#f5f0dc", "Beige"],
+                        ["naranja", "#ff7043", "Naranja"],
+                        ["amarillo","#fdd835", "Amarillo"],
+                        ["rojo",    "#e53935", "Rojo"],
+                        ["azul",    "#1e88e5", "Azul"],
+                        ["verde",   "#43a047", "Verde"]
                     ] as [key, color, label]}
                         <button class="color-btn"
                             class:color-active={filtroColores[key]}
@@ -516,7 +531,7 @@
             </div>
         {/if}
 
-        <!-- ══════════ PANEL: UBICACIÓN ══════════ -->
+        <!-- ══════════ PANEL: UBICACION ══════════ -->
         {#if activePill === "Ubicación"}
             <div class="filtros-panel">
                 <div class="filtros-header">

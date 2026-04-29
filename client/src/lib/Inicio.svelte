@@ -274,6 +274,28 @@
 </div>
 
 <style>
+.btn-ver-todos {
+    background: transparent;
+    border: none;
+    color: #F4D35E; /* Tu color amarillo exacto */
+    font-family: "Poppins", sans-serif;
+    font-size: 14px; /* Ajusta este valor si lo necesitas más grande o pequeño */
+    font-weight: 600;
+    
+    /* Aquí está la magia del subrayado */
+    text-decoration: underline;
+    text-decoration-color: #F4D35E;
+    text-decoration-thickness: 2px; /* Hace la línea un poco más gruesa */
+    text-underline-offset: 4px; /* Separa la línea del texto para que se vea como en tu diseño */
+    
+    cursor: pointer;
+    padding: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .btn-ver-todos:hover {
+    opacity: 0.8; /* Un pequeño efecto visual al pasar el ratón */
+  }
   /* Header */
   .top-brand-header {
     background: #0d3b66;

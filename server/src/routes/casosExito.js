@@ -9,8 +9,9 @@ router.get("/", async (req, res) => {
             SELECT
                 p.post_id,
                 pt.name AS name,
+                p.date AS fecha_recuperacion,
+                p.story, -- ¡Aquí agregamos la nueva columna!
                 (
-                    -- Esta subconsulta busca la imagen original de la mascota
                     SELECT i.storage_url 
                     FROM Images i 
                     INNER JOIN Posts p_orig ON i.post_id = p_orig.post_id 
@@ -19,7 +20,7 @@ router.get("/", async (req, res) => {
                 ) AS image_url
             FROM Posts p
             INNER JOIN Pets pt ON p.pet_id = pt.pet_id
-            WHERE p.type = 'Success Story'
+            WHERE p.type = 'Sheltered'
             ORDER BY p.date DESC;
         `;
 
@@ -27,7 +28,7 @@ router.get("/", async (req, res) => {
         res.json(results);
     } catch (err) {
         console.error("Error al obtener casos de éxito:", err);
-        res.status(500).json({ error: "Error interno del servidor" });
+        res.status(500).json({ error: "Error interno" });
     }
 });
 

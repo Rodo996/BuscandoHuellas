@@ -2,6 +2,21 @@
   import { createEventDispatcher } from "svelte";
   import NavBar from "./Navbar.svelte";
   const dispatch = createEventDispatcher();
+
+  // Creamos datos simulados para las tarjetas fijas de Inicio
+  const casoMessi = {
+    name: "Messi",
+    image_url: "/Img-Inicio/messi.jpg",
+    fecha_recuperacion: "2026-04-20", // Puedes poner la fecha que gustes
+    story: "¡Una vecina lo vio saltando alegremente cerca del parque y nos avisó por la app! Messi ya está a salvo."
+  };
+
+  const casoJuan = {
+    name: "Juan",
+    image_url: "/Img-Inicio/juan.png",
+    fecha_recuperacion: "2026-04-15",
+    story: "Gracias a la comunidad compartiendo la publicación, un veterinario reconoció a Juan y pudimos ir por él."
+  };
 </script>
 
 <div class="app-container">
@@ -166,9 +181,8 @@
             </svg>
             ¡Encontrado!
           </span>
-          <button class="btn-historia">Ver historia</button>
-        </div>
-      </div>
+          <button class="btn-historia" on:click={() => dispatch('verHistoria', casoMessi)}>Ver historia</button>        </div>
+          </div>
       <div class="success-card">
         <img src="/Img-Inicio/juan.png" alt="Juan" />
         <div class="success-content">
@@ -189,8 +203,7 @@
             </svg>
             ¡Encontrado!
           </span>
-          <button class="btn-historia">Ver historia</button>
-        </div>
+          <button class="btn-historia" on:click={() => dispatch('verHistoria', casoJuan)}>Ver historia</button>        </div>
       </div>
     </div>
   </div>

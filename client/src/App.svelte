@@ -11,6 +11,7 @@
   import Chats from './lib/Chats.svelte'; 
   import Chat from './lib/Chat.svelte';
   import CasosExito from './lib/Caso_exito.svelte'; 
+  import FichaExito from './lib/Ficha_exito.svelte';
   // --- LÓGICA DE RUTAS UNIFICADA ---
   let path = window.location.pathname;
   let partes = path.split('/').filter(p => p !== ""); 
@@ -23,6 +24,7 @@
   // --- ESTADO DEL CHAT (AÑADIDO) ---
   let contactoActivo = null; 
 
+  let casoSeleccionado = null;
   function navegar(vista, sub = '') {
     vistaAnterior = vistaActual; 
     vistaActual = vista;
@@ -79,11 +81,24 @@
         on:irAPublicar={irAPublicar} 
         on:irAChats={irAChats}
         on:verCasosExito={verCasosExito}
+        on:verHistoria={(e) => {
+            casoSeleccionado = e.detail; 
+            navegar('ficha_exito'); 
+        }}
       />
     {:else if vistaActual === 'casos_exito'}
       <CasosExito 
       on:volver={irAInicio} 
       on:verCasosExito={verCasosExito}
+      on:verHistoria={(e) => {
+            casoSeleccionado = e.detail; // Guardamos los datos de la mascota
+            navegar('ficha_exito'); // Cambiamos de pantalla
+        }}
+      />
+    {:else if vistaActual === 'ficha_exito'}
+      <FichaExito 
+        caso={casoSeleccionado} 
+        on:volver={() => navegar('casos_exito')} 
       />
     {:else if vistaActual === 'buscar'}
       <Buscar 

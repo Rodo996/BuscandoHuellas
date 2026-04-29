@@ -2,14 +2,56 @@
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher();
 
+  // RECIBE EL MENSAJE SI INTENTAN ENTRAR A EDITAR SIN SESIÓN
+  export let mensajeAlerta = ""; 
+
   let email = '';
   let password = '';
 
+  // VARIABLE PARA MOSTRAR EL ERROR DEL BACKEND
+  let mensajeError = '';
+
   const volver = () => dispatch('volver');
-  
+
+  // --- CÓDIGO BASURA COMENTADO ---
+  /*
   const login = () => {
     console.log('Login intentado con:', email, password);
     dispatch('loginExitoso');
+  };
+  */
+
+  // --- NUEVO CÓDIGO DE LOGIN ---
+  const login = async () => {
+    // Limpiamos mensajes pasados antes de un nuevo intento
+    mensajeError = '';
+    mensajeAlerta = ''; 
+
+    try {
+      const res = await fetch('http://localhost:3000/api/iniciar-sesion', { 
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await res.json();
+
+      // BLOQUEO: Si fue 401 (mala contraseña) o 403 (no verificado)
+      if (!res.ok) {
+        mensajeError = data.error || 'Error al iniciar sesión.'; 
+        return; 
+      }
+
+      // Si fue exitoso (200), avisamos al App.svelte
+      console.log('Login exitoso con:', email);
+      dispatch('loginExitoso');
+
+    } catch (error) {
+      console.error("Error en la petición:", error);
+      mensajeError = "No se pudo conectar con el servidor.";
+    }
   };
 </script>
 
@@ -69,12 +111,24 @@
       <img src="https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?q=80&w=600&auto=format&fit=crop" alt="Mascotas" />
     </div>
 
+    {#if mensajeAlerta}
+      <div style="color: #856404; background-color: #fff3cd; padding: 12px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 5px; border: 1px solid #ffeeba;">
+        {mensajeAlerta}
+      </div>
+    {/if}
+
+    {#if mensajeError}
+      <div style="color: #721c24; background-color: #f8d7da; padding: 12px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 5px;">
+        {mensajeError}
+      </div>
+    {/if}
+
     <form class="auth-form" on:submit|preventDefault={login}>
       
       <div class="field-container">
         <label for="email">Correo electrónico*</label>
         <div class="input-box">
-          <input type="email" id="email" bind:value={email} placeholder="Ej. laura.garcia@gmail.com" required />
+          <input type="email" id="email" required bind:value={email} placeholder="Ej. laura.garcia@gmail.com" />
           <span class="icon-suffix">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
@@ -86,7 +140,7 @@
       <div class="field-container">
         <label for="password">Contraseña*</label>
         <div class="input-box">
-          <input type="password" id="password" bind:value={password} placeholder="Ej. ************" required />
+          <input type="password" id="password" required bind:value={password} placeholder="Ej. ************" />
           <span class="icon-suffix">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
@@ -122,13 +176,12 @@
     overflow-x: hidden;
   }
 
-  /* ESTILOS CLONADOS EXACTAMENTE DE BUSCAR.SVELTE */
   .top-brand-header {
     background-color: #0D3B66;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 18px 0; /* Padding estándar de Buscar.svelte */
+    padding: 18px 0;
     width: 100%;
   }
 
@@ -140,14 +193,13 @@
   
   .brand-text {
     font-size: 24px;
-    font-weight: 800; /* Extra Bold para el logo */
+    font-weight: 800;
     letter-spacing: -0.5px;
   }
 
   .text-white { color: #FFFFFF; }
   .text-yellow { color: #F4D35E; }
 
-  /* Ajustes de la cabecera de la sección */
   .section-header {
     display: flex;
     align-items: center;
@@ -174,7 +226,8 @@
   }
 
   .main-content {
-    padding: 0 24px 32px 24px;
+    /* MANTENEMOS EL PADDING EXTRA DE 120PX PARA QUE EL BOTÓN NO SE OCULTE DETRÁS DEL NAVBAR */
+    padding: 0 24px 120px 24px;
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -223,11 +276,12 @@
     padding: 0 44px;
     border: none;
     border-radius: 12px;
-    background-color: #FDF7DF; /* Amarillo suave */
+    background-color: #FDF7DF;
     font-family: 'Poppins', sans-serif;
     font-size: 14px;
     text-align: center;
     box-sizing: border-box;
+    color: black;
   }
 
   .icon-suffix {
@@ -259,7 +313,7 @@
   .submit-button {
     width: 100%;
     height: 56px;
-    background-color: #F4D35E; /* Amarillo fuerte */
+    background-color: #F4D35E;
     color: #0D3B66;
     border: none;
     border-radius: 12px;

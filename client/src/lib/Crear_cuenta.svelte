@@ -12,7 +12,6 @@
       },
       body: JSON.stringify({ email, name, password })
     });
-
     if (res.ok) {
       dispatch('registroExitoso');
     }
@@ -119,16 +118,16 @@
         </div>
       </div>
 
-      <div class="login-prompt-section">
-        <p>¿Ya tienes una cuenta?</p>
-        <button type="button" class="btn-primary" on:click={volver}>Inicia sesión</button>
-      </div>
-
       <div class="image-box">
         <img src="https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?q=80&w=600&auto=format&fit=crop" alt="Gatitos" />
       </div>
 
       <button type="submit" class="btn-primary">Continuar</button>
+
+      <div class="login-prompt-section">
+        <p>¿Ya tienes una cuenta?</p>
+        <button type="button" class="btn-primary" on:click={volver}>Inicia sesión</button>
+      </div>
 
     </form>
   </main>
@@ -147,7 +146,8 @@
     display: flex;
     flex-direction: column;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    font-family: 'Poppins', sans-serif; /* Poppins en toda la pestaña */
+    font-family: 'Poppins', sans-serif;
+    /* Poppins en toda la pestaña */
     overflow-x: hidden;
   }
 
@@ -174,6 +174,7 @@
   .content {
     flex: 1;
     padding: 24px;
+    padding-bottom: 120px; /* <--- ESPACIO EXTRA PARA LA NAVBAR */
     display: flex;
     flex-direction: column;
   }

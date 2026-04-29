@@ -6,6 +6,8 @@ import postsRouter from './routes/posts.js';
 import catalogsRouter from './routes/catalogs.js';
 import reportSheetRouter from './routes/reportSheet.js';
 import crearCuentaRouter from './routes/crearCuenta.js';
+import editarCuentaRouter from './routes/editarCuenta.js';
+import iniciarSesionRouter from './routes/iniciarSesion.js';
 import imagesRouter from './routes/images.js'
 import casosExitoRouter from './routes/casosExito.js';
 
@@ -25,6 +27,8 @@ app.use('/api/posts', postsRouter);
 app.use('/api/catalogs', catalogsRouter);
 app.use('/api/mascotas', reportSheetRouter);
 app.use('/api/crear-cuenta', crearCuentaRouter);
+app.use('/api/editar-perfil', editarCuentaRouter);
+app.use('/api/iniciar-sesion', iniciarSesionRouter);
 app.use('/api/images', imagesRouter);
 app.use('/api/casos-exito', casosExitoRouter);
 

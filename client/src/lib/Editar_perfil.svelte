@@ -2,122 +2,129 @@
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher();
 
-  // Variables para los campos solicitados
-  let nombreUsuario = "Laura García";
-  let correo = "laura.garcia@gmail.com";
-  let telefono = ""; 
-  let descripcion = "";
+  // Variables inicializadas
+  let name = "";
+  let email = "";
+  let phoneNumber = ""; 
+  let description = "";
 
   const volver = () => dispatch('volver');
   
-  function guardarCambios() {
-    console.log("Datos a guardar:", { nombreUsuario, correo, telefono, descripcion });
-    alert("Perfil actualizado correctamente");
+  async function guardarCambios() {
+    const datos = { name, email, phoneNumber, description };
+    console.log("Datos a enviar al backend:", datos);
+    
+    try {
+      const response = await fetch('http://localhost:3000/api/editar-perfil', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(datos)
+      });
+
+      const resServidor = await response.json();
+
+      if (response.ok) {
+        if (resServidor.cambios) {
+          alert("¡Perfil actualizado con éxito!");
+        } else {
+          alert("No se realizaron cambios (los datos ya eran iguales).");
+        }
+      } else {
+        alert("Error: " + resServidor.error);
+      }
+    } catch (error) {
+      console.error("Error de conexión:", error);
+      alert("No se pudo conectar con el servidor. ¿Está encendido el backend?");
+    }
   }
 </script>
 
 <div class="mobile-container">
   
   <header class="top-brand-header">
-    <svg
-      width="36"
-      height="36"
-      viewBox="0 0 36 36"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <polyline
-        points="2,17 18,4 34,17"
-        stroke="#F4D35E"
-        stroke-width="2.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      />
-      <rect
-        x="7"
-        y="16"
-        width="22"
-        height="16"
-        rx="1"
-        stroke="#F4D35E"
-        stroke-width="2.5"
-        fill="none"
-      />
-      <ellipse cx="12.5" cy="21" rx="1.3" ry="1.8" transform="rotate(-20 12.5 21)" fill="#F4D35E" />
-      <ellipse cx="15.8" cy="19.5" rx="1.3" ry="1.8" transform="rotate(-6 15.8 19.5)" fill="#F4D35E" />
-      <ellipse cx="19.2" cy="19.5" rx="1.3" ry="1.8" transform="rotate(6 19.2 19.5)" fill="#F4D35E" />
-      <ellipse cx="22.5" cy="21" rx="1.3" ry="1.8" transform="rotate(20 22.5 21)" fill="#F4D35E" />
-      <ellipse cx="17.5" cy="25.5" rx="3.2" ry="2.4" fill="#F4D35E" />
-    </svg>
-    <div class="brand-text">
-      <span class="text-white">Buscando</span><span class="text-yellow">Huellas</span>
+    <div class="brand-wrapper">
+      <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polyline points="2,17 18,4 34,17" stroke="#F4D35E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="7" y="16" width="22" height="16" rx="1" stroke="#F4D35E" stroke-width="2.5" fill="none"/>
+        <ellipse cx="12.5" cy="21" rx="1.3" ry="1.8" transform="rotate(-20 12.5 21)" fill="#F4D35E" />
+        <ellipse cx="15.8" cy="19.5" rx="1.3" ry="1.8" transform="rotate(-6 15.8 19.5)" fill="#F4D35E" />
+        <ellipse cx="19.2" cy="19.5" rx="1.3" ry="1.8" transform="rotate(6 19.2 19.5)" fill="#F4D35E" />
+        <ellipse cx="22.5" cy="21" rx="1.3" ry="1.8" transform="rotate(20 22.5 21)" fill="#F4D35E" />
+        <ellipse cx="17.5" cy="25.5" rx="3.2" ry="2.4" fill="#F4D35E" />
+      </svg>
+      <div class="brand-text">
+        <span class="text-white">Buscando</span><span class="text-yellow">Huellas</span>
+      </div>
     </div>
   </header>
 
-  <div class="header-section">
-    <h1 class="page-title">Editar perfil</h1>
-    <button class="close-btn" on:click={volver} aria-label="Cerrar">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0D3B66" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="18" y1="6" x2="6" y2="18"></line>
-        <line x1="6" y1="6" x2="18" y2="18"></line>
-      </svg>
-    </button>
-  </div>
+  <main class="content">
+    <div class="section-title-container">
+      <h2 class="page-title">Editar Perfil</h2>
+      <button class="close-btn" on:click={volver} aria-label="Cerrar">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0D3B66" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
 
-  <main class="content-body">
-    
-    <form class="profile-form" on:submit|preventDefault={guardarCambios}>
+    <form class="edit-form" on:submit|preventDefault={guardarCambios}>
       
-      <div class="input-group">
-        <label for="nombreUsuario">Nombre de usuario*</label>
+      <div class="field-group">
+        <label for="name">Nombre</label>
         <div class="input-wrapper">
-          <input type="text" id="nombreUsuario" bind:value={nombreUsuario} placeholder="Ej. Laura García" required />
+          <input type="text" id="name" bind:value={name} placeholder="Tu nombre" />
           <span class="input-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
             </svg>
           </span>
         </div>
       </div>
 
-      <div class="input-group">
-        <label for="correo">Correo electrónico*</label>
+      <div class="field-group">
+        <label for="email">Correo electrónico</label>
         <div class="input-wrapper">
-          <input type="email" id="correo" bind:value={correo} placeholder="Ej. a01849028@tec.mx" required />
+          <input type="email" id="email" bind:value={email} placeholder="tu@correo.com" />
           <span class="input-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
             </svg>
           </span>
         </div>
       </div>
 
-      <div class="input-group">
-        <label for="telefono">Número telefónico</label>
+      <div class="field-group">
+        <label for="phone">Teléfono</label>
         <div class="input-wrapper">
-          <input type="tel" id="telefono" bind:value={telefono} placeholder="Ej. 55 1234 5678" />
+          <input type="tel" id="phone" bind:value={phoneNumber} placeholder="Tu teléfono" />
           <span class="input-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
             </svg>
           </span>
         </div>
       </div>
 
-      <div class="input-group">
-        <label for="descripcion">Descripción</label>
+      <div class="field-group">
+        <label for="desc">Descripción</label>
         <div class="input-wrapper">
-          <textarea id="descripcion" bind:value={descripcion} placeholder="Cuéntanos un poco sobre ti..." rows="4"></textarea>
+          <textarea id="desc" rows="4" bind:value={description} placeholder="Cuéntanos sobre ti..."></textarea>
           <span class="input-icon textarea-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
             </svg>
           </span>
         </div>
       </div>
 
       <div class="form-actions">
-        <button type="submit" class="btn-primary">Continuar</button>
+        <button type="submit" class="btn-primary">Guardar cambios</button>
       </div>
 
     </form>
@@ -125,10 +132,8 @@
 </div>
 
 <style>
-  /* Importar solo Poppins */
   @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
 
-  /* Contenedor principal responsivo */
   .mobile-container {
     width: 100%;
     max-width: 480px;
@@ -137,92 +142,113 @@
     background-color: #FFFFFF;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     font-family: 'Poppins', sans-serif;
     overflow-x: hidden;
   }
 
-  /* Banner Superior */
+  /* Header Superior */
   .top-brand-header {
-    background: #0D3B66;
+    background-color: #0D3B66;
+    padding: 18px 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 12px;
-    padding: 20px 0;
   }
-  
+
+  .brand-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
   .brand-text {
     font-size: 24px;
     font-weight: 800;
-    letter-spacing: -0.5px;
   }
 
   .text-white { color: #FFFFFF; }
   .text-yellow { color: #F4D35E; }
 
-  /* Header Secundario con X a la derecha */
-  .header-section {
+  /* Contenido Principal */
+  .content {
+    flex: 1;
+    padding: 24px 24px 120px 24px; /* <--- ESPACIO EXTRA PARA LA NAVBAR */
     display: flex;
+    flex-direction: column;
+  }
+
+  .section-title-container {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    position: relative;
-    padding: 24px 24px 16px 24px;
+    margin-bottom: 30px;
   }
 
   .page-title {
     font-size: 22px;
     font-weight: 700;
-    color: #0D3B66; /* Azul marino */
+    color: #0D3B66;
     margin: 0;
+    flex: 1;
     text-align: center;
+    padding-left: 32px;
   }
 
   .close-btn {
-    position: absolute;
-    right: 24px; /* Pegado a la derecha */
     background: transparent;
     border: none;
     cursor: pointer;
     display: flex;
     align-items: center;
-    justify-content: center;
-    padding: 4px;
-    transition: opacity 0.2s;
   }
 
-  .close-btn:active {
-    opacity: 0.6;
-  }
-
-  /* Cuerpo del contenido */
-  .content-body {
-    flex: 1;
-    padding: 0 24px 32px 24px;
+  /* Avatar */
+  .profile-avatar-section {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .avatar-circle {
+    width: 100px;
+    height: 100px;
+    background-color: #FDF7DF;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .change-photo-link {
+    background: none;
+    border: none;
+    color: #0D3B66;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: underline;
+    cursor: pointer;
   }
 
   /* Formulario */
-  .profile-form {
+  .edit-form {
     display: flex;
     flex-direction: column;
     gap: 20px;
-    margin-top: 10px;
   }
 
-  .input-group {
+  .field-group {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    align-items: center; /* Centrar labels */
+    align-items: center;
   }
 
-  .input-group label {
-    font-size: 15px;
+  .field-group label {
+    font-size: 14px;
     font-weight: 700;
-    color: #0D3B66; /* Azul marino */
-    text-align: center;
+    color: #0D3B66;
   }
 
   .input-wrapper {
@@ -230,31 +256,28 @@
     width: 100%;
   }
 
-  /* Inputs amarillos (#FDF7DF) centrados */
   .input-wrapper input,
   .input-wrapper textarea {
     width: 100%;
-    padding: 0 44px; /* Espacio simétrico */
+    padding: 0 44px;
     border: none;
     border-radius: 12px;
-    background-color: #FDF7DF; /* Amarillo tenue pedido */
+    background-color: #FDF7DF;
     font-family: 'Poppins', sans-serif;
     font-size: 14px;
     color: #1F2937;
-    text-align: center; /* Texto centrado */
+    text-align: center;
     box-sizing: border-box;
-    transition: box-shadow 0.2s;
   }
 
   .input-wrapper input {
     height: 52px;
   }
 
-  /* Estilos específicos para el textarea de descripción */
   .input-wrapper textarea {
     padding-top: 16px;
     padding-bottom: 16px;
-    resize: none; /* Evita que rompa el diseño */
+    resize: none;
   }
 
   .input-wrapper input:focus,
@@ -263,12 +286,6 @@
     box-shadow: 0 0 0 2px rgba(13, 59, 102, 0.15);
   }
 
-  .input-wrapper input::placeholder,
-  .input-wrapper textarea::placeholder {
-    color: #9CA3AF;
-  }
-
-  /* Icono de lápiz a la derecha */
   .input-icon {
     position: absolute;
     right: 16px;
@@ -278,32 +295,24 @@
     pointer-events: none;
   }
 
-  /* Ajuste para que el icono en el textarea no quede tan centrado verticalmente si hay mucho texto */
   .textarea-icon {
-    top: 26px; /* Lo mantiene alineado con la primera línea de texto */
+    top: 26px;
   }
 
-  /* Botón de Continuar */
-  .form-actions {
-    margin-top: 16px;
-  }
-
+  /* Botón */
   .btn-primary {
     width: 100%;
-    height: 54px;
-    background-color: #F4D35E; /* Amarillo brillante */
-    color: #0D3B66; /* Azul marino */
+    height: 56px;
+    background-color: #F4D35E;
+    color: #0D3B66;
     border: none;
     border-radius: 12px;
     font-family: 'Poppins', sans-serif;
     font-size: 16px;
     font-weight: 700;
     cursor: pointer;
-    transition: background-color 0.2s, transform 0.1s;
-  }
-
-  .btn-primary:hover {
-    background-color: #E8BF4C;
+    transition: transform 0.1s ease;
+    margin-top: 10px;
   }
 
   .btn-primary:active {

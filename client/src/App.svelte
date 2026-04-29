@@ -14,22 +14,23 @@
   import CasoCerrado from './lib/Caso_cerrado.svelte';
   // --- LÓGICA DE RUTAS UNIFICADA ---
   let path = window.location.pathname;
-  let partes = path.split('/').filter(p => p !== ""); 
+  let partes = path.split('/').filter(p => p !== "");
   
   let vistaActual = partes[0] || 'inicio'; 
   let subVista = partes[1] || ''; 
   let vistaAnterior = "inicio"; 
 
   let mascotaSeleccionada = null;
-  // --- ESTADO DEL CHAT (AÑADIDO) ---
-  let contactoActivo = null; 
+  let contactoActivo = null;
+
+  // --- ESTADO DE SESIÓN AÑADIDO ---
+  let sesionActiva = false; 
 
   let casoSeleccionado = null;
   function navegar(vista, sub = '') {
     vistaAnterior = vistaActual; 
     vistaActual = vista;
     subVista = sub;
-    
     const url = sub ? `/${vista}/${sub}` : `/${vista}`;
     const urlFinal = vista === 'inicio' ? '/' : url;
     history.pushState({}, '', urlFinal);
@@ -44,13 +45,20 @@
     navegar('publicar');
   };
 
-  const irAPerfil   = () => navegar('perfil', 'iniciar_sesion');
+  // --- GUARDIÁN DE RUTAS EN EL PERFIL ---
+  const irAPerfil = () => {
+    // Si ya inició sesión, lo manda a editar su perfil.
+    if (sesionActiva) {
+      navegar('perfil', 'editar_perfil');
+    } else {
+      // Si no, lo manda a iniciar sesión.
+      navegar('perfil', 'iniciar_sesion');
+    }
+  };
 
-  // --- NAVEGACIÓN DE CHATS (AÑADIDA) ---
   const irAChats = () => navegar('chats');
-
+  
   const irAChat = (event) => {
-    // Si viene de la lista de chats tiene detalle, si no (desde ficha mascota) es genérico
     if (event && event.detail) {
         contactoActivo = event.detail;
     } else {
@@ -134,17 +142,23 @@
       <Chat contacto={contactoActivo} on:volver={irAChats} />
 
     {:else if vistaActual === 'perfil'}
-        {#if subVista === 'crear_cuenta'}
+        {#if subVista === 'editar_perfil' && sesionActiva}
+          <EditarPerfil on:volver={irAInicio} />
+          
+        {:else if subVista === 'crear_cuenta'}
           <CrearCuenta on:volver={() => navegar('perfil', 'iniciar_sesion')} />
-        {:else if subVista === 'editar_perfil'}
-          <EditarPerfil on:volver={irAPerfil} />
+          
         {:else}
           <IniciarSesion 
+            mensajeAlerta={(!sesionActiva && subVista === 'editar_perfil') ? "Primero debes acceder a tu cuenta" : ""}
             on:irACrearCuenta={() => navegar('perfil', 'crear_cuenta')}
-            on:loginExitoso={() => navegar('perfil', 'editar_perfil')} 
+            on:loginExitoso={() => {
+              sesionActiva = true; // Activa la sesión en toda la app
+              navegar('perfil', 'editar_perfil');
+            }} 
             on:volver={irAInicio}
           />
-        {/if}
+          {/if}
     {/if}
 
   </div>
@@ -160,7 +174,7 @@
 </main>
 
 <style>
-  /* ESTILOS UNIFICADOS (Tus estilos originales de 151 líneas) */
+  /* ESTILOS ORIGINALES INTACTOS */
   @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
 
   :global(html), :global(body) {

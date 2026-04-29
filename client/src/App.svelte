@@ -130,11 +130,11 @@
           navegar("ficha_exito");
         }}
       />
-    {:else if vistaActual === "caso_cerrado"}
-      <CasoCerrado
-        pet_id={mascotaSeleccionada?.pet_id || mascotaSeleccionada?.id}
-        on:volver={() => navegar("publicacion")}
-        on:exitoPublicado={() => navegar("casos_exito")}
+    {:else if vistaActual === 'caso_cerrado'}
+      <CasoCerrado 
+        pet_id={mascotaSeleccionada?.pet_id || mascotaSeleccionada?.id || contactoActivo?.pet_id} 
+        on:volver={() => navegar('publicacion')} 
+        on:exitoPublicado={() => navegar('casos_exito')}
       />
     {:else if vistaActual === "buscar"}
       <Buscar

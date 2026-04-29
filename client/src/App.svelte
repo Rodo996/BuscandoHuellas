@@ -179,7 +179,8 @@
     position: relative;
     padding-bottom: 50px;
     box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
-    overflow-x: hidden;
+    overflow-x: clip;
+    /*overflow-x: hidden;*/
   }
 
   @media (max-width: 400px) {

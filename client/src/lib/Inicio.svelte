@@ -127,7 +127,7 @@
       />
       <div class="report-info">
         <h3>¿Puedes ayudar a alguien perdido?</h3>
-        <button class="report-btn">
+        <button class="report-btn" on:click={() => dispatch('irAPublicar')}>
           <svg
             width="22"
             height="22"
@@ -262,7 +262,7 @@
       </div>
     </div>
     <p class="copyright">
-      © 2026 Mascota Perdida. Todos los derechos reservados.
+      © 2026 Buscando Huellas. Todos los derechos reservados.
     </p>
   </footer>
 

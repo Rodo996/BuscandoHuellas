@@ -11,6 +11,8 @@
   import Chat from './lib/Chat.svelte';
   import CasosExito from './lib/Caso_exito.svelte'; 
   import FichaExito from './lib/Ficha_exito.svelte';
+  import { listaContactos } from './lib/contactos.js';
+  import { onMount } from 'svelte';
   // --- LÓGICA DE RUTAS UNIFICADA ---
   let path = window.location.pathname;
   let partes = path.split('/').filter(p => p !== "");
@@ -18,14 +20,14 @@
   let vistaActual = partes[0] || 'inicio'; 
   let subVista = partes[1] || ''; 
   let vistaAnterior = "inicio"; 
-
   let mascotaSeleccionada = null;
-  let contactoActivo = null;
-
   // --- ESTADO DE SESIÓN AÑADIDO ---
   let sesionActiva = false; 
-
   let casoSeleccionado = null;
+  //Estos dos let son para chat.svelte
+  let contactoActivo = null;
+  let cargandoContacto = false;
+
   function navegar(vista, sub = '') {
     vistaAnterior = vistaActual; 
     vistaActual = vista;
@@ -63,7 +65,7 @@
     } else {
         contactoActivo = { nombre: "Dueño", color: "#F4D35E" };
     }
-    navegar('chat');
+    navegar('chat', contactoActivo.id);
   };
 
   const irAPublicacion = (event) => {
@@ -77,6 +79,15 @@
     vistaActual = p[0] || 'inicio';
     subVista = p[1] || '';
   };
+ onMount(async () => {
+    if (vistaActual === 'chat' && subVista) {
+        cargandoContacto = true;  // ← bloquea el render de Chat
+        const encontrado = listaContactos.find(c => c.id === Number(subVista));
+        contactoActivo = encontrado ?? null;
+        if (!contactoActivo) navegar('chats');
+        cargandoContacto = false; // ← libera el render
+    }
+});
 </script>
 
 <main>
@@ -132,8 +143,13 @@
       <Chats on:volver={irAInicio} on:abrirChat={irAChat} />
 
     {:else if vistaActual === 'chat'}
-      <Chat contacto={contactoActivo} on:volver={irAChats} />
-
+  {#if cargandoContacto}
+    <div style="display:flex; justify-content:center; align-items:center; height:100vh;">
+      <p style="font-family:Poppins; color:#0D3B66; font-weight:600;">Cargando...</p>
+    </div>
+  {:else}
+    <Chat contacto={contactoActivo} on:volver={irAChats} />
+  {/if}
     {:else if vistaActual === 'perfil'}
         {#if subVista === 'editar_perfil' && sesionActiva}
           <EditarPerfil on:volver={irAInicio} />

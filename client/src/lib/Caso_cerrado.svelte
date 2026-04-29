@@ -17,8 +17,7 @@
       imagenEvidencia = e.target.files[0];
     }
   };
-
-  const confirmarPublicacion = async () => {
+const confirmarPublicacion = async () => {
     if (!evidenciaTexto.trim()) {
       alert("Por favor, cuéntanos brevemente cómo fue el reencuentro.");
       return;
@@ -26,20 +25,26 @@
 
     cargando = true;
     try {
-      // 1. Crear el Post de tipo 'Success Story'
+      
       const res = await fetch('http://localhost:3000/api/casos-exito', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          pet_id: pet_id,
+          pet_id: pet_id, // Quitamos el truco del 15
           story: evidenciaTexto
         })
       });
 
-      if (!res.ok) throw new Error("Error al crear el post");
-      const { post_id } = await res.json();
+      // Leemos la respuesta (ya sea éxito o error)
+      const data = await res.json();
 
-      // 2. Subir la imagen de evidencia si existe (usando tu ruta de imágenes)
+      if (!res.ok) {
+        // Si el backend mandó error 500, lanzamos el texto real de MySQL
+        throw new Error(data.error || "Error en la base de datos");
+      }
+
+      const post_id = data.post_id;
+
       if (imagenEvidencia && post_id) {
         const formData = new FormData();
         formData.append("image", imagenEvidencia);
@@ -49,11 +54,11 @@
         });
       }
 
-      // 3. Notificar éxito y navegar
       dispatch('exitoPublicado');
     } catch (error) {
       console.error(error);
-      alert("Hubo un problema al cerrar el caso.");
+      // ¡Ahora la alerta te dirá exactamente qué columna o dato no le gustó a MySQL!
+      alert("Ups, MySQL dice: " + error.message);
     } finally {
       cargando = false;
     }

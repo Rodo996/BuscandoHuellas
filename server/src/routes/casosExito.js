@@ -12,30 +12,30 @@ router.post("/", async (req, res) => {
         await conn.beginTransaction();
         const { pet_id, story } = req.body;
 
-        // 1. Insertar el Caso de Éxito con user_id y location_id por defecto
+        if (!pet_id) return res.status(400).json({ error: "Falta el ID de la mascota." });
+
+        // 1. Insertamos el post (quitamos closed_at para que MySQL asigne NULL por defecto)
         const [postResult] = await conn.execute(
-            `INSERT INTO Posts (user_id, pet_id, location_id, type, date, story, status) 
-             VALUES (1, ?, 1, 'Success Story', NOW(), ?, 'Active');`,
+            `INSERT INTO Posts (user_id, pet_id, location_id, type, date, story, status, created_at) 
+             VALUES (1, ?, 1, 'Success Story', NOW(), ?, 'Active', NOW());`,
             [pet_id, story]
         );
 
         const newPostId = postResult.insertId;
 
-        // 2. ¡CORREGIDO! Actualizamos el status en la tabla Posts (no en Pets)
-        // Solo actualizamos los posts antiguos (Lost, Spotted, etc.) a 'Encontrado'
+        // 2. Usamos 'Closed' en vez de 'Encontrado' para evitar errores de ENUM
         await conn.execute(
-            `UPDATE Posts SET status = 'Encontrado' WHERE pet_id = ? AND type != 'Success Story';`,
+            `UPDATE Posts SET status = 'Closed' WHERE pet_id = ? AND type != 'Success Story';`,
             [pet_id]
         );
 
         await conn.commit();
-        
-        // Devolvemos el post_id para que el frontend pueda subir la foto de evidencia
         res.status(201).json({ post_id: newPostId });
     } catch (err) {
         await conn.rollback();
-        console.error("Error exacto de MySQL:", err); 
-        res.status(500).json({ error: "Error al publicar la historia." });
+        console.error("Error MySQL:", err.message); 
+        // ¡Magia! Enviamos el error real al frontend:
+        res.status(500).json({ error: err.message });
     } finally {
         conn.release();
     }

@@ -96,7 +96,7 @@
       />
     {:else if vistaActual === 'caso_cerrado'}
       <CasoCerrado 
-        pet_id={mascotaSeleccionada?.id} 
+      pet_id={mascotaSeleccionada?.pet_id}
     on:volver={() => navegar('publicacion')} 
     on:exitoPublicado={() => navegar('casos_exito')}
       />

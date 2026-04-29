@@ -15,6 +15,13 @@
 
     $: cruzaTexto  = mascota.esCruza   === true ? "Sí" : mascota.esCruza   === false ? "No" : "Sin datos";
     $: colaTexto   = mascota.tieneCola === true ? "Sí" : mascota.tieneCola === false ? "No" : "Sin datos";
+    function contactar() {
+    dispatch('irAChat', {
+        id: mascota.duenoId ?? 0,   // cuando tengas BD real será el id del dueño
+        nombre: mascota.dueno ?? 'Dueño',
+        color: '#F4D35E'
+    });
+}
 </script>
 
 <div class="app-container">
@@ -137,7 +144,7 @@
                 <h4>{mascota.dueno ?? "Publicado por usuario"}</h4>
                 <p>Dueño • {mascota.duenoTiempo ?? ""}</p>
             </div>
-            <button class="contact-btn">
+            <button class="contact-btn" on:click={contactar}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
                     stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7

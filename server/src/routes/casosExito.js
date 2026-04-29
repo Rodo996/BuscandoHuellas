@@ -20,7 +20,7 @@ router.get("/", async (req, res) => {
                 ) AS image_url
             FROM Posts p
             INNER JOIN Pets pt ON p.pet_id = pt.pet_id
-            WHERE p.type = 'Sheltered'
+            WHERE p.type = 'Success Story'
             ORDER BY p.date DESC;
         `;
 

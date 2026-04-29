@@ -9,14 +9,6 @@
   let mensajeError = '';
 
   const volver = () => dispatch('volver');
-  
-  // --- CÓDIGO BASURA / ANTERIOR COMENTADO ---
-  /*
-  const login = () => {
-    console.log('Login intentado con:', email, password);
-    dispatch('loginExitoso');
-  };
-  */
 
   // --- NUEVO CÓDIGO CORREGIDO ---
   const login = async () => {
@@ -169,13 +161,12 @@
     overflow-x: hidden;
   }
 
-  /* ESTILOS CLONADOS EXACTAMENTE DE BUSCAR.SVELTE */
   .top-brand-header {
     background-color: #0D3B66;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 18px 0; /* Padding estándar de Buscar.svelte */
+    padding: 18px 0;
     width: 100%;
   }
 
@@ -187,14 +178,13 @@
   
   .brand-text {
     font-size: 24px;
-    font-weight: 800; /* Extra Bold para el logo */
+    font-weight: 800;
     letter-spacing: -0.5px;
   }
 
   .text-white { color: #FFFFFF; }
   .text-yellow { color: #F4D35E; }
 
-  /* Ajustes de la cabecera de la sección */
   .section-header {
     display: flex;
     align-items: center;
@@ -221,7 +211,7 @@
   }
 
   .main-content {
-    padding: 0 24px 32px 24px;
+    padding: 0 24px 120px 24px; /* <--- ESPACIO EXTRA PARA LA NAVBAR */
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -270,7 +260,7 @@
     padding: 0 44px;
     border: none;
     border-radius: 12px;
-    background-color: #FDF7DF; /* Amarillo suave */
+    background-color: #FDF7DF;
     font-family: 'Poppins', sans-serif;
     font-size: 14px;
     text-align: center;
@@ -306,7 +296,7 @@
   .submit-button {
     width: 100%;
     height: 56px;
-    background-color: #F4D35E; /* Amarillo fuerte */
+    background-color: #F4D35E;
     color: #0D3B66;
     border: none;
     border-radius: 12px;

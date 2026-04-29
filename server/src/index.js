@@ -9,6 +9,7 @@ import crearCuentaRouter from './routes/crearCuenta.js';
 import editarCuentaRouter from './routes/editarCuenta.js';
 import iniciarSesionRouter from './routes/iniciarSesion.js';
 import imagesRouter from './routes/images.js'
+import casosExitoRouter from './routes/casosExito.js';
 
 const app = express();
 
@@ -29,7 +30,7 @@ app.use('/api/crear-cuenta', crearCuentaRouter);
 app.use('/api/editar-perfil', editarCuentaRouter);
 app.use('/api/iniciar-sesion', iniciarSesionRouter);
 app.use('/api/images', imagesRouter);
-
+app.use('/api/casos-exito', casosExitoRouter);
 
 app.listen(process.env.PORT, () =>
   console.log(`Server corriendo en http://localhost:${process.env.PORT}`)

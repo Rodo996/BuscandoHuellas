@@ -5,11 +5,52 @@
   let email = '';
   let password = '';
 
+  // VARIABLE NUEVA PARA MOSTRAR EL ERROR EN PANTALLA
+  let mensajeError = '';
+
   const volver = () => dispatch('volver');
   
+  // --- CÓDIGO BASURA / ANTERIOR COMENTADO ---
+  /*
   const login = () => {
     console.log('Login intentado con:', email, password);
     dispatch('loginExitoso');
+  };
+  */
+
+  // --- NUEVO CÓDIGO CORREGIDO ---
+  const login = async () => {
+    // Limpiamos errores pasados antes de un nuevo intento
+    mensajeError = '';
+
+    try {
+      // Hacemos la petición a tu backend
+      const res = await fetch('http://localhost:3000/api/iniciar-sesion', { 
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
+
+      // Extraemos la respuesta (ya sea éxito o error)
+      const data = await res.json();
+
+      // AQUÍ ESTÁ EL BLOQUEO REAL: Si el status NO es 200 (es decir, fue 401 o 403)
+      if (!res.ok) {
+        // Guardamos el error del backend en nuestra variable y DETENEMOS la ejecución
+        mensajeError = data.error || 'Error al iniciar sesión.'; 
+        return; 
+      }
+
+      // Si todo salió bien (res.ok es true y el usuario estaba verificado), despachamos el éxito
+      console.log('Login exitoso con:', email);
+      dispatch('loginExitoso');
+
+    } catch (error) {
+      console.error("Error en la petición:", error);
+      mensajeError = "No se pudo conectar con el servidor.";
+    }
   };
 </script>
 
@@ -68,6 +109,12 @@
     <div class="hero-image">
       <img src="https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?q=80&w=600&auto=format&fit=crop" alt="Mascotas" />
     </div>
+
+    {#if mensajeError}
+      <div style="color: #721c24; background-color: #f8d7da; padding: 12px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 5px;">
+        {mensajeError}
+      </div>
+    {/if}
 
     <form class="auth-form" on:submit|preventDefault={login}>
       

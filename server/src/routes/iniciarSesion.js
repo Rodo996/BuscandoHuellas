@@ -6,46 +6,44 @@ const router = Router();
 router.post("/", async (req, res) => {
     const conn = await pool.getConnection();
     try {
-      // Para un simple SELECT no es estrictamente necesario el beginTransaction(), 
-      // pero no hace daño dejarlo si planeas hacer UPDATEs aquí en el futuro.
-      
-      const {
-        email,
-        password
-      } = req.body;
+      const { email, password } = req.body;
 
+      // 1. Buscamos al usuario, su contraseña Y su estado de verificación
       const [loginResult] = await conn.execute(
-        `SELECT user_id, verificado 
-        FROM Users 
-        WHERE email = ? AND password = ?;`,
+        `SELECT user_id, verified 
+         FROM Users 
+         WHERE email = ? AND password = ?;`,
         [email, password]
       );
 
-      // Arreglo vacío, el correo o la contraseña están mal
+      // 2. Si no encuentra nada, el correo o la clave están mal
       if (loginResult.length === 0) {
-        return res.status(401).json({ error: "Correo o contraseña incorrectos." });
+        return res.status(401).json({ 
+          error: "Credenciales incorrectas." 
+        });
       }
 
       const user = loginResult[0];
 
-      // 2. Comprobamos si ya verificó su correo (si si, 1)
-      if (user.verificado === 0) {
+      // 3. BLOQUEO REAL A PRUEBA DE BALAS: 
+      // Convertimos a número para asegurar que atrape el 0 o false
+      if (Number(user.verified) === 0 || !user.verified) {
         return res.status(403).json({ 
-          error: "Debes verificar tu correo electrónico antes de iniciar sesión. Revisa tu bandeja de entrada." 
+          error: "Tu cuenta aún no ha sido verificada. Revisa tu correo electrónico." 
         });
       }
 
-      // 3. Si existe, la contraseña está bien y SÍ está verificado, le damos acceso
+      // 4. Si es 1 (verificado), dejamos loguear
       res.status(200).json({
         message: "Inicio de sesión exitoso",
         user_id: user.user_id
       });
 
     } catch (err) {
-      console.error("Error en login:", err);
+      console.error(err);
       res.status(500).json({ 
-        error: "Error interno del servidor", 
-        detail: err.message 
+        error: "Error interno del servidor.",
+        detail: err.message
       });
     } finally {
       conn.release();

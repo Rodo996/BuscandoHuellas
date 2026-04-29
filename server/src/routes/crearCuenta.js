@@ -1,18 +1,9 @@
 import { Router } from 'express';
 import pool from '../db.js';
-import nodemailer from 'nodemailer'; 
 import jwt from 'jsonwebtoken';      
+import transporter from '../mailer.js';
 
 const router = Router();
-
-// Configuración del transporte de correo (basado en el video)
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }
-});
 
 // 1. Ruta principal para CREAR LA CUENTA
 router.post("/", async (req, res) => {

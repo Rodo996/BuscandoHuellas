@@ -4,9 +4,11 @@
 
   const dispatch = createEventDispatcher();
 
+  export let id_usuario;
+
   const API = "http://localhost:3000/api";
 
-  let tipoPublicacion = "Extraviado";
+  let tipoPublicacion = "Extraviada";
 
   // --- Campos del formulario ---
   let nombreMascota = "";
@@ -26,6 +28,7 @@
   let telefono = "";
   let email = "";
   let cp = "";
+  let municipio = "";
   let lat = 20.6597;
   let lng = -103.3496;
 
@@ -111,6 +114,7 @@
     direccion = e.detail.address;
     lat = e.detail.lat;
     lng = e.detail.lng;
+    municipio = e.detail.municipality ?? '';
   }
 
   let obteniendoUbicacion = false;
@@ -130,6 +134,11 @@
           const data = await res.json();
           direccion = data.display_name ?? "";
           cp = data.address?.postcode ?? "";
+          municipio = data.address?.municipality
+            ?? data.address?.city
+            ?? data.address?.town
+            ?? data.address?.village
+            ?? '';
         } catch {
           /* queda vacío */
         }
@@ -165,6 +174,8 @@
 
   let imagenSeleccionada = null;
 
+  $: console.log('user_id en Publicar:', id_usuario);
+
   async function handlePublicar() {
     intentoEnvio = true;
     if (!validar()) return;
@@ -180,14 +191,15 @@
       color_ids: [colorSeleccionado.color_id],
       disability_ids: discapacidadesSeleccionadas.map((d) => d.disability_id),
       zip_code: cp,
+      municipality: municipio,
       street: direccion,
       lat: lat,
       lng: lng,
-      user_id: 1, // temporal hasta auth
+      user_id: id_usuario,
       type:
-        tipoPublicacion === "Extraviado"
+        tipoPublicacion === "Extraviada"
           ? "Lost"
-          : tipoPublicacion === "Avistado"
+          : tipoPublicacion === "Avistada"
             ? "Spotted"
             : "Sheltered",
     };
@@ -324,7 +336,7 @@
     <div class="field-group">
       <label class="field-label">Tipo de publicación</label>
       <div class="tipo-btns">
-        {#each ["Extraviado", "Avistado", "Alojado"] as tipo}
+        {#each ["Extraviada", "Avistada", "Alojada"] as tipo}
           <button
             class="tipo-btn"
             class:active={tipoPublicacion === tipo}
@@ -911,7 +923,7 @@
 
   /* Header página */
   .page-header {
-    position: sticky;
+    position: relative;
     top: 0;
     z-index: 10;
     display: flex;
@@ -922,6 +934,9 @@
     border-bottom: 1px solid #f3f4f6;
   }
   .page-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
     margin: 0;
     font-family: "Poppins", sans-serif;
     font-size: 16px;
@@ -936,6 +951,7 @@
     background: none;
     border: none;
     cursor: pointer;
+    margin-left: auto;
   }
 
   /* Contenedor form */

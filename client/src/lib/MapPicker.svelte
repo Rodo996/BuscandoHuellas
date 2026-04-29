@@ -91,6 +91,12 @@
                 lng: lngVal,
                 address: data.display_name ?? "",
                 postcode: data.address?.postcode ?? "",
+                municipality:
+                    data.address?.municipality ??
+                    data.address?.city ??
+                    data.address?.town ??
+                    data.address?.village ??
+                    "",
             });
         } catch {
             dispatch("ubicacion", {

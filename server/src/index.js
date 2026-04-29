@@ -9,6 +9,7 @@ import crearCuentaRouter from './routes/crearCuenta.js';
 import editarCuentaRouter from './routes/editarCuenta.js';
 import iniciarSesionRouter from './routes/iniciarSesion.js';
 import imagesRouter from './routes/images.js'
+import notificationsRouter from './routes/notifications.js'
 import casosExitoRouter from './routes/casosExito.js';
 
 const app = express();
@@ -30,6 +31,7 @@ app.use('/api/crear-cuenta', crearCuentaRouter);
 app.use('/api/editar-perfil', editarCuentaRouter);
 app.use('/api/iniciar-sesion', iniciarSesionRouter);
 app.use('/api/images', imagesRouter);
+app.use('/api/notifications', notificationsRouter);
 app.use('/api/casos-exito', casosExitoRouter);
 
 app.listen(process.env.PORT, () =>

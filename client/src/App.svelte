@@ -7,11 +7,11 @@
   import CrearCuenta from './lib/Crear_cuenta.svelte';
   import EditarPerfil from './lib/Editar_perfil.svelte';
   import Navbar from './lib/Navbar.svelte';
-  // --- IMPORTACIONES DE CHAT (AÑADIDAS) ---
   import Chats from './lib/Chats.svelte'; 
   import Chat from './lib/Chat.svelte';
   import CasosExito from './lib/Caso_exito.svelte'; 
   import FichaExito from './lib/Ficha_exito.svelte';
+  import CasoCerrado from './lib/Caso_cerrado.svelte';
   // --- LÓGICA DE RUTAS UNIFICADA ---
   let path = window.location.pathname;
   let partes = path.split('/').filter(p => p !== ""); 
@@ -85,6 +85,12 @@
             casoSeleccionado = e.detail; 
             navegar('ficha_exito'); 
         }}
+      />
+    {:else if vistaActual === 'caso_cerrado'}
+      <CasoCerrado 
+        pet_id={mascotaSeleccionada?.id} 
+    on:volver={() => navegar('publicacion')} 
+    on:exitoPublicado={() => navegar('casos_exito')}
       />
     {:else if vistaActual === 'casos_exito'}
       <CasosExito 

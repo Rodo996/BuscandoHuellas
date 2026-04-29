@@ -6,7 +6,7 @@
 
     // 1. Recibimos la información del contacto desde App.svelte
     export let contacto = null;
-
+    let mostrarConfirmacion = false;
   // Aseguramos que haya un contacto por defecto por si acaso
     $: infoContacto = contacto ?? null;
 
@@ -76,7 +76,11 @@
 
         return 'Ok 👍';
     }
-  
+
+function confirmarCierreCaso() {
+    mostrarConfirmacion = false;
+    dispatch('cerrarCaso', { contactoId: contacto.id });
+}
 </script>
 
 <div class="app-container">
@@ -141,11 +145,6 @@
                   </div>
               </div>
 
-          {:else if msg.tipo === 'system'}
-              <div class="system-card">
-                  <p>¿Se ha resuelto el caso?</p>
-                  <button class="btn-cerrar-caso">Cerrar caso</button>
-              </div>
               {:else if msg.tipo === 'request_proof'}
         <div class="message-row other">
             <div class="msg-bubble light-yellow proof-card">
@@ -164,14 +163,16 @@
 
   <!-- BOTONES -->
   <div class="action-chips-container">
-      <button class="chip chip-blue" on:click={() => accion('Prueba de propiedad')}>
-          Prueba de propiedad
-      </button>
-
-      <button class="chip chip-orange" on:click={() => accion('Acordar encuentro')}>
-          Acordar encuentro
-      </button>
-  </div>
+    <button class="chip chip-blue" on:click={() => accion('Prueba de propiedad')}>
+        Prueba de propiedad
+    </button>
+    <button class="chip chip-orange" on:click={() => accion('Acordar encuentro')}>
+        Acordar encuentro
+    </button>
+    <button class="chip chip-red" on:click={() => mostrarConfirmacion = true}>
+        Cerrar caso
+    </button>
+</div>
 
   <NavBar 
       vistaActiva="chats" 
@@ -180,6 +181,22 @@
       on:irAPublicar={() => dispatch("irAPublicar")}
   />
   {/if}
+  {#if mostrarConfirmacion}
+        <div class="modal-overlay">
+            <div class="modal-box">
+                <p class="modal-titulo">¿Cerrar este caso?</p>
+                <p class="modal-subtitulo">Esta acción marcará el caso como resuelto.</p>
+                <div class="modal-botones">
+                <button class="modal-btn cancelar" on:click={() => mostrarConfirmacion = false}>
+                    Cancelar
+                    </button>
+                    <button class="modal-btn confirmar" on:click={confirmarCierreCaso}>
+                    Confirmar
+                 </button>
+                </div>
+            </div>
+        </div>
+{/if}
 </div>
 <style>
   /* Estructura Base */
@@ -408,18 +425,7 @@
   }
 
   /* Tarjeta de Sistema (Cerrar caso) */
-  .system-card {
-      background-color: #FFFBEB;
-      border: 1px solid #FDE68A;
-      border-radius: 16px;
-      padding: 16px;
-      margin: 10px 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: left;
-      gap: 12px;
-  }
+  
   .system-icon-wrapper {
       background-color: #FEF3C7;
       padding: 8px;
@@ -432,22 +438,6 @@
       font-family: 'Inter', sans-serif;
       font-weight: 500;
       line-height: 1.5;
-  }
-  .btn-cerrar-caso {
-      background-color: #FBBF24;
-      color: #000000;
-      border: none;
-      width: 100%;
-      padding: 12px;
-      border-radius: 8px;
-      font-family: 'Poppins', sans-serif;
-      font-weight: 700;
-      font-size: 16px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
   }
 
   /* Contenedor de Botones Inferiores */

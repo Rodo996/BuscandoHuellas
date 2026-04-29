@@ -1,7 +1,25 @@
 <script>
-  import { createEventDispatcher } from "svelte";
+  import { createEventDispatcher, onMount } from "svelte";
   import NavBar from "./Navbar.svelte";
   const dispatch = createEventDispatcher();
+
+  // Arreglo para guardar los 2 casos más recientes
+  let casosDestacados = [];
+
+  let casoJuan = { name: 'Juan' };
+
+  onMount(async () => {
+    try {
+      const res = await fetch('http://localhost:3000/api/casos-exito');
+      if (res.ok) {
+        const data = await res.json();
+        // Tomamos solo los primeros 2 elementos del arreglo (.slice(0, 2))
+        casosDestacados = data.slice(0, 2);
+      }
+    } catch (e) {
+      console.error("Error al cargar los casos de éxito en inicio:", e);
+    }
+  });
 </script>
 
 <div class="app-container">
@@ -109,7 +127,7 @@
       />
       <div class="report-info">
         <h3>¿Puedes ayudar a alguien perdido?</h3>
-        <button class="report-btn">
+        <button class="report-btn" on:click={() => dispatch('irAPublicar')}>
           <svg
             width="22"
             height="22"
@@ -138,58 +156,53 @@
     </div>
   </div>
 
-  <div class="success-section">
+<div class="success-section">
     <div class="success-header">
       <h2>Casos de éxito</h2>
-      <a href="#" class="view-all">Ver todos</a>
+      <button class="btn-ver-todos" on:click={() => dispatch('verCasosExito')}>
+        Ver todos
+      </button>   
     </div>
+    
     <div class="success-grid">
-      <div class="success-card">
-        <img src="/Img-Inicio/messi.jpg" alt="Messi" />
-        <div class="success-content">
-          <h4>Messi</h4>
-          <span class="tag-encontrado">
-            <svg
-              width="13"
-              height="13"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#15803D"
-              stroke-width="2.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <polyline points="7 12 10.5 15.5 17 9" />
-            </svg>
-            ¡Encontrado!
-          </span>
-          <button class="btn-historia">Ver historia</button>
-        </div>
-      </div>
-      <div class="success-card">
-        <img src="/Img-Inicio/juan.png" alt="Juan" />
-        <div class="success-content">
-          <h4>Juan</h4>
-          <span class="tag-encontrado">
-            <svg
-              width="13"
-              height="13"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#15803D"
-              stroke-width="2.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <polyline points="7 12 10.5 15.5 17 9" />
-            </svg>
-            ¡Encontrado!
-          </span>
-          <button class="btn-historia">Ver historia</button>
-        </div>
-      </div>
+      {#if casosDestacados.length > 0}
+        {#each casosDestacados as caso}
+          <div class="success-card">
+            {#if caso.image_url}
+              <img src={caso.image_url} alt={caso.name} />
+            {:else}
+              <img src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60" alt="Mascota feliz" />
+            {/if}
+            
+            <div class="success-content">
+              <h4>{caso.name}</h4>
+              <span class="tag-encontrado">
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#15803D"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="7 12 10.5 15.5 17 9" />
+                </svg>
+                ¡Encontrado!
+              </span>
+              <button class="btn-historia" on:click={() => dispatch('verHistoria', caso)}>
+                Ver historia
+              </button>        
+            </div>
+          </div>
+        {/each}
+      {:else}
+        <p style="grid-column: span 2; text-align: center; color: #9CA3AF; font-size: 14px; padding: 10px;">
+          Cargando casos de éxito...
+        </p>
+      {/if}
     </div>
   </div>
 
@@ -249,7 +262,7 @@
       </div>
     </div>
     <p class="copyright">
-      © 2026 Mascota Perdida. Todos los derechos reservados.
+      © 2026 Buscando Huellas. Todos los derechos reservados.
     </p>
   </footer>
 

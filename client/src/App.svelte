@@ -9,7 +9,8 @@
   import Navbar from './lib/Navbar.svelte';
   import Chats from './lib/Chats.svelte'; 
   import Chat from './lib/Chat.svelte';
-
+  import CasosExito from './lib/Caso_exito.svelte'; 
+  import FichaExito from './lib/Ficha_exito.svelte';
   // --- LÓGICA DE RUTAS UNIFICADA ---
   let path = window.location.pathname;
   let partes = path.split('/').filter(p => p !== "");
@@ -24,6 +25,7 @@
   // --- ESTADO DE SESIÓN AÑADIDO ---
   let sesionActiva = false; 
 
+  let casoSeleccionado = null;
   function navegar(vista, sub = '') {
     vistaAnterior = vistaActual; 
     vistaActual = vista;
@@ -36,7 +38,7 @@
   // --- FUNCIONES DE NAVEGACIÓN ---
   const irAInicio   = () => navegar('inicio');
   const irABuscar   = () => navegar('buscar');
-  
+  const verCasosExito = () => navegar('casos_exito');
   const irAPublicar = () => {
     vistaAnterior = vistaActual;
     navegar('publicar');
@@ -85,8 +87,26 @@
         on:irABuscar={irABuscar} 
         on:irAPublicar={irAPublicar} 
         on:irAChats={irAChats}
+        on:verCasosExito={verCasosExito}
+        on:verHistoria={(e) => {
+            casoSeleccionado = e.detail; 
+            navegar('ficha_exito'); 
+        }}
       />
-
+    {:else if vistaActual === 'casos_exito'}
+      <CasosExito 
+      on:volver={irAInicio} 
+      on:verCasosExito={verCasosExito}
+      on:verHistoria={(e) => {
+            casoSeleccionado = e.detail; // Guardamos los datos de la mascota
+            navegar('ficha_exito'); // Cambiamos de pantalla
+        }}
+      />
+    {:else if vistaActual === 'ficha_exito'}
+      <FichaExito 
+        caso={casoSeleccionado} 
+        on:volver={() => navegar('casos_exito')} 
+      />
     {:else if vistaActual === 'buscar'}
       <Buscar 
         on:volver={irAInicio} 
@@ -172,7 +192,8 @@
     position: relative;
     padding-bottom: 50px;
     box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
-    overflow-x: hidden;
+    overflow-x: clip;
+    /*overflow-x: hidden;*/
   }
 
   @media (max-width: 400px) {

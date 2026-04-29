@@ -11,6 +11,7 @@
   import Chat from "./lib/Chat.svelte";
   import CasosExito from "./lib/Caso_exito.svelte";
   import FichaExito from "./lib/Ficha_exito.svelte";
+  import CasoCerrado from "./lib/Caso_cerrado.svelte";
   import { listaContactos } from "./lib/contactos.js";
 
   import { onMount } from "svelte";
@@ -129,6 +130,12 @@
           navegar("ficha_exito");
         }}
       />
+    {:else if vistaActual === "caso_cerrado"}
+      <CasoCerrado
+        pet_id={mascotaSeleccionada?.pet_id || mascotaSeleccionada?.id}
+        on:volver={() => navegar("publicacion")}
+        on:exitoPublicado={() => navegar("casos_exito")}
+      />
     {:else if vistaActual === "buscar"}
       <Buscar
         on:volver={irAInicio}
@@ -155,6 +162,7 @@
         mascota={mascotaSeleccionada}
         on:volver={irABuscar}
         on:irAChat={irAChat}
+        on:cerrarCaso={() => navegar("caso_cerrado")}
       />
     {:else if vistaActual === "publicar"}
       {#if sesionActiva && user_id}
@@ -187,7 +195,11 @@
           </p>
         </div>
       {:else}
-        <Chat contacto={contactoActivo} on:volver={irAChats} />
+        <Chat
+          contacto={contactoActivo}
+          on:volver={irAChats}
+          on:cerrarCaso={() => navegar("caso_cerrado")}
+        />
       {/if}
     {:else if vistaActual === "perfil"}
       {#if subVista === "editar_perfil" && sesionActiva}

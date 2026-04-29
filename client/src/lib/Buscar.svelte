@@ -658,7 +658,7 @@
 
     <!-- Grid de resultados -->
     <section class="results-grid" style="padding-top: 0;">
-        {#each mascotasOrdenadas as mascota (mascota.id)}
+        {#each mascotasOrdenadas as mascota (mascota.pet_id)}
             <div class="pet-card" on:click={() => abrirPublicacion(mascota)}>
                 <div class="pet-image-wrapper">
                     <img src={mascota.img} alt="Mascota" />

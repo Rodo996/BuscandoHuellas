@@ -8,6 +8,7 @@ import reportSheetRouter from './routes/reportSheet.js';
 import crearCuentaRouter from './routes/crearCuenta.js';
 import editarCuentaRouter from './routes/editarCuenta.js';
 import imagesRouter from './routes/images.js'
+import notificationsRouter from './routes/notifications.js'
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.use('/api/mascotas', reportSheetRouter);
 app.use('/api/crear-cuenta', crearCuentaRouter);
 app.use('/api/editar-perfil', editarCuentaRouter);
 app.use('/api/images', imagesRouter);
+app.use('/api/notifications', notificationsRouter);
 
 
 app.listen(process.env.PORT, () =>

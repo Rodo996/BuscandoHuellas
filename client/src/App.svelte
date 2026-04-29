@@ -11,6 +11,7 @@
   import Chat from './lib/Chat.svelte';
   import CasosExito from './lib/Caso_exito.svelte'; 
   import FichaExito from './lib/Ficha_exito.svelte';
+  import CasoCerrado from './lib/Caso_cerrado.svelte';
   import { listaContactos } from './lib/contactos.js';
   import { onMount } from 'svelte';
   // --- LÓGICA DE RUTAS UNIFICADA ---

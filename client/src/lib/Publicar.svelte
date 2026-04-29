@@ -4,6 +4,8 @@
 
   const dispatch = createEventDispatcher();
 
+  export let id_usuario;
+
   const API = "http://localhost:3000/api";
 
   let tipoPublicacion = "Extraviada";
@@ -172,6 +174,8 @@
 
   let imagenSeleccionada = null;
 
+  $: console.log('user_id en Publicar:', id_usuario);
+
   async function handlePublicar() {
     intentoEnvio = true;
     if (!validar()) return;
@@ -191,7 +195,7 @@
       street: direccion,
       lat: lat,
       lng: lng,
-      user_id: 1,
+      user_id: id_usuario,
       type:
         tipoPublicacion === "Extraviada"
           ? "Lost"

@@ -9,13 +9,14 @@
   import Navbar from "./lib/Navbar.svelte";
   import Chats from "./lib/Chats.svelte";
   import Chat from "./lib/Chat.svelte";
-  import CasosExito from './lib/Caso_exito.svelte'; 
-  import FichaExito from './lib/Ficha_exito.svelte';
+  import CasosExito from "./lib/Caso_exito.svelte";
+  import FichaExito from "./lib/Ficha_exito.svelte";
   import { onMount } from "svelte";
 
   const API = "http://localhost:3000/api";
   let noLeidas = 0;
-  let user_id = 1;
+  let user_id = null;
+
   // --- LÓGICA DE RUTAS UNIFICADA ---
   let path = window.location.pathname;
   let partes = path.split("/").filter((p) => p !== "");
@@ -28,10 +29,10 @@
   let contactoActivo = null;
 
   // --- ESTADO DE SESIÓN AÑADIDO ---
-  let sesionActiva = false; 
+  let sesionActiva = false;
   let casoSeleccionado = null;
-  function navegar(vista, sub = '') {
-    vistaAnterior = vistaActual; 
+  function navegar(vista, sub = "") {
+    vistaAnterior = vistaActual;
     vistaActual = vista;
     subVista = sub;
 
@@ -41,9 +42,9 @@
   }
 
   // --- FUNCIONES DE NAVEGACIÓN ---
-  const irAInicio   = () => navegar("inicio");
-  const irABuscar   = () => navegar("buscar");
-  const verCasosExito = () => navegar('casos_exito');
+  const irAInicio = () => navegar("inicio");
+  const irABuscar = () => navegar("buscar");
+  const verCasosExito = () => navegar("casos_exito");
   const irAPublicar = () => {
     vistaAnterior = vistaActual;
     navegar("publicar");
@@ -54,15 +55,15 @@
     noLeidas = 0;
     // Si ya inició sesión, lo manda a editar su perfil.
     if (sesionActiva) {
-      navegar('perfil', 'editar_perfil');
+      navegar("perfil", "editar_perfil");
     } else {
       // Si no, lo manda a iniciar sesión.
-      navegar('perfil', 'iniciar_sesion');
+      navegar("perfil", "iniciar_sesion");
     }
   };
 
   const irAChats = () => navegar("chats");
-  
+
   const irAChat = (event) => {
     if (event && event.detail) {
       contactoActivo = event.detail;
@@ -84,6 +85,7 @@
   };
 
   async function cargarNotificaciones() {
+    if (!user_id) return;
     try {
       const res = await fetch(`${API}/notifications/${user_id}`);
       const data = await res.json();
@@ -105,37 +107,38 @@
         on:irABuscar={irABuscar}
         on:irAPublicar={irAPublicar}
         on:irAChats={irAChats}
+        on:verCasosExito={verCasosExito}
+        on:verHistoria={(e) => {
+          casoSeleccionado = e.detail;
+          navegar("ficha_exito");
+        }}
       />
     {:else if vistaActual === "buscar"}
       <Buscar
         on:volver={irAInicio}
         on:verPublicacion={irAPublicacion}
         on:irAPublicar={irAPublicar}
+        on:irAChats={irAPublicacion}
+      />
+    {:else if vistaActual === "casos_exito"}
+      <CasosExito
+        on:volver={irAInicio}
         on:verCasosExito={verCasosExito}
         on:verHistoria={(e) => {
-            casoSeleccionado = e.detail; 
-            navegar('ficha_exito'); 
+          casoSeleccionado = e.detail; // Guardamos los datos de la mascota
+          navegar("ficha_exito"); // Cambiamos de pantalla
         }}
       />
-    {:else if vistaActual === 'casos_exito'}
-      <CasosExito 
-      on:volver={irAInicio} 
-      on:verCasosExito={verCasosExito}
-      on:verHistoria={(e) => {
-            casoSeleccionado = e.detail; // Guardamos los datos de la mascota
-            navegar('ficha_exito'); // Cambiamos de pantalla
-        }}
+    {:else if vistaActual === "ficha_exito"}
+      <FichaExito
+        caso={casoSeleccionado}
+        on:volver={() => navegar("casos_exito")}
       />
-    {:else if vistaActual === 'ficha_exito'}
-      <FichaExito 
-        caso={casoSeleccionado} 
-        on:volver={() => navegar('casos_exito')} 
-      />
-    {:else if vistaActual === 'buscar'}
-      <Buscar 
-        on:volver={irAInicio} 
-        on:verPublicacion={irAPublicacion} 
-        on:irAPublicar={irAPublicar} 
+    {:else if vistaActual === "buscar"}
+      <Buscar
+        on:volver={irAInicio}
+        on:verPublicacion={irAPublicacion}
+        on:irAPublicar={irAPublicar}
         on:irAChats={irAChats}
       />
     {:else if vistaActual === "publicacion"}
@@ -145,33 +148,47 @@
         on:irAChat={irAChat}
       />
     {:else if vistaActual === "publicar"}
-      <Publicar
-        on:volver={() => navegar(vistaAnterior)}
-        on:publicado={irAInicio}
-      />
+      {#if sesionActiva && user_id}
+        <Publicar
+          id_usuario={user_id}
+          on:volver={() => navegar(vistaAnterior)}
+          on:publicado={irAInicio}
+        />
+      {:else}
+        <IniciarSesion
+          mensajeAlerta="Debes iniciar sesión para publicar"
+          on:irACrearCuenta={() => navegar("perfil", "crear_cuenta")}
+          on:loginExitoso={(e) => {
+            sesionActiva = true;
+            user_id = e.detail.user_id;
+            navegar("publicar");
+          }}
+          on:volver={() => navegar(vistaAnterior)}
+        />
+      {/if}
     {:else if vistaActual === "chats"}
       <Chats on:volver={irAInicio} on:abrirChat={irAChat} />
     {:else if vistaActual === "chat"}
       <Chat contacto={contactoActivo} on:volver={irAChats} />
-
-    {:else if vistaActual === 'perfil'}
-        {#if subVista === 'editar_perfil' && sesionActiva}
-          <EditarPerfil on:volver={irAInicio} />
-          
-        {:else if subVista === 'crear_cuenta'}
-          <CrearCuenta on:volver={() => navegar('perfil', 'iniciar_sesion')} />
-          
-        {:else}
-          <IniciarSesion 
-            mensajeAlerta={(!sesionActiva && subVista === 'editar_perfil') ? "Primero debes acceder a tu cuenta" : ""}
-            on:irACrearCuenta={() => navegar('perfil', 'crear_cuenta')}
-            on:loginExitoso={() => {
-              sesionActiva = true; // Activa la sesión en toda la app
-              navegar('perfil', 'editar_perfil');
-            }} 
-            on:volver={irAInicio}
-          />
-          {/if}
+    {:else if vistaActual === "perfil"}
+      {#if subVista === "editar_perfil" && sesionActiva}
+        <EditarPerfil user_id={user_id ?? 0} on:volver={irAInicio} />
+      {:else if subVista === "crear_cuenta"}
+        <CrearCuenta on:volver={() => navegar("perfil", "iniciar_sesion")} />
+      {:else}
+        <IniciarSesion
+          mensajeAlerta={!sesionActiva && subVista === "editar_perfil"
+            ? "Primero debes acceder a tu cuenta"
+            : ""}
+          on:irACrearCuenta={() => navegar("perfil", "crear_cuenta")}
+          on:loginExitoso={(e) => {
+            sesionActiva = true; // Activa la sesión en toda la app
+            user_id = e.detail.user_id; // Se guarda el id de usuario real
+            navegar("perfil", "editar_perfil");
+          }}
+          on:volver={irAInicio}
+        />
+      {/if}
     {/if}
   </div>
 
@@ -187,7 +204,7 @@
 </main>
 
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
+  @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap");
 
   :global(html),
   :global(body) {

@@ -3,6 +3,19 @@ import pool from '../db.js';
 
 const router = Router();
 
+router.get('/:user_id', async (req, res) => {
+  try {
+    const [rows] = await pool.execute(
+      `SELECT name, email, phone_num, description FROM Users WHERE user_id = ?`,
+      [req.params.user_id]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Usuario no encontrado' });
+    res.json(rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.post("/", async (req, res) => {
     const conn = await pool.getConnection();
     try {

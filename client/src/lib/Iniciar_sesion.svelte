@@ -46,7 +46,8 @@
 
       // Si fue exitoso (200), avisamos al App.svelte
       console.log('Login exitoso con:', email);
-      dispatch('loginExitoso');
+      console.log('data del login:', data);
+      dispatch('loginExitoso', { user_id: data.user_id });
 
     } catch (error) {
       console.error("Error en la petición:", error);

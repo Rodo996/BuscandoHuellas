@@ -1,20 +1,9 @@
 <script>
     import { createEventDispatcher } from 'svelte';
     import NavBar from './Navbar.svelte';
+    import { listaContactos } from './contactos.js';
     
     const dispatch = createEventDispatcher();
-
-    // Recreamos tu lista de contactos con los colores exactos de tu diseño de Figma
-    let listaContactos = [
-        { id: 1, nombre: "Laura García", color: "#1A5C8C" },
-        { id: 2, nombre: "Rodolfo", color: "#9CA3AF" },
-        { id: 3, nombre: "Christian", color: "#FBBF24" },
-        { id: 4, nombre: "Maria", color: "#C2410C" },
-        { id: 5, nombre: "Andrea", color: "#ED1A1A" },
-        { id: 6, nombre: "Carlos", color: "#1ABFD2" },
-        { id: 7, nombre: "Roberto", color: "#24FB32" },
-        { id: 8, nombre: "Diego", color: "rgba(13, 59, 102, 0.6)" } // Opacidad del 60%
-    ];
 
     function abrirChat(contacto) {
         dispatch('abrirChat', contacto);

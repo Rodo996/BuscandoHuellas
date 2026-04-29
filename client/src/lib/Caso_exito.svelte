@@ -119,29 +119,24 @@
       <p class="status-msg">Aún no hay historias para mostrar.</p>
     {:else}
       <div class="pet-grid">
-        {#each casos as caso}
-          <div class="pet-card">
-          <div class="pet-card" on:click={() => dispatch('verHistoria', caso)} style="cursor: pointer;">
-            <div class="img-container">
-              {#if caso.image_url}
-                <img src={caso.image_url} alt="Foto de {caso.name}" />
-              {:else}
-                <img src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60" alt="Mascota feliz" />
-              {/if}
-            </div>
-            <div class="pet-info">
-              <h2 class="pet-name">{caso.name}</h2>
-              <div class="home-label">
-                <div class="label-avatar">
-                   <img src={caso.image_url} alt="Miniavtara de {caso.name}" />
-                </div>
-                <span>En casa</span>
-              </div>
-            </div>
-          </div>
-          </div>
-        {/each}
+  {#each casos as caso}
+    <div class="pet-card" on:click={() => dispatch('verHistoria', caso)}>
+      <div class="img-container">
+        <img 
+          src={caso.evidencia_url || caso.image_url || '/placeholder-pet.png'} 
+          alt={caso.name} 
+        />
       </div>
+      <div class="pet-info">
+        <h3 class="pet-name">{caso.name}</h3>
+        <div class="home-label">
+          <div class="mini-avatar">🏠</div>
+          <span>¡En casa!</span>
+        </div>
+      </div>
+    </div>
+  {/each}
+</div>
     {/if}
   </main>
   

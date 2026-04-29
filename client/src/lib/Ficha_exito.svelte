@@ -110,7 +110,14 @@
             <h2>¡{caso.name} ya está en casa!</h2>
             <p class="date-text">Se reunió con su familia el <strong>{formatearFecha(caso.fecha_recuperacion)}</strong>.</p>
         </div>
-
+        <div class="image-section">
+        <img 
+            src={caso.evidencia_url || caso.image_url} 
+            alt="Final feliz" 
+            class="main-image" 
+        />
+        <div class="badge-recuperado">¡RECUPERADO!</div>
+    </div>
         <div class="info-card">
             <span class="label">Detalles del reencuentro</span>
             <span class="value">

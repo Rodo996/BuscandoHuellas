@@ -24,12 +24,93 @@
     // Mas filtros
     let filtroEsCruza   = false;
     let filtroTieneCola = false;
+
+    // ─── Ubicación del usuario ─────────────────────────────────────
+    let userLat = null;
+    let userLng = null;
+    let gpsEstado = "idle"; // "idle" | "cargando" | "ok" | "error"
+
+    // ─── Búsqueda de ubicación manual ─────────────────────────────
+    let inputUbicacion = "";
+    let buscandoUbicacion = false;
+    let errorUbicacion = "";
+
     //Filtro fecha
     let ordenFecha = "reciente";
     // ─── Filtro rango de fechas ────────────────────────────────────
     let filtroFechaDesde = "";
     let filtroFechaHasta = "";
     $: badgeFecha = (filtroFechaDesde || filtroFechaHasta) ? 1 : 0;
+
+    // Fórmula Haversine
+    function haversine(lat1, lng1, lat2, lng2) {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLng = (lng2 - lng1) * Math.PI / 180;
+        const a =
+            Math.sin(dLat / 2) ** 2 +
+            Math.cos(lat1 * Math.PI / 180) *
+            Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLng / 2) ** 2;
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c; // distancia en km
+    }
+
+    const obtenerUbicacion = () => {
+        if (!navigator.geolocation) {
+            gpsEstado = "error";
+            return;
+        }
+        gpsEstado = "cargando";
+        navigator.geolocation.getCurrentPosition(
+            async (pos) => {
+                userLat = pos.coords.latitude;
+                userLng = pos.coords.longitude;
+                gpsEstado = "ok";
+
+                // Convertir coordenadas a texto legible
+                try {
+                    const res = await fetch(
+                        `https://nominatim.openstreetmap.org/reverse?lat=${userLat}&lon=${userLng}&format=json`,
+                        { headers: { "Accept-Language": "es" } }
+                    );
+                    const data = await res.json();
+                    if (data.display_name) {
+                        inputUbicacion = data.display_name.split(",").slice(0, 3).join(",").trim();
+                    }
+                } catch {
+                    // Si falla el reverse, no pasa nada, las coords ya están guardadas
+                }
+            },
+            () => { gpsEstado = "error"; }
+        );
+    };
+
+    const buscarUbicacion = async () => {
+        if (!inputUbicacion.trim()) return;
+        buscandoUbicacion = true;
+        errorUbicacion = "";
+        try {
+            const res = await fetch(
+                `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(inputUbicacion)}&format=json&limit=1`,
+                { headers: { "Accept-Language": "es" } }
+            );
+            const data = await res.json();
+            if (data.length > 0) {
+                userLat = parseFloat(data[0].lat);
+                userLng = parseFloat(data[0].lon);
+                gpsEstado = "ok";
+                inputUbicacion = data[0].display_name.split(",").slice(0, 2).join(",");
+            } else {
+                errorUbicacion = "No se encontró esa ubicación, intenta ser más específico.";
+            }
+        } catch {
+            errorUbicacion = "Error al buscar la ubicación.";
+        } finally {
+            buscandoUbicacion = false;
+        }
+    };
+
 
     const limpiarFecha = () => {
         filtroFechaDesde = "";
@@ -46,7 +127,7 @@
         });
     };
 
-    let radioBusqueda  = 1;
+    let radioBusqueda  = 10;
     // Para la fecha
     const cambiarOrden = (nuevoOrden) => {
         ordenFecha = nuevoOrden;
@@ -78,7 +159,15 @@
         filtroColores = { negro: false, blanco: false, cafe: false,
                          gris: false, dorado: false, naranja: false, mixto: false };
     };
-    const limpiarUbicacion = () => { radioBusqueda = 1; };
+    
+    const limpiarUbicacion = () => {
+        radioBusqueda = 1;
+        userLat = null;
+        userLng = null;
+        gpsEstado = "idle";
+        inputUbicacion = "";
+        errorUbicacion = "";
+    };
 
     const aplicarFiltros   = () => { activePill = null; };
 
@@ -140,9 +229,20 @@
             return true;
         })();
 
+        const coincideUbicacion = (() => {
+            // Si el radio está en mínimo (1km) o no hay GPS → no filtrar
+            if (!userLat || !userLng) return true;
+            if (!m.latitud || !m.longitud) return true; // sin coords → incluir
+            const distancia = haversine(
+                userLat, userLng,
+                parseFloat(m.latitud), parseFloat(m.longitud)
+            );
+            return distancia <= radioBusqueda;
+        })();
+
         return coincideTexto && coincideTipo && coincideTamano &&
             coincideSexo && coincideRaza && coincideColor &&
-            coincideCruza && coincideCola && coincideFecha;
+            coincideCruza && coincideCola && coincideFecha && coincideUbicacion;
     });
 
     // ─── Luego ordenamos por separado ─────────────────────────────
@@ -160,7 +260,7 @@
 
     $: badgeRaza  = filtroRazaBusqueda ? 1 : 0;
     $: badgeColor = Object.values(filtroColores).filter(Boolean).length;
-    $: badgeUbic  = radioBusqueda > 1 ? 1 : 0;
+    $: badgeUbic = (userLat && radioBusqueda > 1) ? 1 : 0;
 
     const abrirPublicacion = (mascota) => dispatch("verPublicacion", mascota);
 </script>
@@ -424,31 +524,75 @@
                     <button class="limpiar-btn" on:click={limpiarUbicacion}>Limpiar</button>
                 </div>
 
-                <div class="slider-section">
+                <!-- Opción 1: GPS automático -->
+                <button class="gps-btn" on:click={obtenerUbicacion}>
+                    Usar mi ubicación actual
+                </button>
+
+                <div class="ubicacion-divider">
+                    <span>o ingresa una dirección</span>
+                </div>
+
+                <!-- Opción 2: Texto manual -->
+                <div class="ubicacion-input-wrap">
+                    <input
+                        type="text"
+                        class="fecha-input"
+                        bind:value={inputUbicacion}
+                        placeholder="Ej: Av. Vallarta, Guadalajara, Jalisco"
+                        on:keydown={(e) => e.key === 'Enter' && buscarUbicacion()}
+                    />
+                    <button class="buscar-ubi-btn" on:click={buscarUbicacion}
+                        disabled={buscandoUbicacion}>
+                        {buscandoUbicacion ? "..." : "Buscar"}
+                    </button>
+                </div>
+
+                {#if errorUbicacion}
+                    <p class="ubi-error">{errorUbicacion}</p>
+                {/if}
+
+                <!-- Estado actual -->
+                {#if gpsEstado === "cargando"}
+                    <div class="gps-status gps-loading">Obteniendo ubicación...</div>
+                {:else if gpsEstado === "ok"}
+                    <div class="gps-status gps-ok">Ubicación detectada</div>
+                {:else if gpsEstado === "error"}
+                    <div class="gps-status gps-error">
+                        No se pudo obtener ubicación GPS.<br/>
+                        <small>Intenta ingresar una dirección manualmente.</small>
+                    </div>
+                {/if}
+
+                <!-- Slider — activo solo si hay ubicación -->
+                <div class="slider-section" style="margin-top:16px; opacity:{userLat ? 1 : 0.4}">
                     <div class="slider-labels">
                         <span>Radio de búsqueda</span>
                         <span class="slider-value">{radioBusqueda} km</span>
                     </div>
                     <input type="range" min="1" max="50"
-                        bind:value={radioBusqueda} class="custom-slider" />
+                        bind:value={radioBusqueda}
+                        disabled={!userLat}
+                        class="custom-slider" />
                     <div class="slider-minmax">
                         <span>1 km</span>
                         <span>50 km</span>
                     </div>
                 </div>
 
-                <!-- Accesos rápidos de radio -->
-                <div class="tags-wrap" style="margin-top:4px;margin-bottom:20px">
-                    {#each [1,5,10,25,50] as km}
-                        <button class="tag-btn"
-                            class:tag-active={radioBusqueda === km}
-                            on:click={() => radioBusqueda = km}>
-                            {km} km
-                        </button>
-                    {/each}
-                </div>
+                {#if userLat}
+                    <div class="tags-wrap" style="margin-top:8px;margin-bottom:20px">
+                        {#each [1,5,10,25,50] as km}
+                            <button class="tag-btn"
+                                class:tag-active={radioBusqueda === km}
+                                on:click={() => radioBusqueda = km}>
+                                {km} km
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
 
-                <button class="aplicar-btn" on:click={aplicarFiltros}>
+                <button class="aplicar-btn" style="margin-top:8px" on:click={aplicarFiltros}>
                     Aplicar filtros {badgeUbic > 0 ? `(${badgeUbic})` : ""}
                 </button>
             </div>
@@ -764,4 +908,74 @@
         outline: none; box-sizing: border-box;
     }
     .fecha-input:focus { border-color: #0d3b66; background: #ffffff; }
+    /* GPS */
+    .gps-btn {
+        width: 100%;
+        background: #0d3b66;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 12px;
+        font-family: "Poppins", sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-bottom: 4px;
+    }
+    .gps-status {
+        padding: 10px 14px;
+        border-radius: 10px;
+        font-size: 12px;
+        font-family: "Poppins", sans-serif;
+        margin-bottom: 8px;
+    }
+    .gps-loading { background: #fef3c7; color: #92400e; }
+    .gps-ok      { background: #d1fae5; color: #065f46; }
+    .gps-error   { background: #fee2e2; color: #991b1b; }
+
+    /* Ubicación manual */
+    .ubicacion-divider {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 12px 0;
+        font-size: 11px;
+        color: #9ca3af;
+        font-family: "Poppins", sans-serif;
+    }
+    .ubicacion-divider::before,
+    .ubicacion-divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: #e5e7eb;
+    }
+    .ubicacion-input-wrap {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+    .ubicacion-input-wrap .fecha-input {
+        flex: 1;
+        margin: 0;
+    }
+    .buscar-ubi-btn {
+        background: #0d3b66;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 0 16px;
+        font-family: "Poppins", sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+    .buscar-ubi-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .ubi-error {
+        font-size: 11px;
+        color: #991b1b;
+        margin: 4px 0 8px 0;
+        font-family: "Poppins", sans-serif;
+    }
 </style>

@@ -69,16 +69,6 @@
       </button>
     </div>
 
-    <div class="profile-avatar-section">
-      <div class="avatar-circle">
-        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#0D3B66" stroke-width="1.5">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-          <circle cx="12" cy="7" r="4"></circle>
-        </svg>
-      </div>
-      <button class="change-photo-link">Cambiar foto de perfil</button>
-    </div>
-
     <form class="edit-form" on:submit|preventDefault={guardarCambios}>
       
       <div class="field-group">

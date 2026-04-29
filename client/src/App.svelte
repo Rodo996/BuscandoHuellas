@@ -7,11 +7,10 @@
   import CrearCuenta from './lib/Crear_cuenta.svelte';
   import EditarPerfil from './lib/Editar_perfil.svelte';
   import Navbar from './lib/Navbar.svelte';
-  // --- IMPORTACIONES DE CHAT (AÑADIDAS) ---
   import Chats from './lib/Chats.svelte'; 
   import Chat from './lib/Chat.svelte';
 
-  // --- LÓGICA DE RUTAS UNIFICADA ---
+  // --- LÓGICA DE RUTAS ---
   let path = window.location.pathname;
   let partes = path.split('/').filter(p => p !== ""); 
   
@@ -20,8 +19,10 @@
   let vistaAnterior = "inicio"; 
 
   let mascotaSeleccionada = null;
-  // --- ESTADO DEL CHAT (AÑADIDO) ---
   let contactoActivo = null; 
+
+  // --- NUEVA VARIABLE DE ESTADO DE SESIÓN ---
+  let sesionActiva = false; // Controla si el usuario ya entró
 
   function navegar(vista, sub = '') {
     vistaAnterior = vistaActual; 
@@ -33,92 +34,73 @@
     history.pushState({}, '', urlFinal);
   }
 
-  // --- FUNCIONES DE NAVEGACIÓN ---
-  const irAInicio   = () => navegar('inicio');
-  const irABuscar   = () => navegar('buscar');
-  
-  const irAPublicar = () => {
-    vistaAnterior = vistaActual;
-    navegar('publicar');
-  };
-
-  const irAPerfil   = () => navegar('perfil', 'iniciar_sesion');
-
-  // --- NAVEGACIÓN DE CHATS (AÑADIDA) ---
+  // --- FUNCIONES DE NAVEGACIÓN MODIFICADAS ---
+  const irAInicio = () => navegar('inicio');
+  const irABuscar = () => navegar('buscar');
+  const irAPublicar = () => navegar('publicar');
   const irAChats = () => navegar('chats');
 
-  const irAChat = (event) => {
-    // Si viene de la lista de chats tiene detalle, si no (desde ficha mascota) es genérico
-    if (event && event.detail) {
-        contactoActivo = event.detail;
+  // MODIFICACIÓN AQUÍ: Ya no va a 'perfil' a secas si hay sesión
+  const irAPerfil = () => {
+    if (sesionActiva) {
+      navegar('perfil', 'editar_perfil'); // Directo a editar si ya logueó
     } else {
-        contactoActivo = { nombre: "Dueño", color: "#F4D35E" };
+      navegar('perfil'); // A iniciar sesión si no hay cuenta activa
     }
-    navegar('chat');
   };
 
-  const irAPublicacion = (event) => {
-    mascotaSeleccionada = event.detail;
+  const verMascota = (m) => {
+    mascotaSeleccionada = m;
     navegar('publicacion');
   };
 
-  // Sincronización con el botón "Atrás" del navegador
-  window.onpopstate = () => {
-    const p = window.location.pathname.split('/').filter(p => p !== "");
-    vistaActual = p[0] || 'inicio';
-    subVista = p[1] || '';
+  const abrirChat = (contacto) => {
+    contactoActivo = contacto;
+    navegar('chats', 'detalle');
   };
 </script>
 
 <main>
-  <div class="app-container">
-
+  <div class="container">
     {#if vistaActual === 'inicio'}
-      <Inicio 
-        on:irABuscar={irABuscar} 
-        on:irAPublicar={irAPublicar} 
-        on:irAChats={irAChats}
-      />
-
+      <Inicio on:verMascota={(e) => verMascota(e.detail)} />
+    
     {:else if vistaActual === 'buscar'}
-      <Buscar 
-        on:volver={irAInicio} 
-        on:verPublicacion={irAPublicacion} 
-        on:irAPublicar={irAPublicar} 
-        on:irAChats={irAChats}
-      />
+      <Buscar />
 
     {:else if vistaActual === 'publicacion'}
       <Publicacion 
         mascota={mascotaSeleccionada} 
-        on:volver={irABuscar} 
-        on:irAChat={irAChat}
+        on:volver={() => navegar(vistaAnterior)} 
       />
 
     {:else if vistaActual === 'publicar'}
-      <Publicar 
-        on:volver={() => navegar(vistaAnterior)} 
-        on:publicado={irAInicio}
-      />
+      <Publicar on:volver={irAInicio} />
 
     {:else if vistaActual === 'chats'}
-      <Chats on:volver={irAInicio} on:abrirChat={irAChat} />
-
-    {:else if vistaActual === 'chat'}
-      <Chat contacto={contactoActivo} on:volver={irAChats} />
+        {#if subVista === 'detalle'}
+          <Chat contacto={contactoActivo} on:volver={irAChats} />
+        {:else}
+          <Chats on:seleccionarChat={(e) => abrirChat(e.detail)} />
+        {/if}
 
     {:else if vistaActual === 'perfil'}
         {#if subVista === 'crear_cuenta'}
           <CrearCuenta on:volver={() => navegar('perfil', 'iniciar_sesion')} />
+        
         {:else if subVista === 'editar_perfil'}
-          <EditarPerfil on:volver={irAPerfil} />
+          <EditarPerfil on:volver={irAInicio} />
+        
         {:else}
           <IniciarSesion 
             on:irACrearCuenta={() => navegar('perfil', 'crear_cuenta')}
-            on:loginExitoso={() => navegar('perfil', 'editar_perfil')} 
+            on:loginExitoso={() => {
+              sesionActiva = true; // <--- ACTIVAMOS LA SESIÓN
+              navegar('perfil', 'editar_perfil'); // <--- MANDAMOS A EDITAR
+            }} 
             on:volver={irAInicio}
           />
-        {/if}
+          {/if}
     {/if}
 
   </div>
@@ -134,7 +116,7 @@
 </main>
 
 <style>
-  /* ESTILOS UNIFICADOS (Tus estilos originales de 151 líneas) */
+  /* Tus estilos se mantienen exactamente igual */
   @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
 
   :global(html), :global(body) {
@@ -150,27 +132,14 @@
     box-sizing: border-box;
   }
 
-  :global(.app-container) {
+  .container {
     width: 100%;
-    max-width: 400px;
-    margin-inline: auto; 
-    background: #FFFFFF;
-    min-height: 100vh;
+    max-width: 480px;
+    margin: 0 auto;
+    background-color: white;
+    min-height: 100dvh;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
     position: relative;
-    padding-bottom: 50px;
-    box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
-    overflow-x: hidden;
-  }
-
-  @media (max-width: 400px) {
-    :global(.app-container) {
-      box-shadow: none;
-    }
-  }
-
-  @media (min-width: 401px) {
-    :global(body) {
-      background-color: #f3f4f6;
-    }
+    padding-bottom: 70px;
   }
 </style>

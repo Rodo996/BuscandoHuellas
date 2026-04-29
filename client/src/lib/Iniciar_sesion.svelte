@@ -74,7 +74,7 @@
       <div class="field-container">
         <label for="email">Correo electrónico*</label>
         <div class="input-box">
-          <input type="email" id="email" bind:value={email} placeholder="Ej. laura.garcia@gmail.com" required />
+          <input type="email" id="email" required bind:value={email} placeholder="Ej. laura.garcia@gmail.com" />
           <span class="icon-suffix">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
@@ -86,7 +86,7 @@
       <div class="field-container">
         <label for="password">Contraseña*</label>
         <div class="input-box">
-          <input type="password" id="password" bind:value={password} placeholder="Ej. ************" required />
+          <input type="password" id="password" required bind:value={password} placeholder="Ej. ************" />
           <span class="icon-suffix">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>

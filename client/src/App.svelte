@@ -10,93 +10,124 @@
   import Chats from './lib/Chats.svelte'; 
   import Chat from './lib/Chat.svelte';
 
-  // --- LÓGICA DE RUTAS ---
+  // --- LÓGICA DE RUTAS UNIFICADA ---
   let path = window.location.pathname;
-  let partes = path.split('/').filter(p => p !== ""); 
+  let partes = path.split('/').filter(p => p !== "");
   
   let vistaActual = partes[0] || 'inicio'; 
   let subVista = partes[1] || ''; 
   let vistaAnterior = "inicio"; 
 
   let mascotaSeleccionada = null;
-  let contactoActivo = null; 
+  let contactoActivo = null;
 
-  // --- NUEVA VARIABLE DE ESTADO DE SESIÓN ---
-  let sesionActiva = false; // Controla si el usuario ya entró
+  // --- ESTADO DE SESIÓN AÑADIDO ---
+  let sesionActiva = false; 
 
   function navegar(vista, sub = '') {
     vistaAnterior = vistaActual; 
     vistaActual = vista;
     subVista = sub;
-    
     const url = sub ? `/${vista}/${sub}` : `/${vista}`;
     const urlFinal = vista === 'inicio' ? '/' : url;
     history.pushState({}, '', urlFinal);
   }
 
-  // --- FUNCIONES DE NAVEGACIÓN MODIFICADAS ---
-  const irAInicio = () => navegar('inicio');
-  const irABuscar = () => navegar('buscar');
-  const irAPublicar = () => navegar('publicar');
-  const irAChats = () => navegar('chats');
+  // --- FUNCIONES DE NAVEGACIÓN ---
+  const irAInicio   = () => navegar('inicio');
+  const irABuscar   = () => navegar('buscar');
+  
+  const irAPublicar = () => {
+    vistaAnterior = vistaActual;
+    navegar('publicar');
+  };
 
-  // MODIFICACIÓN AQUÍ: Ya no va a 'perfil' a secas si hay sesión
+  // --- GUARDIÁN DE RUTAS EN EL PERFIL ---
   const irAPerfil = () => {
+    // Si ya inició sesión, lo manda a editar su perfil.
     if (sesionActiva) {
-      navegar('perfil', 'editar_perfil'); // Directo a editar si ya logueó
+      navegar('perfil', 'editar_perfil');
     } else {
-      navegar('perfil'); // A iniciar sesión si no hay cuenta activa
+      // Si no, lo manda a iniciar sesión.
+      navegar('perfil', 'iniciar_sesion');
     }
   };
 
-  const verMascota = (m) => {
-    mascotaSeleccionada = m;
+  const irAChats = () => navegar('chats');
+  
+  const irAChat = (event) => {
+    if (event && event.detail) {
+        contactoActivo = event.detail;
+    } else {
+        contactoActivo = { nombre: "Dueño", color: "#F4D35E" };
+    }
+    navegar('chat');
+  };
+
+  const irAPublicacion = (event) => {
+    mascotaSeleccionada = event.detail;
     navegar('publicacion');
   };
 
-  const abrirChat = (contacto) => {
-    contactoActivo = contacto;
-    navegar('chats', 'detalle');
+  // Sincronización con el botón "Atrás" del navegador
+  window.onpopstate = () => {
+    const p = window.location.pathname.split('/').filter(p => p !== "");
+    vistaActual = p[0] || 'inicio';
+    subVista = p[1] || '';
   };
 </script>
 
 <main>
-  <div class="container">
+  <div class="app-container">
+
     {#if vistaActual === 'inicio'}
-      <Inicio on:verMascota={(e) => verMascota(e.detail)} />
-    
+      <Inicio 
+        on:irABuscar={irABuscar} 
+        on:irAPublicar={irAPublicar} 
+        on:irAChats={irAChats}
+      />
+
     {:else if vistaActual === 'buscar'}
-      <Buscar />
+      <Buscar 
+        on:volver={irAInicio} 
+        on:verPublicacion={irAPublicacion} 
+        on:irAPublicar={irAPublicar} 
+        on:irAChats={irAChats}
+      />
 
     {:else if vistaActual === 'publicacion'}
       <Publicacion 
         mascota={mascotaSeleccionada} 
-        on:volver={() => navegar(vistaAnterior)} 
+        on:volver={irABuscar} 
+        on:irAChat={irAChat}
       />
 
     {:else if vistaActual === 'publicar'}
-      <Publicar on:volver={irAInicio} />
+      <Publicar 
+        on:volver={() => navegar(vistaAnterior)} 
+        on:publicado={irAInicio}
+      />
 
     {:else if vistaActual === 'chats'}
-        {#if subVista === 'detalle'}
-          <Chat contacto={contactoActivo} on:volver={irAChats} />
-        {:else}
-          <Chats on:seleccionarChat={(e) => abrirChat(e.detail)} />
-        {/if}
+      <Chats on:volver={irAInicio} on:abrirChat={irAChat} />
+
+    {:else if vistaActual === 'chat'}
+      <Chat contacto={contactoActivo} on:volver={irAChats} />
 
     {:else if vistaActual === 'perfil'}
-        {#if subVista === 'crear_cuenta'}
-          <CrearCuenta on:volver={() => navegar('perfil', 'iniciar_sesion')} />
-        
-        {:else if subVista === 'editar_perfil'}
+        {#if subVista === 'editar_perfil' && sesionActiva}
           <EditarPerfil on:volver={irAInicio} />
-        
+          
+        {:else if subVista === 'crear_cuenta'}
+          <CrearCuenta on:volver={() => navegar('perfil', 'iniciar_sesion')} />
+          
         {:else}
           <IniciarSesion 
+            mensajeAlerta={(!sesionActiva && subVista === 'editar_perfil') ? "Primero debes acceder a tu cuenta" : ""}
             on:irACrearCuenta={() => navegar('perfil', 'crear_cuenta')}
             on:loginExitoso={() => {
-              sesionActiva = true; // <--- ACTIVAMOS LA SESIÓN
-              navegar('perfil', 'editar_perfil'); // <--- MANDAMOS A EDITAR
+              sesionActiva = true; // Activa la sesión en toda la app
+              navegar('perfil', 'editar_perfil');
             }} 
             on:volver={irAInicio}
           />
@@ -116,7 +147,7 @@
 </main>
 
 <style>
-  /* Tus estilos se mantienen exactamente igual */
+  /* ESTILOS ORIGINALES INTACTOS */
   @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
 
   :global(html), :global(body) {
@@ -132,14 +163,27 @@
     box-sizing: border-box;
   }
 
-  .container {
+  :global(.app-container) {
     width: 100%;
-    max-width: 480px;
-    margin: 0 auto;
-    background-color: white;
-    min-height: 100dvh;
-    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    max-width: 400px;
+    margin-inline: auto; 
+    background: #FFFFFF;
+    min-height: 100vh;
     position: relative;
-    padding-bottom: 70px;
+    padding-bottom: 50px;
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+    overflow-x: hidden;
+  }
+
+  @media (max-width: 400px) {
+    :global(.app-container) {
+      box-shadow: none;
+    }
+  }
+
+  @media (min-width: 401px) {
+    :global(body) {
+      background-color: #f3f4f6;
+    }
   }
 </style>

@@ -2,21 +2,32 @@
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher();
 
+  // RECIBE EL MENSAJE SI INTENTAN ENTRAR A EDITAR SIN SESIÓN
+  export let mensajeAlerta = ""; 
+
   let email = '';
   let password = '';
 
-  // VARIABLE NUEVA PARA MOSTRAR EL ERROR EN PANTALLA
+  // VARIABLE PARA MOSTRAR EL ERROR DEL BACKEND
   let mensajeError = '';
 
   const volver = () => dispatch('volver');
 
-  // --- NUEVO CÓDIGO CORREGIDO ---
+  // --- CÓDIGO BASURA COMENTADO ---
+  /*
+  const login = () => {
+    console.log('Login intentado con:', email, password);
+    dispatch('loginExitoso');
+  };
+  */
+
+  // --- NUEVO CÓDIGO DE LOGIN ---
   const login = async () => {
-    // Limpiamos errores pasados antes de un nuevo intento
+    // Limpiamos mensajes pasados antes de un nuevo intento
     mensajeError = '';
+    mensajeAlerta = ''; 
 
     try {
-      // Hacemos la petición a tu backend
       const res = await fetch('http://localhost:3000/api/iniciar-sesion', { 
         method: 'POST',
         headers: {
@@ -25,17 +36,15 @@
         body: JSON.stringify({ email, password })
       });
 
-      // Extraemos la respuesta (ya sea éxito o error)
       const data = await res.json();
 
-      // AQUÍ ESTÁ EL BLOQUEO REAL: Si el status NO es 200 (es decir, fue 401 o 403)
+      // BLOQUEO: Si fue 401 (mala contraseña) o 403 (no verificado)
       if (!res.ok) {
-        // Guardamos el error del backend en nuestra variable y DETENEMOS la ejecución
         mensajeError = data.error || 'Error al iniciar sesión.'; 
         return; 
       }
 
-      // Si todo salió bien (res.ok es true y el usuario estaba verificado), despachamos el éxito
+      // Si fue exitoso (200), avisamos al App.svelte
       console.log('Login exitoso con:', email);
       dispatch('loginExitoso');
 
@@ -101,6 +110,12 @@
     <div class="hero-image">
       <img src="https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?q=80&w=600&auto=format&fit=crop" alt="Mascotas" />
     </div>
+
+    {#if mensajeAlerta}
+      <div style="color: #856404; background-color: #fff3cd; padding: 12px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 5px; border: 1px solid #ffeeba;">
+        {mensajeAlerta}
+      </div>
+    {/if}
 
     {#if mensajeError}
       <div style="color: #721c24; background-color: #f8d7da; padding: 12px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 5px;">
@@ -211,7 +226,8 @@
   }
 
   .main-content {
-    padding: 0 24px 120px 24px; /* <--- ESPACIO EXTRA PARA LA NAVBAR */
+    /* MANTENEMOS EL PADDING EXTRA DE 120PX PARA QUE EL BOTÓN NO SE OCULTE DETRÁS DEL NAVBAR */
+    padding: 0 24px 120px 24px;
     display: flex;
     flex-direction: column;
     gap: 20px;

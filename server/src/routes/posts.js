@@ -9,13 +9,15 @@ router.post("/", async (req, res) => {
     const {
       name, breed_id, is_mixed_breed, sex, size, has_tail,
       distinctive_features, color_ids, disability_ids,
-      zip_code, street, lat, lng, user_id, type,
+      zip_code, municipality, street, lat, lng, user_id, type,
     } = req.body;
+
+    await conn.beginTransaction();
 
     if (zip_code) {
       await conn.execute(
-        `INSERT IGNORE INTO Zip_Codes (zip_code) VALUES (?)`,
-        [zip_code]
+        `INSERT IGNORE INTO Zip_Codes (zip_code, municipality) VALUES (?, ?)`,
+        [zip_code, municipality ?? '']
       );
     }
 
@@ -31,7 +33,6 @@ router.post("/", async (req, res) => {
     const post_id = result.post_id;
     const pet_id = result.pet_id;
 
-    // Colores y discapacidades
     for (const color_id of color_ids)
       await conn.execute(
         `INSERT INTO Pet_Colors (pet_id, color_id) VALUES (?, ?)`,
@@ -44,13 +45,19 @@ router.post("/", async (req, res) => {
         [pet_id, disability_id]
       );
 
+    await conn.commit();
+    conn.release();
+
+    pool.execute(`CALL sp_buscar_coincidencias(?)`, [post_id])
+      .catch(err => console.error('Matching error (no crítico):', err));
+
     res.status(201).json({ post_id });
 
   } catch (err) {
+    await conn.rollback();
+    conn.release();
     console.error(err);
     res.status(500).json({ error: "Error al crear la publicación", detail: err.message });
-  } finally {
-    conn.release();
   }
 });
 

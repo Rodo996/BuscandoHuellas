@@ -8,7 +8,7 @@
     export let contacto = null;
 
   // Aseguramos que haya un contacto por defecto por si acaso
-    $: infoContacto = contacto || { nombre: "Laura García", color: "#1A5C8C" };
+    $: infoContacto = contacto ?? null;
 
   // 2. Base de datos simulada de mensajes dinámicos
   const baseMensajes = {
@@ -37,9 +37,11 @@
   // Cargar la conversación dependiendo del nombre del contacto
   let mensajes = [];
 
-  $: {
-      mensajes = [...(baseMensajes[infoContacto.nombre] || msgsDefault)];
-  }
+ $: {
+    mensajes = infoContacto
+        ? [...(baseMensajes[infoContacto.nombre] || msgsDefault)]
+        : [];
+}
 
     function volver() { dispatch('volver'); }
     function accion(tipoAccion) {
@@ -85,7 +87,7 @@
       </svg>
       <span class="text-white">Buscando</span><span class="text-yellow">Huellas</span>
   </div>
-
+{#if infoContacto}
   <div class="contact-header">
       <button class="back-btn" on:click={volver}>
           ←
@@ -177,6 +179,7 @@
       on:irABuscar={() => dispatch("irABuscar")}
       on:irAPublicar={() => dispatch("irAPublicar")}
   />
+  {/if}
 </div>
 <style>
   /* Estructura Base */
@@ -218,13 +221,15 @@
       border-bottom: 1px solid #FAF0CA;
       flex-shrink: 0;
   }
-  .back-btn, .options-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 4px;
-      display: flex;
-  }
+ .back-btn, .options-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    color: #0D3B66;
+    font-size: 20px;
+}
   .user-info {
       display: flex;
       align-items: center;

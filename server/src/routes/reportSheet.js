@@ -14,6 +14,7 @@ router.get("/", async (req, res) => {
                 p.is_mixed_breed AS esCruza,
                 p.has_tail AS tieneCola,
                 p.distinctive_features AS rasgos,
+                u.name AS dueno,         -- ← NUEVO
                 CASE 
                     WHEN p.sex = 'Male'         THEN 'Macho' 
                     WHEN p.sex = 'Female'       THEN 'Hembra' 
@@ -52,24 +53,25 @@ router.get("/", async (req, res) => {
                 ) AS discapacidades
 
             FROM Pets p
-            LEFT JOIN Breeds b    ON p.breed_id = b.breed_id
-            LEFT JOIN Species sp  ON b.species_id = sp.species_id
-
-            -- ← Solo el post más reciente por mascota
-            LEFT JOIN Posts post ON post.post_id = (
+            LEFT JOIN Breeds    b    ON p.breed_id    = b.breed_id
+            LEFT JOIN Species   sp   ON b.species_id  = sp.species_id
+            LEFT JOIN Posts     post ON post.post_id  = (
                 SELECT post_id FROM Posts
                 WHERE pet_id = p.pet_id
+                    AND type != 'Success Story'   
                 ORDER BY date DESC
                 LIMIT 1
             )
-
-            LEFT JOIN Locations loc ON post.location_id = loc.location_id
-            LEFT JOIN Images pi     ON post.post_id = pi.post_id
+            LEFT JOIN Users     u    ON post.user_id  = u.user_id    
+            LEFT JOIN Locations loc  ON post.location_id = loc.location_id
+            LEFT JOIN Images    pi   ON post.post_id     = pi.post_id
 
             GROUP BY
                 p.pet_id, p.name, sp.species_name, b.breed_name,
                 p.is_mixed_breed, p.has_tail, p.distinctive_features,
-                p.sex, p.size, post.type, post.date, loc.street, loc.lat, loc.lng
+                p.sex, p.size, post.type, post.date,
+                loc.street, loc.lat, loc.lng,
+                u.name                  
 
             ORDER BY post.date DESC;
         `;

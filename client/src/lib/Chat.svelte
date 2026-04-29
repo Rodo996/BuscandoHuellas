@@ -221,13 +221,15 @@
       border-bottom: 1px solid #FAF0CA;
       flex-shrink: 0;
   }
-  .back-btn, .options-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 4px;
-      display: flex;
-  }
+ .back-btn, .options-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    color: #0D3B66;
+    font-size: 20px;
+}
   .user-info {
       display: flex;
       align-items: center;

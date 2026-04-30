@@ -1,268 +1,146 @@
 <script>
-  import Inicio from "./lib/Inicio.svelte";
-  import Buscar from "./lib/Buscar.svelte";
-  import Publicacion from "./lib/Publicacion.svelte";
-  import Publicar from "./lib/Publicar.svelte";
-  import IniciarSesion from "./lib/Iniciar_sesion.svelte";
-  import CrearCuenta from "./lib/Crear_cuenta.svelte";
-  import EditarPerfil from "./lib/Editar_perfil.svelte";
-  import Navbar from "./lib/Navbar.svelte";
-  import Chats from "./lib/Chats.svelte";
-  import Chat from "./lib/Chat.svelte";
-  import CasosExito from "./lib/Caso_exito.svelte";
-  import FichaExito from "./lib/Ficha_exito.svelte";
-  import CasoCerrado from "./lib/Caso_cerrado.svelte";
-  import { listaContactos } from "./lib/contactos.js";
+  import Inicio from './lib/Inicio.svelte'; 
+  import Buscar from './lib/Buscar.svelte';
+  import Publicacion from './lib/Publicacion.svelte';
+  import Publicar from './lib/Publicar.svelte';
+  import IniciarSesion from './lib/Iniciar_sesion.svelte';
+  import CrearCuenta from './lib/Crear_cuenta.svelte';
+  import EditarPerfil from './lib/Editar_perfil.svelte';
+  import Navbar from './lib/Navbar.svelte';
+  import Chats from './lib/Chats.svelte'; 
+  import Chat from './lib/Chat.svelte';
+  import { onMount } from 'svelte';   // ← NUEVO
 
-  import { onMount } from "svelte";
+  const API = "http://localhost:3000/api";  // ← NUEVO
 
-  const API = "http://localhost:3000/api";
-  let noLeidas = 0;
-  let user_id = null;
-  // --- LÓGICA DE RUTAS UNIFICADA ---
   let path = window.location.pathname;
-  let partes = path.split("/").filter((p) => p !== "");
-
-  let vistaActual = partes[0] || "inicio";
-  let subVista = partes[1] || "";
-  let vistaAnterior = "inicio";
+  let partes = path.split('/').filter(p => p !== "");
+  let user_id = null;
+  
+  let vistaActual = partes[0] || 'inicio'; 
+  let subVista = partes[1] || ''; 
+  let vistaAnterior = "inicio"; 
   let mascotaSeleccionada = null;
-
-  // --- ESTADO DE SESIÓN AÑADIDO ---
-  let sesionActiva = false;
-  let casoSeleccionado = null;
-  //Estos dos let son para chat.svelte
   let contactoActivo = null;
-  let cargandoContacto = false;
+  let sesionActiva = false; 
 
-  function navegar(vista, sub = "") {
-    vistaAnterior = vistaActual;
+  function navegar(vista, sub = '') {
+    vistaAnterior = vistaActual; 
     vistaActual = vista;
     subVista = sub;
-
     const url = sub ? `/${vista}/${sub}` : `/${vista}`;
-    const urlFinal = vista === "inicio" ? "/" : url;
-    history.pushState({}, "", urlFinal);
+    const urlFinal = vista === 'inicio' ? '/' : url;
+    history.pushState({}, '', urlFinal);
   }
 
-  // --- FUNCIONES DE NAVEGACIÓN ---
-  const irAInicio = () => navegar("inicio");
-  const irABuscar = () => navegar("buscar");
-  const verCasosExito = () => navegar("casos_exito");
-  const irAPublicar = () => {
-    vistaAnterior = vistaActual;
-    navegar("publicar");
-  };
-
-  // --- GUARDIÁN DE RUTAS EN EL PERFIL ---
+  const irAInicio   = () => navegar('inicio');
+  const irABuscar   = () => navegar('buscar');
+  const irAPublicar = () => { vistaAnterior = vistaActual; navegar('publicar'); };
   const irAPerfil = () => {
-    noLeidas = 0;
-    // Si ya inició sesión, lo manda a editar su perfil.
-    if (sesionActiva) {
-      navegar("perfil", "editar_perfil");
-    } else {
-      // Si no, lo manda a iniciar sesión.
-      navegar("perfil", "iniciar_sesion");
-    }
+    if (sesionActiva) navegar('perfil', 'editar_perfil');
+    else navegar('perfil', 'iniciar_sesion');
   };
-
-  const irAChats = () => navegar("chats");
-
+  const irAChats = () => navegar('chats');
   const irAChat = (event) => {
-    if (event && event.detail) {
-      contactoActivo = event.detail;
-    } else {
-      contactoActivo = { nombre: "Dueño", color: "#F4D35E" };
-    }
-    navegar("chat", contactoActivo.id);
+    contactoActivo = event?.detail ?? { nombre: "Dueño", color: "#F4D35E" };
+    navegar('chat');
   };
-
-  // ← CAMBIO 1: incluye el ID en la URL
   const irAPublicacion = (event) => {
     mascotaSeleccionada = event.detail;
-    navegar("publicacion");
+    navegar("publicacion", mascotaSeleccionada.id);  // ← URL cambia a /publicacion/15
   };
 
   window.onpopstate = () => {
-    const p = window.location.pathname.split("/").filter((p) => p !== "");
-    vistaActual = p[0] || "inicio";
-    subVista = p[1] || "";
+    const p = window.location.pathname.split('/').filter(p => p !== "");
+    vistaActual = p[0] || 'inicio';
+    subVista = p[1] || '';
   };
 
-  async function cargarNotificaciones() {
-    if (!user_id) return;
-    try {
-      const res = await fetch(`${API}/notifications/${user_id}`);
-      const data = await res.json();
-      noLeidas = data.filter((n) => !n.is_read).length;
-    } catch {}
-  }
-
-  onMount(() => {
-    (async () => {
-      cargarNotificaciones();
-
-      if (vistaActual === "chat" && subVista) {
-        cargandoContacto = true;
-        const encontrado = listaContactos.find(
-          (c) => c.id === Number(subVista),
-        );
-        contactoActivo = encontrado ?? null;
-        if (!contactoActivo) navegar("chats");
-        cargandoContacto = false;
+  // ── NUEVO: carga directa por URL ─────────────────────────────
+  onMount(async () => {
+    if (vistaActual === "publicacion" && subVista) {
+      try {
+        const res = await fetch(`${API}/mascotas/${subVista}`);
+        if (res.ok) {
+          mascotaSeleccionada = await res.json();
+        } else {
+          navegar("buscar");
+        }
+      } catch {
+        navegar("buscar");
       }
-    })();
-
-    const intervalo = setInterval(cargarNotificaciones, 30000);
-    return () => clearInterval(intervalo);
+    }
   });
 </script>
 
 <main>
   <div class="app-container">
-    {#if vistaActual === "inicio"}
-      <Inicio
-        on:irABuscar={irABuscar}
-        on:irAPublicar={irAPublicar}
-        on:irAChats={irAChats}
-        on:verCasosExito={verCasosExito}
-        on:verHistoria={(e) => {
-          casoSeleccionado = e.detail;
-          navegar("ficha_exito");
-        }}
-      />
-    {:else if vistaActual === 'caso_cerrado'}
-      <CasoCerrado 
-        pet_id={mascotaSeleccionada?.pet_id || mascotaSeleccionada?.id || contactoActivo?.pet_id} 
-        on:volver={() => navegar('publicacion')} 
-        on:exitoPublicado={() => navegar('casos_exito')}
-      />
-    {:else if vistaActual === "buscar"}
-      <Buscar
-        on:volver={irAInicio}
-        on:verPublicacion={irAPublicacion}
-        on:irAPublicar={irAPublicar}
+
+    {#if vistaActual === 'inicio'}
+      <Inicio 
+        on:irABuscar={irABuscar} 
+        on:irAPublicar={irAPublicar} 
         on:irAChats={irAChats}
       />
-    {:else if vistaActual === "casos_exito"}
-      <CasosExito
-        on:volver={irAInicio}
-        on:verCasosExito={verCasosExito}
-        on:verHistoria={(e) => {
-          casoSeleccionado = e.detail; // Guardamos los datos de la mascota
-          navegar("ficha_exito"); // Cambiamos de pantalla
-        }}
+
+    {:else if vistaActual === 'buscar'}
+      <Buscar 
+        on:volver={irAInicio} 
+        on:verPublicacion={irAPublicacion} 
+        on:irAPublicar={irAPublicar} 
+        on:irAChats={irAChats}
       />
-    {:else if vistaActual === "ficha_exito"}
-      <FichaExito
-        caso={casoSeleccionado}
-        on:volver={() => navegar("casos_exito")}
-      />
-    {:else if vistaActual === "publicacion"}
-      <Publicacion
-        mascota={mascotaSeleccionada}
-        on:volver={irABuscar}
-        on:irAChat={irAChat}
-        on:cerrarCaso={() => navegar("caso_cerrado")}
-      />
-    {:else if vistaActual === "publicar"}
-      {#if sesionActiva && user_id}
-        <Publicar
-          id_usuario={user_id}
-          on:volver={() => navegar(vistaAnterior)}
-          on:publicado={irAInicio}
+
+    <!-- ── MODIFICADO: muestra loading mientras carga por URL ── -->
+    {:else if vistaActual === 'publicacion'}
+      {#if mascotaSeleccionada}
+        <Publicacion 
+          mascota={mascotaSeleccionada} 
+          on:volver={irABuscar} 
+          on:irAChat={irAChat}
         />
       {:else}
-        <IniciarSesion
-          mensajeAlerta="Debes iniciar sesión para publicar"
-          on:irACrearCuenta={() => navegar("perfil", "crear_cuenta")}
-          on:loginExitoso={(e) => {
-            sesionActiva = true;
-            user_id = e.detail.user_id;
-            navegar("publicar");
-          }}
-          on:volver={() => navegar(vistaAnterior)}
-        />
-      {/if}
-    {:else if vistaActual === "chats"}
-      <Chats on:volver={irAInicio} on:abrirChat={irAChat} />
-    {:else if vistaActual === "chat"}
-      {#if cargandoContacto}
-        <div
-          style="display:flex; justify-content:center; align-items:center; height:100vh;"
-        >
-          <p style="font-family:Poppins; color:#0D3B66; font-weight:600;">
-            Cargando...
-          </p>
+        <div style="display:flex; justify-content:center; align-items:center; height:100vh;">
+          <p style="font-family:Poppins; color:#0D3B66; font-weight:600;">Cargando...</p>
         </div>
-      {:else}
-        <Chat
-          contacto={contactoActivo}
-          on:volver={irAChats}
-          on:cerrarCaso={() => navegar("caso_cerrado")}
-        />
       {/if}
-    {:else if vistaActual === "perfil"}
-      {#if subVista === "editar_perfil" && sesionActiva}
+
+    {:else if vistaActual === 'publicar'}
+      <Publicar 
+        id_usuario={user_id}
+        on:volver={() => navegar(vistaAnterior)} 
+        on:publicado={irAInicio}
+      />
+
+    {:else if vistaActual === 'chats'}
+      <Chats on:volver={irAInicio} on:abrirChat={irAChat} />
+
+    {:else if vistaActual === 'chat'}
+      <Chat contacto={contactoActivo} on:volver={irAChats} />
+
+    {:else if vistaActual === 'perfil'}
+      {#if subVista === 'editar_perfil' && sesionActiva}
         <EditarPerfil user_id={user_id ?? 0} on:volver={irAInicio} />
-      {:else if subVista === "crear_cuenta"}
-        <CrearCuenta on:volver={() => navegar("perfil", "iniciar_sesion")} />
+      {:else if subVista === 'crear_cuenta'}
+        <CrearCuenta on:volver={() => navegar('perfil', 'iniciar_sesion')} />
       {:else}
-        <IniciarSesion
-          mensajeAlerta={!sesionActiva && subVista === "editar_perfil"
-            ? "Primero debes acceder a tu cuenta"
-            : ""}
-          on:irACrearCuenta={() => navegar("perfil", "crear_cuenta")}
-          on:loginExitoso={(e) => {
-            sesionActiva = true; // Activa la sesión en toda la app
-            user_id = e.detail.user_id; // Se guarda el id de usuario real
-            navegar("perfil", "editar_perfil");
-          }}
+        <IniciarSesion 
+          mensajeAlerta={(!sesionActiva && subVista === 'editar_perfil') ? "Primero debes acceder a tu cuenta" : ""}
+          on:irACrearCuenta={() => navegar('perfil', 'crear_cuenta')}
+          on:loginExitoso={() => { sesionActiva = true; navegar('perfil', 'editar_perfil'); }} 
           on:volver={irAInicio}
         />
       {/if}
     {/if}
+
   </div>
 
-  <Navbar
+  <Navbar 
     vistaActiva={vistaActual}
-    {noLeidas}
     on:irAInicio={irAInicio}
     on:irABuscar={irABuscar}
     on:irAPublicar={irAPublicar}
     on:irAPerfil={irAPerfil}
-    on:irAChats={irAChats}
+    on:irAChats={irAChats} 
   />
 </main>
-
-<style>
-  @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap");
-
-  :global(html),
-  :global(body) {
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    min-height: 100dvh;
-    font-family: "Poppins", sans-serif;
-    background-color: #f3f4f6;
-  }
-  :global(*) { box-sizing: border-box; }
-  :global(.app-container) {
-    width: 100%;
-    max-width: 400px;
-    margin-inline: auto;
-    background: #ffffff;
-    min-height: 100vh;
-    position: relative;
-    padding-bottom: 50px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    overflow-x: clip;
-  }
-  @media (max-width: 400px) {
-    :global(.app-container) { box-shadow: none; }
-  }
-  @media (min-width: 401px) {
-    :global(body) { background-color: #f3f4f6; }
-  }
-</style>

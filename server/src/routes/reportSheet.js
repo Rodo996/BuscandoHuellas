@@ -14,7 +14,9 @@ router.get("/", async (req, res) => {
                 p.is_mixed_breed AS esCruza,
                 p.has_tail AS tieneCola,
                 p.distinctive_features AS rasgos,
-                u.name AS dueno,         -- ← NUEVO
+                COALESCE(post.contact_name,  u.name)      AS dueno,
+                COALESCE(post.contact_email, u.email)     AS duenoEmail,
+                COALESCE(post.contact_phone, u.phone_num) AS duenoTelefono,
                 CASE 
                     WHEN p.sex = 'Male'         THEN 'Macho' 
                     WHEN p.sex = 'Female'       THEN 'Hembra' 
@@ -71,8 +73,9 @@ router.get("/", async (req, res) => {
                 p.is_mixed_breed, p.has_tail, p.distinctive_features,
                 p.sex, p.size, post.type, post.date,
                 loc.street, loc.lat, loc.lng,
-                u.name                  
-
+                u.name, u.email, u.phone_num,
+                post.contact_name, post.contact_email, post.contact_phone
+                
             ORDER BY post.date DESC;
         `;
 
@@ -86,7 +89,7 @@ router.get("/", async (req, res) => {
             discapacidades: typeof row.discapacidades === "string"
                 ? JSON.parse(row.discapacidades)
                 : (row.discapacidades ?? []),
-            esCruza:   row.esCruza   === 1,
+            esCruza: row.esCruza === 1,
             tieneCola: row.tieneCola === 1,
         }));
 

@@ -77,6 +77,7 @@
     navegar("chat", contactoActivo.id);
   };
 
+  // ← CAMBIO 1: incluye el ID en la URL
   const irAPublicacion = (event) => {
     mascotaSeleccionada = event.detail;
     navegar("publicacion");
@@ -246,11 +247,7 @@
     font-family: "Poppins", sans-serif;
     background-color: #f3f4f6;
   }
-
-  :global(*) {
-    box-sizing: border-box;
-  }
-
+  :global(*) { box-sizing: border-box; }
   :global(.app-container) {
     width: 100%;
     max-width: 400px;
@@ -262,16 +259,10 @@
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
     overflow-x: clip;
   }
-
   @media (max-width: 400px) {
-    :global(.app-container) {
-      box-shadow: none;
-    }
+    :global(.app-container) { box-shadow: none; }
   }
-
   @media (min-width: 401px) {
-    :global(body) {
-      background-color: #f3f4f6;
-    }
+    :global(body) { background-color: #f3f4f6; }
   }
 </style>

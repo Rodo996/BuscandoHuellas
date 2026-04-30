@@ -130,11 +130,45 @@
       <div class="pet-info">
         <h3 class="pet-name">{caso.name}</h3>
         <div class="home-label">
-          <div class="mini-avatar">🏠</div>
-          <span>¡En casa!</span>
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 36 36"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <!-- Tejado -->
+    <polyline
+      points="2,17 18,4 34,17"
+      stroke="#F4D35E"
+      stroke-width="2.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      fill="none"
+    />
+    <!-- Paredes -->
+    <rect
+      x="7"
+      y="16"
+      width="22"
+      height="16"
+      rx="1"
+      stroke="#F4D35E"
+      stroke-width="2.5"
+      fill="none"
+    />
+    <!-- Huella: 4 dedos (ovalados, inclinados) -->
+    <ellipse cx="12.5" cy="21" rx="1.3" ry="1.8" transform="rotate(-20 12.5 21)" fill="#F4D35E" />
+    <ellipse cx="15.8" cy="19.5" rx="1.3" ry="1.8" transform="rotate(-6 15.8 19.5)" fill="#F4D35E" />
+    <ellipse cx="19.2" cy="19.5" rx="1.3" ry="1.8" transform="rotate(6 19.2 19.5)" fill="#F4D35E" />
+    <ellipse cx="22.5" cy="21" rx="1.3" ry="1.8" transform="rotate(20 22.5 21)" fill="#F4D35E" />
+    <!-- Almohadilla central (ovalada horizontal) -->
+    <ellipse cx="17.5" cy="25.5" rx="3.2" ry="2.4" fill="#F4D35E" />
+  </svg>
+  <span>¡En casa!</span>
+</div>
         </div>
       </div>
-    </div>
   {/each}
 </div>
     {/if}
@@ -299,17 +333,24 @@
   }
 
   /* Sello "En casa" con el mini-avatar */
+  /* Sello "En casa" horizontal */
   .home-label {
     display: flex;
-    align-items: center;
-    gap: 6px;
+    flex-direction: row; /* Fuerza el formato horizontal */
+    align-items: center; /* Centra verticalmente la casita y el texto */
+    gap: 8px; /* Separación perfecta entre el icono y el texto */
     background-color: #F3F4F6;
     border-radius: 10px;
-    padding: 4px 8px;
-    width: fit-content; /* Se ajusta al contenido */
+    padding: 6px 12px; /* Un poco más de espacio a los lados como en la foto */
+    width: fit-content; 
     border: 1px solid #E5E7EB;
   }
 
+  .home-label span {
+    font-size: 14px; /* Un pelín más grande para que haga juego con el icono de 24px */
+    font-weight: 500;
+    color: #4B5563; /* Gris oscuro para el texto */
+  }
   .label-avatar {
     width: 18px;
     height: 18px;

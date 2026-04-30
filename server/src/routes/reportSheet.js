@@ -15,13 +15,9 @@ router.get("/", async (req, res) => {
                 p.is_mixed_breed AS esCruza,
                 p.has_tail AS tieneCola,
                 p.distinctive_features AS rasgos,
-<<<<<<< HEAD
                 COALESCE(post.contact_name,  u.name)      AS dueno,
                 COALESCE(post.contact_email, u.email)     AS duenoEmail,
                 COALESCE(post.contact_phone, u.phone_num) AS duenoTelefono,
-=======
-                u.name AS dueno,
->>>>>>> KirkMainPostCopia
                 CASE 
                     WHEN p.sex = 'Male'         THEN 'Macho' 
                     WHEN p.sex = 'Female'       THEN 'Hembra' 
@@ -75,22 +71,16 @@ router.get("/", async (req, res) => {
                 p.pet_id, p.name, sp.species_name, b.breed_name,
                 p.is_mixed_breed, p.has_tail, p.distinctive_features,
                 p.sex, p.size, post.type, post.date,
-<<<<<<< HEAD
                 loc.street, loc.lat, loc.lng,
                 u.name, u.email, u.phone_num,
                 post.contact_name, post.contact_email, post.contact_phone
                 
-=======
-                loc.street, loc.lat, loc.lng, u.name
-
->>>>>>> KirkMainPostCopia
             ORDER BY post.date DESC;
         `;
 
         const [results] = await pool.query(sql);
         const parsed = results.map(row => ({
             ...row,
-<<<<<<< HEAD
             colores: typeof row.colores === "string"
                 ? JSON.parse(row.colores)
                 : (row.colores ?? []),
@@ -98,11 +88,6 @@ router.get("/", async (req, res) => {
                 ? JSON.parse(row.discapacidades)
                 : (row.discapacidades ?? []),
             esCruza: row.esCruza === 1,
-=======
-            colores: typeof row.colores === "string" ? JSON.parse(row.colores) : (row.colores ?? []),
-            discapacidades: typeof row.discapacidades === "string" ? JSON.parse(row.discapacidades) : (row.discapacidades ?? []),
-            esCruza:   row.esCruza   === 1,
->>>>>>> KirkMainPostCopia
             tieneCola: row.tieneCola === 1,
         }));
         res.json(parsed);

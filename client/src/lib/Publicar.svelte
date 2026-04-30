@@ -49,11 +49,22 @@
       especies = await speciesRes.json();
       opcionesColor = await colorsRes.json();
       opcionesDiscapacidad = await disabilitiesRes.json();
+
+      if (id_usuario) {
+        const userRes = await fetch(`${API}/editar-perfil/${id_usuario}`);
+        if (userRes.ok) {
+          const u = await userRes.json();
+          tuNombre = u.name ?? "";
+          email = u.email ?? "";
+          telefono = u.phone_num ?? "";
+        }
+      }
     } catch (err) {
-      console.error("Error cargando catálogos:", err);
+      console.error("Error cargando catálogos", err);
     } finally {
       cargando = false;
     }
+
     document.addEventListener("click", cerrarDropdown);
   });
 
@@ -157,7 +168,8 @@
 
   function validar() {
     errores = {};
-    if (!nombreMascota.trim() && tipoPublicacion === "Extraviada") errores.nombreMascota = true;
+    if (!nombreMascota.trim() && tipoPublicacion === "Extraviada")
+      errores.nombreMascota = true;
     if (!especieSeleccionada) errores.especie = true;
     if (!razaSeleccionada) errores.raza = true;
     if (!tamano) errores.tamano = true;
@@ -203,6 +215,9 @@
           : tipoPublicacion === "Avistada"
             ? "Spotted"
             : "Sheltered",
+      contact_name: tuNombre.trim() || null,
+      contact_email: email.trim() || null,
+      contact_phone: telefono.trim() || null,
     };
 
     try {
@@ -355,9 +370,7 @@
           Nombre de la mascota <span class="req">*</span>
         </label>
       {:else}
-        <label class="field-label">
-          Nombre de la mascota
-        </label>
+        <label class="field-label"> Nombre de la mascota </label>
       {/if}
       <div
         class="input-row"

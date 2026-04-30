@@ -12,6 +12,7 @@ router.post("/", async (req, res) => {
       name, breed_id, is_mixed_breed, sex, size, has_tail,
       distinctive_features, color_ids, disability_ids,
       zip_code, municipality, street, lat, lng, user_id, type,
+      contact_name, contact_email, contact_phone 
     } = req.body;
 
     await conn.beginTransaction();
@@ -46,6 +47,20 @@ router.post("/", async (req, res) => {
         `INSERT INTO Pet_Disabilities (pet_id, disability_id) VALUES (?, ?)`,
         [pet_id, disability_id]
       );
+
+    const [[userRow]] = await conn.execute(
+      `SELECT name, email, phone_num FROM Users WHERE user_id = ?`,
+      [user_id]
+    );
+
+    const finalName = contact_name?.trim() || userRow.name;
+    const finalEmail = contact_email?.trim() || userRow.email;
+    const finalPhone = contact_phone?.trim() || userRow.phone_num || null;
+
+    await conn.execute(
+      `UPDATE Posts SET contact_name = ?, contact_email = ?, contact_phone = ? WHERE post_id = ?`,
+      [finalName, finalEmail, finalPhone, post_id]
+    );
 
     await conn.commit();
     conn.release();

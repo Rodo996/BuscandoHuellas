@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import pool from '../db.js';
 import jwt from 'jsonwebtoken';      
-import transporter from '../mailer.js';
+import { enviarCorreo, plantillas } from '../services/notifications.js';
 
 const router = Router();
 
@@ -47,24 +47,8 @@ router.post("/", async (req, res) => {
       const urlConfirmacion = `http://localhost:3000/api/crear-cuenta/verificar/${token}`;
 
       // Enviar el correo
-      await transporter.sendMail({
-          from: process.env.EMAIL_USER,
-          to: email,
-          subject: 'Verifica tu cuenta en Buscando Huellas',
-          html: `
-            <div style="font-family: sans-serif; max-width: 600px; margin: auto;">
-                <h2 style="color: #0D3B66;">¡Bienvenido ${name}!</h2>
-                <p>Casi terminas. Haz clic en el siguiente botón para activar tu cuenta:</p>
-                <a href="${urlConfirmacion}" 
-                   style="display: inline-block; padding: 12px 24px; background-color: #F4D35E; color: #0D3B66; text-decoration: none; font-weight: bold; border-radius: 8px;">
-                   Confirmar mi correo
-                </a>
-                <p style="margin-top: 20px; font-size: 12px; color: #666;">
-                   Si no solicitaste esta cuenta, puedes ignorar este mensaje.
-                </p>
-            </div>
-          `
-      });
+      const { subject, html } = plantillas.bienvenida(name, urlConfirmacion);
+      await enviarCorreo({ to: email, subject, html });
 
       await conn.commit();
       

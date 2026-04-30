@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import pool from '../db.js';
 import jwt from 'jsonwebtoken';      
-import { enviarCorreo, plantillas } from '../services/notificaciones.js';
+import { enviarCorreo, plantillas } from '../services/notifications.js';
 
 const router = Router();
 

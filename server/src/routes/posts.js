@@ -1,6 +1,6 @@
 import { Router } from "express";
 import pool from "../db.js";
-import { procesarCoincidencias } from '../services/notificaciones.js';
+import { procesarCoincidencias } from '../services/notifications.js';
 
 const router = Router();
 

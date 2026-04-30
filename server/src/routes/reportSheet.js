@@ -64,7 +64,7 @@ router.get("/", async (req, res) => {
             LEFT JOIN Users     u    ON post.user_id     = u.user_id
             LEFT JOIN Locations loc  ON post.location_id = loc.location_id
             LEFT JOIN Images    pi   ON post.post_id     = pi.post_id
-
+            WHERE post.post_id IS NOT NULL
             GROUP BY
                 p.pet_id, p.name, sp.species_name, b.breed_name,
                 p.is_mixed_breed, p.has_tail, p.distinctive_features,

@@ -114,7 +114,7 @@
     direccion = e.detail.address;
     lat = e.detail.lat;
     lng = e.detail.lng;
-    municipio = e.detail.municipality ?? '';
+    municipio = e.detail.municipality ?? "";
   }
 
   let obteniendoUbicacion = false;
@@ -134,11 +134,12 @@
           const data = await res.json();
           direccion = data.display_name ?? "";
           cp = data.address?.postcode ?? "";
-          municipio = data.address?.municipality
-            ?? data.address?.city
-            ?? data.address?.town
-            ?? data.address?.village
-            ?? '';
+          municipio =
+            data.address?.municipality ??
+            data.address?.city ??
+            data.address?.town ??
+            data.address?.village ??
+            "";
         } catch {
           /* queda vacío */
         }
@@ -156,7 +157,7 @@
 
   function validar() {
     errores = {};
-    if (!nombreMascota.trim()) errores.nombreMascota = true;
+    if (!nombreMascota.trim() && tipoPublicacion === "Extraviada") errores.nombreMascota = true;
     if (!especieSeleccionada) errores.especie = true;
     if (!razaSeleccionada) errores.raza = true;
     if (!tamano) errores.tamano = true;
@@ -174,14 +175,14 @@
 
   let imagenSeleccionada = null;
 
-  $: console.log('user_id en Publicar:', id_usuario);
+  $: console.log("user_id en Publicar:", id_usuario);
 
   async function handlePublicar() {
     intentoEnvio = true;
     if (!validar()) return;
 
     const payload = {
-      name: nombreMascota,
+      name: nombreMascota.trim() != "" ? nombreMascota : null,
       breed_id: razaSeleccionada.breed_id,
       is_mixed_breed: esMestizo,
       sex: sexo === "Macho" ? "Male" : "Female",
@@ -349,9 +350,15 @@
 
     <!-- Nombre de la mascota -->
     <div class="field-group">
-      <label class="field-label">
-        Nombre de la mascota <span class="req">*</span>
-      </label>
+      {#if tipoPublicacion === "Extraviada"}
+        <label class="field-label">
+          Nombre de la mascota <span class="req">*</span>
+        </label>
+      {:else}
+        <label class="field-label">
+          Nombre de la mascota
+        </label>
+      {/if}
       <div
         class="input-row"
         class:error={intentoEnvio && errores.nombreMascota}

@@ -118,6 +118,7 @@
     const intervalo = setInterval(cargarNotificaciones, 30000);
     return () => clearInterval(intervalo);
   });
+  $: console.log('user_id en App:', user_id);
 </script>
 
 <main>

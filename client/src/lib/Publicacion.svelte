@@ -16,9 +16,10 @@
     $: console.log(mascota);
     $: cruzaTexto  = mascota.esCruza   === true ? "Sí" : mascota.esCruza   === false ? "No" : "Sin datos";
     $: colaTexto   = mascota.tieneCola === true ? "Sí" : mascota.tieneCola === false ? "No" : "Sin datos";
+    const API = 'http://localhost:3000/api';
     async function contactar() {
         try {
-            const res = await fetch('http://localhost:3000/api/chats', {
+            const res = await fetch(`${API}/chats`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

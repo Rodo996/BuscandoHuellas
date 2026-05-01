@@ -1,12 +1,18 @@
 <script>
     import { createEventDispatcher } from 'svelte';
     import NavBar from './Navbar.svelte';
-
+    import MapPicker from './MapPicker.svelte';
     const dispatch = createEventDispatcher();
 
     // 1. Recibimos la información del contacto desde App.svelte
     export let contacto = null;
     let mostrarConfirmacion = false;
+    let mostrarModalEncuentro = false;
+    let encuentroUbicacion = null;
+    let encuentroFecha = '';
+    let encuentroHora = '';
+    let encuentroDireccion = '';
+    export let user_id = null;
   // Aseguramos que haya un contacto por defecto por si acaso
     $: infoContacto = contacto ?? null;
 
@@ -45,25 +51,53 @@
 
     function volver() { dispatch('volver'); }
     function accion(tipoAccion) {
-        if (tipoAccion === 'Prueba de propiedad') {
-
-            // mensaje que tú envías
+    if (tipoAccion === 'Prueba de propiedad') {
+        mensajes = [...mensajes, {
+            tipo: 'me',
+            texto: 'Solicité prueba de propiedad',
+            hora: horaActual()
+        }];
+        setTimeout(() => {
             mensajes = [...mensajes, {
-                tipo: 'me',
-                texto: 'Solicité prueba de propiedad',
-                hora: '10:30'
+                tipo: 'request_proof',
+                from: 'other',
+                hora: horaActual()
             }];
-
-            // mensaje especial que recibe el otro (simulado)
-            setTimeout(() => {
-                mensajes = [...mensajes, {
-                    tipo: 'request_proof',
-                    from: 'other',
-                    hora: '10:31'
-                }];
-            }, 800);
-        }
+        }, 800);
     }
+
+    if (tipoAccion === 'Acordar encuentro') {
+        // Abre el modal en lugar de mandar mensaje directo
+        mostrarModalEncuentro = true;
+    }
+}
+    // Hora formateada para los mensajes
+function horaActual() {
+    return new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+}
+
+// Confirmar el encuentro desde el modal
+function confirmarEncuentro() {
+    if (!encuentroFecha || !encuentroHora || !encuentroUbicacion) return;
+
+    mensajes = [...mensajes, {
+        tipo: 'meeting',
+        texto: `📍 Encuentro acordado`,
+        direccion: encuentroDireccion,
+        fecha: encuentroFecha,
+        hora: encuentroHora,
+        lat: encuentroUbicacion.lat,
+        lng: encuentroUbicacion.lng,
+        horaMsg: horaActual()
+    }];
+
+    // Resetear y cerrar modal
+    mostrarModalEncuentro = false;
+    encuentroFecha = '';
+    encuentroHora = '';
+    encuentroUbicacion = null;
+    encuentroDireccion = '';
+}
     // 🤖 Respuestas simuladas
     function generarRespuesta(tipo) {
         if (tipo === 'Prueba de propiedad') {
@@ -144,7 +178,18 @@ function confirmarCierreCaso() {
                       <span class="time">{msg.hora}</span>
                   </div>
               </div>
-
+            {:else if msg.tipo === 'meeting'}
+                <div class="message-row me">
+                    <div class="msg-bubble dark-yellow meeting-bubble">
+                        <p>📍 <strong>Encuentro acordado</strong></p>
+                        <p class="meeting-dir">{msg.direccion}</p>
+                        <div class="meeting-details">
+                            <span>📅 {msg.fecha}</span>
+                            <span>🕐 {msg.hora}</span>
+                        </div>
+                        <span class="time">{msg.horaMsg}</span>
+                    </div>
+                </div>
               {:else if msg.tipo === 'request_proof'}
         <div class="message-row other">
             <div class="msg-bubble light-yellow proof-card">
@@ -157,6 +202,7 @@ function confirmarCierreCaso() {
                 <span class="time">{msg.hora}</span>
             </div>
     </div>
+
           {/if}
       {/each}
   </div>
@@ -196,6 +242,64 @@ function confirmarCierreCaso() {
                 </div>
             </div>
         </div>
+{/if}
+{#if mostrarModalEncuentro}
+    <div class="modal-overlay">
+        <div class="modal-box encuentro-modal">
+            <div class="modal-header">
+                <p class="modal-titulo">Acordar encuentro</p>
+                <button class="modal-close" on:click={() => mostrarModalEncuentro = false}>✕</button>
+            </div>
+
+            <!-- Mapa -->
+            <p class="modal-label">📍 Selecciona el lugar</p>
+            <MapPicker
+                on:ubicacion={(e) => {
+                    encuentroUbicacion = e.detail;
+                    encuentroDireccion = e.detail.address;
+                }}
+            />
+
+            {#if encuentroDireccion}
+                <p class="dir-preview">📌 {encuentroDireccion.slice(0, 60)}...</p>
+            {/if}
+
+            <!-- Fecha y hora -->
+            <div class="fecha-hora-row">
+                <div class="input-group">
+                    <label class="modal-label">📅 Fecha</label>
+                    <input
+                        type="date"
+                        class="modal-input"
+                        bind:value={encuentroFecha}
+                        min={new Date().toISOString().split('T')[0]}
+                    />
+                </div>
+                <div class="input-group">
+                    <label class="modal-label">🕐 Hora</label>
+                    <input
+                        type="time"
+                        class="modal-input"
+                        bind:value={encuentroHora}
+                    />
+                </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="modal-botones">
+                <button class="modal-btn cancelar" on:click={() => mostrarModalEncuentro = false}>
+                    Cancelar
+                </button>
+                <button
+                    class="modal-btn confirmar"
+                    on:click={confirmarEncuentro}
+                    disabled={!encuentroFecha || !encuentroHora || !encuentroUbicacion}
+                >
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
 {/if}
 </div>
 <style>
@@ -504,5 +608,146 @@ function confirmarCierreCaso() {
 .proof-card p {
     text-align: left;
 }
+/* Modal encuentro */
+.encuentro-modal {
+    width: 90%;
+    max-width: 360px;
+    max-height: 90vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+}
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: #6B7280;
+}
+.modal-label {
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #0D3B66;
+    margin: 0 0 4px 0;
+}
+.dir-preview {
+    font-size: 11px;
+    color: #6B7280;
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+}
+.fecha-hora-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+.input-group {
+    display: flex;
+    flex-direction: column;
+}
+.modal-input {
+    border: 1.5px solid #E5E7EB;
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    color: #0D3B66;        /* ← asegura texto visible */
+    background: #ffffff;   /* ← fondo blanco explícito */
+    outline: none;
+    width: 100%;
+}
+.modal-input:focus {
+    border-color: #0D3B66;
+}
 
+/* Burbuja de meeting en el chat */
+.meeting-bubble {
+    min-width: 180px;
+}
+.meeting-dir {
+    font-size: 12px !important;
+    color: #4B5563 !important;
+    font-weight: 400 !important;
+}
+.meeting-details {
+    display: flex;
+    gap: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #0D3B66;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Botón confirmar deshabilitado */
+.modal-btn.confirmar:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+.encuentro-modal :global(.map-container) {
+    height: 150px;
+}
+.modal-overlay {
+    position: fixed;    /* ← cambia de absolute a fixed */
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: flex-start;  /* ← cambia de center a flex-start */
+    justify-content: center;
+    z-index: 100;
+    padding-top: 20px;        /* ← pequeño margen arriba */
+    overflow-y: auto;         /* ← permite scroll en el overlay también */
+}
+.modal-box {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px;
+    width: 90%;
+    max-width: 360px;
+    font-family: 'Poppins', sans-serif;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    margin-bottom: 20px;
+}
+
+.modal-titulo {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0D3B66;
+    margin: 0;
+}
+
+.modal-botones {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 4px;
+}
+
+.modal-btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    flex: 1;
+}
+
+.modal-btn.cancelar {
+    background: #F3F4F6;
+    color: #374151;
+}
+
+.modal-btn.confirmar {
+    background: #0D3B66;
+    color: white;
+}
 </style>

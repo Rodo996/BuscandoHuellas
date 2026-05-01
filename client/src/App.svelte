@@ -184,7 +184,7 @@
           <p style="font-family:Poppins; color:#0D3B66; font-weight:600;">Cargando...</p>
         </div>
       {:else}
-        <Chat contacto={contactoActivo} on:volver={irAChats} on:cerrarCaso={() => navegar("caso_cerrado")} />
+        <Chat contacto={contactoActivo} {user_id} on:volver={irAChats} on:cerrarCaso={() => navegar("caso_cerrado")} />
       {/if}
 
     {:else if vistaActual === "perfil"}

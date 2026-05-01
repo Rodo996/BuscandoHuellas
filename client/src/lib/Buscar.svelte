@@ -7,22 +7,20 @@
     let mascotas = [];
     let searchQuery = "";
 
+    let especies = [];
+    let coloresDB = [];
+
     // ─── Estado de pills ───────────────────────────────────────────
     let activePill = null; // null = ningun panel abierto
 
     // ─── Filtros por categoria ──────────────────────────────────────
-    let filtroTipos    = { perro: false, gato: false, ave: false, otro: false };
+    let filtroTiposSeleccionados = new Set();
     let filtroTamanos  = { pequeno: false, mediano: false, grande: false };
     let filtroSexos    = { macho: false, hembra: false };
 
     let filtroRazaBusqueda = "";
 
-    let filtroColores = {
-        negro: false, blanco: false, gris: false,
-        cafe: false, cafeClaro: false, beige: false,
-        naranja: false, amarillo: false, rojo: false,
-        azul: false, verde: false
-    };
+    let filtroColoresSeleccionados = new Set();
     // Mas filtros
     let filtroEsCruza   = false;
     let filtroTieneCola = false;
@@ -36,6 +34,14 @@
     let inputUbicacion = "";
     let buscandoUbicacion = false;
     let errorUbicacion = "";
+
+    let especieActivaFiltro = null;
+    $: tamañosActuales = especieActivaFiltro
+        ? (tamanosPorEspecie[especieActivaFiltro] ?? tamanosPorEspecie.default)
+        : tamanosPorEspecie.default;
+
+    // Filtro tamaños dinámico (reemplaza el objeto hardcodeado)
+    let filtroTamanosSeleccionados = new Set();
 
     //Filtro fecha
     let ordenFecha = "reciente";
@@ -113,6 +119,27 @@
         }
     };
 
+    // Tamaños por especie (igual que en Publicar)
+    const tamanosPorEspecie = {
+        Perro: [
+            { value: "Extra Small", label: "Muy Pequeño", range: "<4 kg" },
+            { value: "Small",       label: "Pequeño",    range: "4-10 kg" },
+            { value: "Medium",      label: "Mediano",    range: "11-25 kg" },
+            { value: "Large",       label: "Grande",     range: "25-44 kg" },
+            { value: "Giant",       label: "Gigante",    range: ">45 kg" },
+        ],
+        Gato: [
+            { value: "Small",  label: "Pequeño", range: "<4.5 kg" },
+            { value: "Medium", label: "Mediano", range: "4.5-7 kg" },
+            { value: "Large",  label: "Grande",  range: ">7 kg" },
+        ],
+        default: [
+            { value: "Small",  label: "Pequeño", range: "" },
+            { value: "Medium", label: "Mediano", range: "" },
+            { value: "Large",  label: "Grande",  range: "" },
+        ],
+    };
+
 
     const limpiarFecha = () => {
         filtroFechaDesde = "";
@@ -138,10 +165,21 @@
     // ─── Carga de mascotas ───────────────────────────────
     onMount(async () => {
         try {
+            // Mascotas
             const response = await fetch("http://localhost:3000/api/mascotas");
             if (response.ok) mascotas = await response.json();
+
+            // Especies
+            const resEspecies = await fetch("http://localhost:3000/api/catalogs/species");
+            if (resEspecies.ok) especies = await resEspecies.json();
+
+            // Colores
+            const resColores = await fetch("http://localhost:3000/api/catalogs/colors");
+            if (resColores.ok) {
+                coloresDB = (await resColores.json()).filter(c => c.color_name !== "Tricolor");
+            }
         } catch (error) {
-            console.error("No se pudieron cargar las mascotas:", error);
+            console.error("Error al cargar datos:", error);
         }
     });
 
@@ -152,20 +190,16 @@
 
     // ─── Limpiar por seccion ───────────────────────────────────────
     const limpiarTipo = () => {
-        filtroTipos   = { perro: false, gato: false, ave: false, otro: false };
-        filtroTamanos = { pequeno: false, mediano: false, grande: false };
-        filtroSexos   = { macho: false, hembra: false };
+        filtroTiposSeleccionados = new Set();
+        filtroTamanosSeleccionados = new Set();
+        filtroSexos = { macho: false, hembra: false };
+        especieActivaFiltro = null;
+        filtroEsCruza = false;   
+        filtroTieneCola = false; 
     };
     const limpiarRaza      = () => { filtroRazaBusqueda = ""; };
 
-    const limpiarColor = () => {
-        filtroColores = {
-            negro: false, blanco: false, gris: false,
-            cafe: false, cafeClaro: false, beige: false,
-            naranja: false, amarillo: false, rojo: false,
-            azul: false, verde: false
-        };
-    };
+    const limpiarColor = () => { filtroColoresSeleccionados = new Set(); };
     
     const limpiarUbicacion = () => {
         radioBusqueda = 1;
@@ -187,48 +221,29 @@
             m.ubicacion?.toLowerCase().includes(termino) ||
             m.rasgos?.toLowerCase().includes(termino);
 
-        const algunTipoActivo = Object.values(filtroTipos).some(Boolean);
-        const coincideTipo = !algunTipoActivo || (
-            (filtroTipos.perro && m.especie === "Perro") ||
-            (filtroTipos.gato  && m.especie === "Gato")
-        );
+        const coincideTipo = filtroTiposSeleccionados.size === 0 ||
+            filtroTiposSeleccionados.has(m.especie);
 
-        const algunTamanoActivo = Object.values(filtroTamanos).some(Boolean);
-        const coincideTamano = !algunTamanoActivo || (
-            (filtroTamanos.pequeno && (m.tamano === "Pequeño" || m.tamano === "Muy Pequeño")) ||
-            (filtroTamanos.mediano && m.tamano === "Mediano") ||
-            (filtroTamanos.grande  && (m.tamano === "Grande"  || m.tamano === "Gigante"))
-        );
+        const coincideTamano = filtroTamanosSeleccionados.size === 0 ||
+            filtroTamanosSeleccionados.has(m.tamano);
 
         const algunSexoActivo = Object.values(filtroSexos).some(Boolean);
-        const coincideSexo = !algunSexoActivo || (
-            (filtroSexos.macho  && m.sexo === "Macho") ||
-            (filtroSexos.hembra && m.sexo === "Hembra")
-        );
+        const coincideSexo = Object.values(filtroSexos).every(v => !v) || 
+        (filtroSexos.macho && m.sex_name === "Macho") || 
+        (filtroSexos.hembra && m.sex_name === "Hembra");
 
         const coincideRaza = !filtroRazaBusqueda ||
             m.raza?.toLowerCase().includes(filtroRazaBusqueda.toLowerCase());
 
-        const algunColorActivo = Object.values(filtroColores).some(Boolean);
+        const algunColorActivo = Object.values(filtroColoresSeleccionados).some(Boolean);
 
-        const coincideColor = !algunColorActivo || (
-            Array.isArray(m.colores) && m.colores.some(c =>
-                (filtroColores.negro     && c.nombre === "Negro")      ||
-                (filtroColores.blanco    && c.nombre === "Blanco")     ||
-                (filtroColores.gris      && c.nombre === "Gris")       ||
-                (filtroColores.cafe      && c.nombre === "Café")       ||
-                (filtroColores.cafeClaro && c.nombre === "Café claro") ||
-                (filtroColores.beige     && c.nombre === "Beige/Crema")||
-                (filtroColores.naranja   && c.nombre === "Naranja")    ||
-                (filtroColores.amarillo  && c.nombre === "Amarillo")   ||
-                (filtroColores.rojo      && c.nombre === "Rojo")       ||
-                (filtroColores.azul      && c.nombre === "Azul")       ||
-                (filtroColores.verde     && c.nombre === "Verde")
-            )
-        );
+        const coincideColor = filtroColoresSeleccionados.size === 0 || 
+            (Array.isArray(m.colores) && m.colores.some(c => 
+                filtroColoresSeleccionados.has(c.color_name) // El backend envía color_name
+            ));
 
-        const coincideCruza = !filtroEsCruza   || m.esCruza   === true;
-        const coincideCola  = !filtroTieneCola || m.tieneCola === true;
+        const coincideCruza = !filtroEsCruza || m.is_mix === 1 || m.is_mix === true;
+        const coincideCola = !filtroTieneCola || m.has_tail === 1 || m.has_tail === true;
 
         const coincideFecha = (() => {
             if (!filtroFechaDesde && !filtroFechaHasta) return true;
@@ -263,14 +278,11 @@
         return ordenFecha === "reciente" ? fechaB - fechaA : fechaA - fechaB;
     });
     // ─── Badge por pill ───────────────────────────────────────────
-    $: badgeTipo = [
-        ...Object.values(filtroTipos),
-        ...Object.values(filtroTamanos),
-        ...Object.values(filtroSexos)
-    ].filter(Boolean).length;
+    $: badgeTipo  = filtroTiposSeleccionados.size + filtroTamanosSeleccionados.size +
+                Object.values(filtroSexos).filter(Boolean).length;
 
     $: badgeRaza  = filtroRazaBusqueda ? 1 : 0;
-    $: badgeColor = Object.values(filtroColores).filter(Boolean).length;
+    $: badgeColor = filtroColoresSeleccionados.size;
     $: badgeUbic = (userLat && radioBusqueda > 1) ? 1 : 0;
 
     const abrirPublicacion = (mascota) => dispatch("verPublicacion", mascota);
@@ -378,59 +390,112 @@
                 <div class="checkbox-column" style="margin-bottom:20px">
                     <h3>Especie</h3>
                     <div class="checkbox-row-group">
-                        {#each [["perro","Perro"],["gato","Gato"],["ave","Ave"],["otro","Otro"]] as [key, label]}
+                        {#each especies as esp}
                             <label class="custom-checkbox">
-                                <input type="checkbox" bind:checked={filtroTipos[key]} />
+                                <input type="checkbox"
+                                    checked={filtroTiposSeleccionados.has(esp.species_name)}
+                                    on:change={() => {
+                                        if (filtroTiposSeleccionados.has(esp.species_name)) {
+                                            filtroTiposSeleccionados.delete(esp.species_name);
+                                            // Si deseleccionas la especie activa, limpia tamaños
+                                            if (especieActivaFiltro === esp.species_name) {
+                                                especieActivaFiltro = null;
+                                                filtroTamanosSeleccionados = new Set();
+                                            }
+                                        } else {
+                                            filtroTiposSeleccionados.add(esp.species_name);
+                                            // Solo actualiza especie activa si hay una sola seleccionada
+                                            if (filtroTiposSeleccionados.size === 1) {
+                                                especieActivaFiltro = esp.species_name;
+                                            } else {
+                                                especieActivaFiltro = null;
+                                            }
+                                        }
+                                        filtroTiposSeleccionados = new Set(filtroTiposSeleccionados);
+                                    }}
+                                />
                                 <span class="checkmark">
-                                    {#if filtroTipos[key]}<svg width="12" height="10" viewBox="0 0 12 10" fill="none">
-                                        <path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>{/if}
+                                    {#if filtroTiposSeleccionados.has(esp.species_name)}
+                                        <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
+                                            <path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    {/if}
                                 </span>
-                                {label}
+                                {esp.species_name}
                             </label>
                         {/each}
                     </div>
                 </div>
 
-                <div class="checkbox-grid" style="margin-bottom:20px">
-                    <div class="checkbox-column">
-                        <h3>Tamaño</h3>
-                        {#each [["pequeno","Pequeño"],["mediano","Mediano"],["grande","Grande"]] as [key, label]}
+                <!-- Tamaños dinámicos según especie seleccionada -->
+                <div class="checkbox-column" style="margin-bottom:20px">
+                    <h3>Tamaño
+                        {#if especieActivaFiltro}
+                            <span style="font-size:11px;color:#9ca3af;font-weight:400;">
+                                — para {especieActivaFiltro}
+                            </span>
+                        {/if}
+                    </h3>
+                    <div class="checkbox-row-group">
+                        {#each tamañosActuales as tam}
                             <label class="custom-checkbox">
-                                <input type="checkbox" bind:checked={filtroTamanos[key]} />
+                                <input type="checkbox"
+                                    checked={filtroTamanosSeleccionados.has(tam.label)}
+                                    on:change={() => {
+                                        if (filtroTamanosSeleccionados.has(tam.label)) {
+                                            filtroTamanosSeleccionados.delete(tam.label);
+                                        } else {
+                                            filtroTamanosSeleccionados.add(tam.label);
+                                        }
+                                        filtroTamanosSeleccionados = new Set(filtroTamanosSeleccionados);
+                                    }}
+                                />
                                 <span class="checkmark">
-                                    {#if filtroTamanos[key]}<svg width="12" height="10" viewBox="0 0 12 10" fill="none">
-                                        <path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>{/if}
+                                    {#if filtroTamanosSeleccionados.has(tam.label)}
+                                        <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
+                                            <path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    {/if}
                                 </span>
-                                {label}
-                            </label>
-                        {/each}
-                    </div>
-                    <div class="checkbox-column">
-                        <h3>Sexo</h3>
-                        {#each [["macho","Macho"],["hembra","Hembra"]] as [key, label]}
-                            <label class="custom-checkbox">
-                                <input type="checkbox" bind:checked={filtroSexos[key]} />
-                                <span class="checkmark">
-                                    {#if filtroSexos[key]}<svg width="12" height="10" viewBox="0 0 12 10" fill="none">
-                                        <path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>{/if}
-                                </span>
-                                {label}
+                                {tam.label}
+                                {#if tam.range}
+                                    <span style="color:#9ca3af;font-size:11px;margin-left:4px;">
+                                        {tam.range}
+                                    </span>
+                                {/if}
                             </label>
                         {/each}
                     </div>
                 </div>
 
-                <!-- Nuevos filtros -->
+                <div class="checkbox-column" style="margin-bottom:20px">
+                    <h3>Sexo</h3>
+                    {#each [["macho","Macho"],["hembra","Hembra"]] as [key, label]}
+                        <label class="custom-checkbox">
+                            <input type="checkbox" bind:checked={filtroSexos[key]} />
+                            <span class="checkmark">
+                                {#if filtroSexos[key]}
+                                    <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
+                                        <path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                {/if}
+                            </span>
+                            {label}
+                        </label>
+                    {/each}
+                </div>
+
                 <div class="checkbox-column" style="margin-bottom:20px">
                     <h3>Características</h3>
                     <label class="custom-checkbox">
                         <input type="checkbox" bind:checked={filtroEsCruza} />
                         <span class="checkmark">
                             {#if filtroEsCruza}<svg width="12" height="10" viewBox="0 0 12 10" fill="none">
-                                <path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>{/if}
                         </span>
                         Es cruza / mestizo
@@ -439,7 +504,8 @@
                         <input type="checkbox" bind:checked={filtroTieneCola} />
                         <span class="checkmark">
                             {#if filtroTieneCola}<svg width="12" height="10" viewBox="0 0 12 10" fill="none">
-                                <path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>{/if}
                         </span>
                         Tiene cola
@@ -498,27 +564,23 @@
                 </div>
 
                 <div class="color-grid">
-                    {#each [
-                        ["negro",   "#1a1a1a", "Negro"],
-                        ["blanco",  "#f5f5f5", "Blanco"],
-                        ["gris",    "#9e9e9e", "Gris"],
-                        ["cafe",    "#795548", "Café"],
-                        ["cafeClaro","#d4a96a","Café claro"],
-                        ["beige",   "#f5f0dc", "Beige"],
-                        ["naranja", "#ff7043", "Naranja"],
-                        ["amarillo","#fdd835", "Amarillo"],
-                        ["rojo",    "#e53935", "Rojo"],
-                        ["azul",    "#1e88e5", "Azul"],
-                        ["verde",   "#43a047", "Verde"]
-                    ] as [key, color, label]}
+                    {#each coloresDB as col}
                         <button class="color-btn"
-                            class:color-active={filtroColores[key]}
-                            on:click={() => filtroColores[key] = !filtroColores[key]}>
+                            class:color-active={filtroColoresSeleccionados.has(col.color_name)}
+                            on:click={() => {
+                                if (filtroColoresSeleccionados.has(col.color_name)) {
+                                    filtroColoresSeleccionados.delete(col.color_name);
+                                } else {
+                                    filtroColoresSeleccionados.add(col.color_name);
+                                }
+                                filtroColoresSeleccionados = new Set(filtroColoresSeleccionados);
+                            }}>
                             <span class="color-dot"
-                                style="background:{color}; {key==='blanco'?'border:1px solid #e5e7eb':''}">
+                                style="background:{col.hex_code ?? '#ccc'};
+                                    {col.color_name === 'Blanco' ? 'border:1px solid #e5e7eb' : ''}">
                             </span>
-                            <span class="color-label">{label}</span>
-                            {#if filtroColores[key]}
+                            <span class="color-label">{col.color_name}</span>
+                            {#if filtroColoresSeleccionados.has(col.color_name)}
                                 <span class="color-check">✓</span>
                             {/if}
                         </button>
@@ -659,9 +721,12 @@
     <!-- Grid de resultados -->
     <section class="results-grid" style="padding-top: 0;">
         {#each mascotasOrdenadas as mascota (mascota.id)}
-            <div class="pet-card" on:click={() => abrirPublicacion(mascota)}>
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <!-- svelte-ignore a11y-no-static-element-interactions -->
+            <div class="pet-card" on:click={() => abrirPublicacion(mascota)} role="button" tabindex="0">
                 <div class="pet-image-wrapper">
-                    <img src={mascota.img} alt="Mascota" />
+                    <!-- Fallback para imágenes -->
+                    <img src={mascota.img || '/img/placeholder-pet.png'} alt="Mascota {mascota.raza}" />
                     <div class="status-badge"
                         class:bg-extraviado={mascota.estado === "Extraviado"}
                         class:bg-alojado={mascota.estado !== "Extraviado"}>
@@ -671,18 +736,19 @@
                 <div class="pet-info">
                     <div class="pet-info-icon">
                         {#if mascota.tieneEtiqueta}
-                            <img src="/Img-Buscar/etiqueta.png" alt="Etiqueta" />
+                            <img src="/Img-Buscar/etiqueta.png" alt="Tiene placa de identificación" />
+                        {:else}
+                            <!-- Icono por defecto o huella si no tiene etiqueta -->
+                            <img src="/Img-Buscar/paw-icon.png" alt="Huella" />
                         {/if}
                     </div>
-                    <span>{mascota.raza} | {mascota.sexo} | {formatearFecha(mascota.fecha)} | {mascota.ubicacion}</span>
+                    <!-- Truncar texto si es muy largo -->
+                    <span class="info-text">
+                        {mascota.raza} | {mascota.sexo} | {formatearFecha(mascota.fecha)} | {mascota.ubicacion}
+                    </span>
                 </div>
             </div>
         {/each}
-        {#if mascotasOrdenadas.length === 0}
-            <div style="grid-column: span 2; text-align: center; color: #9CA3AF; padding: 20px; font-size: 14px;">
-                No se encontraron mascotas con esos filtros.
-            </div>
-        {/if}
     </section>
 
     <NavBar vistaActiva="buscar"

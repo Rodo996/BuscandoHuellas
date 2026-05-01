@@ -25,13 +25,8 @@ router.get("/", async (req, res) => {
                     WHEN p.sex = 'Female'       THEN 'Hembra' 
                     ELSE 'Otro' 
                 END AS sexo, 
-                CASE 
-                    WHEN p.size = 'Extra Small' THEN 'Muy Pequeño'
-                    WHEN p.size = 'Small'       THEN 'Pequeño' 
-                    WHEN p.size = 'Medium'      THEN 'Mediano' 
-                    WHEN p.size = 'Large'       THEN 'Grande'
-                    ELSE 'Gigante' 
-                END AS tamano,
+                p.size AS tamano,
+                COALESCE(p.distinctive_features, 'Sin rasgos particulares') AS rasgos,
                 CASE 
                     WHEN post.type = 'Lost'      THEN 'Extraviado' 
                     WHEN post.type = 'Spotted'   THEN 'Avistado' 
@@ -117,7 +112,13 @@ router.get("/:id", async (req, res) => {
                 p.distinctive_features AS rasgos,
                 u.name AS dueno,
                 CASE WHEN p.sex = 'Male' THEN 'Macho' WHEN p.sex = 'Female' THEN 'Hembra' ELSE 'Otro' END AS sexo,
-                CASE WHEN p.size = 'Extra Small' THEN 'Muy Pequeño' WHEN p.size = 'Small' THEN 'Pequeño' WHEN p.size = 'Medium' THEN 'Mediano' WHEN p.size = 'Large' THEN 'Grande' ELSE 'Gigante' END AS tamano,
+                CASE 
+                    WHEN p.size = 'Extra Small' THEN 'Muy Pequeño (0-5kg)'
+                    WHEN p.size = 'Small' THEN 'Pequeño (5-10kg)'
+                    WHEN p.size = 'Medium' THEN 'Mediano (10-25kg)'
+                    WHEN p.size = 'Large' THEN 'Grande (25-45kg)'
+                    ELSE 'Gigante (+45kg)'
+                END AS tamano,
                 CASE WHEN post.type = 'Lost' THEN 'Extraviado' WHEN post.type = 'Spotted' THEN 'Avistado' WHEN post.type = 'Sheltered' THEN 'Alojado' ELSE 'Exitoso' END AS estado,
                 post.date AS fecha,
                 loc.street AS ubicacion, loc.lat AS latitud, loc.lng AS longitud,

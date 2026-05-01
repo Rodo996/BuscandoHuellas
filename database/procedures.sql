@@ -122,6 +122,7 @@ BEGIN
   WHERE
     p2.post_id   <> p_post_id
     AND p2.status = 'Active'
+    -- Diferente user
     AND p2.user_id <> v_user_id
     -- Tipo opuesto
     AND (

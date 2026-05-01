@@ -1,5 +1,6 @@
 <script>
     import { createEventDispatcher } from "svelte";
+    import { obtenerOCrearContacto } from './contactos.js';
     const dispatch = createEventDispatcher();
 
     export let mascota;
@@ -16,12 +17,9 @@
     $: cruzaTexto  = mascota.esCruza   === true ? "Sí" : mascota.esCruza   === false ? "No" : "Sin datos";
     $: colaTexto   = mascota.tieneCola === true ? "Sí" : mascota.tieneCola === false ? "No" : "Sin datos";
     function contactar() {
-    dispatch('irAChat', {
-        id: mascota.duenoId ?? 0,   // cuando tengas BD real será el id del dueño
-        nombre: mascota.dueno ?? 'Dueño',
-        color: '#F4D35E'
-    });
-}
+        const contacto = obtenerOCrearContacto(mascota.dueno, mascota.id);
+        dispatch('irAChat', contacto);
+    }
 </script>
 
 <div class="app-container">

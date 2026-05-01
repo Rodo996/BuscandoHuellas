@@ -30,7 +30,7 @@
     let userLng = null;
     let gpsEstado = "idle"; // "idle" | "cargando" | "ok" | "error"
 
-    // ─── Busqueda de ubicación manual ─────────────────────────────
+    // ─── Busqueda de ubicacion manual ─────────────────────────────
     let inputUbicacion = "";
     let buscandoUbicacion = false;
     let errorUbicacion = "";
@@ -40,7 +40,7 @@
         ? (tamanosPorEspecie[especieActivaFiltro] ?? tamanosPorEspecie.default)
         : tamanosPorEspecie.default;
 
-    // Filtro tamaños dinámico (reemplaza el objeto hardcodeado)
+    // Filtro tamaños dinamico (reemplaza el objeto hardcodeado)
     let filtroTamanosSeleccionados = new Set();
 
     //Filtro fecha
@@ -224,26 +224,24 @@
         const coincideTipo = filtroTiposSeleccionados.size === 0 ||
             filtroTiposSeleccionados.has(m.especie);
 
+        // Filtro de tamaño: Compara contra el Set de valores (Small, Medium, etc)
         const coincideTamano = filtroTamanosSeleccionados.size === 0 ||
             filtroTamanosSeleccionados.has(m.tamano);
 
-        const algunSexoActivo = Object.values(filtroSexos).some(Boolean);
         const coincideSexo = Object.values(filtroSexos).every(v => !v) || 
-        (filtroSexos.macho && m.sex_name === "Macho") || 
-        (filtroSexos.hembra && m.sex_name === "Hembra");
+            (filtroSexos.macho && m.sexo === "Macho") || 
+            (filtroSexos.hembra && m.sexo === "Hembra");
 
         const coincideRaza = !filtroRazaBusqueda ||
             m.raza?.toLowerCase().includes(filtroRazaBusqueda.toLowerCase());
 
-        const algunColorActivo = Object.values(filtroColoresSeleccionados).some(Boolean);
-
+        // Filtro de color para Set y estructura de backend
         const coincideColor = filtroColoresSeleccionados.size === 0 || 
-            (Array.isArray(m.colores) && m.colores.some(c => 
-                filtroColoresSeleccionados.has(c.color_name) // El backend envía color_name
-            ));
+            (Array.isArray(m.colores) && m.colores.some(c => filtroColoresSeleccionados.has(c.nombre)))
 
-        const coincideCruza = !filtroEsCruza || m.is_mix === 1 || m.is_mix === true;
-        const coincideCola = !filtroTieneCola || m.has_tail === 1 || m.has_tail === true;
+        // Normalizacion de booleanos (acepta true/false o 1/0)
+        const coincideCruza = !filtroEsCruza || m.esCruza === true;
+        const coincideCola  = !filtroTieneCola || m.tieneCola === true;
 
         const coincideFecha = (() => {
             if (!filtroFechaDesde && !filtroFechaHasta) return true;
@@ -258,7 +256,7 @@
 
         const coincideUbicacion = (() => {
             if (!userLat || !userLng) return true;
-            if (!m.latitud || !m.longitud) return true; // sin coords → incluir
+            if (!m.latitud || !m.longitud) return true; 
             const distancia = haversine(
                 userLat, userLng,
                 parseFloat(m.latitud), parseFloat(m.longitud)
@@ -428,7 +426,7 @@
                     </div>
                 </div>
 
-                <!-- Tamaños dinámicos según especie seleccionada -->
+                <!-- ══════════ PANEL: TAMAÑO ══════════-->
                 <div class="checkbox-column" style="margin-bottom:20px">
                     <h3>Tamaño
                         {#if especieActivaFiltro}
@@ -441,25 +439,26 @@
                         {#each tamañosActuales as tam}
                             <label class="custom-checkbox">
                                 <input type="checkbox"
-                                    checked={filtroTamanosSeleccionados.has(tam.label)}
+                                    /* CAMBIO: Usar tam.value en lugar de tam.label */
+                                    checked={filtroTamanosSeleccionados.has(tam.value)} 
                                     on:change={() => {
-                                        if (filtroTamanosSeleccionados.has(tam.label)) {
-                                            filtroTamanosSeleccionados.delete(tam.label);
+                                        if (filtroTamanosSeleccionados.has(tam.value)) {
+                                            filtroTamanosSeleccionados.delete(tam.value);
                                         } else {
-                                            filtroTamanosSeleccionados.add(tam.label);
+                                            filtroTamanosSeleccionados.add(tam.value);
                                         }
                                         filtroTamanosSeleccionados = new Set(filtroTamanosSeleccionados);
                                     }}
                                 />
                                 <span class="checkmark">
-                                    {#if filtroTamanosSeleccionados.has(tam.label)}
+                                    {#if filtroTamanosSeleccionados.has(tam.value)}
                                         <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
                                             <path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="2"
                                                 stroke-linecap="round" stroke-linejoin="round"/>
                                         </svg>
                                     {/if}
                                 </span>
-                                {tam.label}
+                                {tam.label} 
                                 {#if tam.range}
                                     <span style="color:#9ca3af;font-size:11px;margin-left:4px;">
                                         {tam.range}
@@ -601,7 +600,7 @@
                     <button class="limpiar-btn" on:click={limpiarUbicacion}>Limpiar</button>
                 </div>
 
-                <!-- Opción 1: GPS automático -->
+                <!-- GPS automatico -->
                 <button class="gps-btn" on:click={obtenerUbicacion}>
                     Usar mi ubicación actual
                 </button>
@@ -610,7 +609,6 @@
                     <span>o ingresa una dirección</span>
                 </div>
 
-                <!-- Opción 2: Texto manual -->
                 <div class="ubicacion-input-wrap">
                     <input
                         type="text"
@@ -641,7 +639,6 @@
                     </div>
                 {/if}
 
-                <!-- Slider — activo solo si hay ubicación -->
                 <div class="slider-section" style="margin-top:16px; opacity:{userLat ? 1 : 0.4}">
                     <div class="slider-labels">
                         <span>Radio de búsqueda</span>
@@ -725,7 +722,7 @@
             <!-- svelte-ignore a11y-no-static-element-interactions -->
             <div class="pet-card" on:click={() => abrirPublicacion(mascota)} role="button" tabindex="0">
                 <div class="pet-image-wrapper">
-                    <!-- Fallback para imágenes -->
+                    <!-- Fallback para imagenes -->
                     <img src={mascota.img || '/img/placeholder-pet.png'} alt="Mascota {mascota.raza}" />
                     <div class="status-badge"
                         class:bg-extraviado={mascota.estado === "Extraviado"}
@@ -738,11 +735,9 @@
                         {#if mascota.tieneEtiqueta}
                             <img src="/Img-Buscar/etiqueta.png" alt="Tiene placa de identificación" />
                         {:else}
-                            <!-- Icono por defecto o huella si no tiene etiqueta -->
                             <img src="/Img-Buscar/paw-icon.png" alt="Huella" />
                         {/if}
                     </div>
-                    <!-- Truncar texto si es muy largo -->
                     <span class="info-text">
                         {mascota.raza} | {mascota.sexo} | {formatearFecha(mascota.fecha)} | {mascota.ubicacion}
                     </span>
@@ -757,7 +752,6 @@
 </div>
 
 <style>
-    /* ── Mantén todos tus estilos originales ── */
     .top-brand-header {
         background: #0d3b66;
         display: flex;
@@ -943,7 +937,7 @@
         align-items: center; flex-shrink: 0;
     }
     .pet-info-icon img { width: 14px; height: 14px; object-fit: contain; }
-        /* Ordenamiento de los ultimos filtros de fecha por mas reciente */
+
     .orden-row {
         display: flex;
         align-items: center;
@@ -1014,7 +1008,6 @@
     .gps-ok      { background: #d1fae5; color: #065f46; }
     .gps-error   { background: #fee2e2; color: #991b1b; }
 
-    /* Ubicación manual */
     .ubicacion-divider {
         display: flex;
         align-items: center;

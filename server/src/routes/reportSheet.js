@@ -23,13 +23,7 @@ router.get("/", async (req, res) => {
                     WHEN p.sex = 'Female'       THEN 'Hembra' 
                     ELSE 'Otro' 
                 END AS sexo, 
-                CASE 
-                    WHEN p.size = 'Extra Small' THEN 'Muy Pequeño (0-5kg)'
-                    WHEN p.size = 'Small' THEN 'Pequeño (5-10kg)'
-                    WHEN p.size = 'Medium' THEN 'Mediano (10-25kg)'
-                    WHEN p.size = 'Large' THEN 'Grande (25-45kg)'
-                    ELSE 'Gigante (+45kg)'
-                END AS tamano,
+                p.size AS tamano,
                 COALESCE(p.distinctive_features, 'Sin rasgos particulares') AS rasgos,
                 CASE 
                     WHEN post.type = 'Lost'      THEN 'Extraviado' 

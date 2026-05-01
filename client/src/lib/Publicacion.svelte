@@ -4,7 +4,7 @@
     const dispatch = createEventDispatcher();
 
     export let mascota;
-
+    export let user_id = null;
     // Helpers para mostrar arrays como texto legible
     $: coloresTexto = Array.isArray(mascota.colores) && mascota.colores.length > 0
         ? mascota.colores.map(c => c.nombre).join(", ")
@@ -13,13 +13,30 @@
     $: discapacidadesTexto = Array.isArray(mascota.discapacidades) && mascota.discapacidades.length > 0
         ? mascota.discapacidades.map(d => d.nombre).join(", ")
         : "Ninguna";
-
+    $: console.log(mascota);
     $: cruzaTexto  = mascota.esCruza   === true ? "Sí" : mascota.esCruza   === false ? "No" : "Sin datos";
     $: colaTexto   = mascota.tieneCola === true ? "Sí" : mascota.tieneCola === false ? "No" : "Sin datos";
-    function contactar() {
-        const contacto = obtenerOCrearContacto(mascota.dueno, mascota.id);
-        dispatch('irAChat', contacto);
+    async function contactar() {
+        try {
+            const res = await fetch('http://localhost:3000/api/chats', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    post_id: mascota.post_id,
+                    user_sender: user_id,
+                    user_receiver: mascota.dueno_id
+                })
+            });
+            const data = await res.json();
+            const contacto = obtenerOCrearContacto(mascota.dueno, mascota.id);
+            contacto.chat_id = data.chat_id;
+            dispatch('irAChat', contacto);
+        } catch (e) {
+            console.error('Error al crear chat:', e);
+        }
     }
+
+
 </script>
 
 <div class="app-container">

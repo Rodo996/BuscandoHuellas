@@ -12,7 +12,6 @@
   import CasosExito from "./lib/Caso_exito.svelte";
   import FichaExito from "./lib/Ficha_exito.svelte";
   import CasoCerrado from "./lib/Caso_cerrado.svelte";
-  import { listaContactos } from "./lib/contactos.js";
   import { onMount } from "svelte";
 
   const API = "http://localhost:3000/api";
@@ -96,11 +95,24 @@
 
       if (vistaActual === "chat" && subVista) {
         cargandoContacto = true;
-        const encontrado = listaContactos.find((c) => c.id === Number(subVista));
-        contactoActivo = encontrado ?? null;
-        if (!contactoActivo) navegar("chats");
-        cargandoContacto = false;
-      }
+        try {
+            const res = await fetch(`${API}/chats/${subVista}`);
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            const chat = data.find(c => c.other_user_id === Number(subVista));
+            contactoActivo = chat ? {
+                id: chat.other_user_id,
+                chat_id: chat.chat_id,
+                nombre: chat.other_user_name,
+                color: '#1A5C8C'
+            } : null;
+            if (!contactoActivo) navegar('chats');
+        } catch {
+            navegar('chats');
+        } finally {
+            cargandoContacto = false;
+        }
+     }
     })();
 
     const intervalo = setInterval(cargarNotificaciones, 30000);
@@ -149,6 +161,7 @@
       {#if mascotaSeleccionada}
         <Publicacion
           mascota={mascotaSeleccionada}
+          {user_id}
           on:volver={irABuscar}
           on:irAChat={irAChat}
           on:cerrarCaso={() => navegar("caso_cerrado")}
@@ -176,7 +189,7 @@
       {/if}
 
     {:else if vistaActual === "chats"}
-      <Chats on:volver={irAInicio} on:abrirChat={irAChat} />
+      <Chats {user_id} on:volver={irAInicio} on:abrirChat={irAChat} />
 
     {:else if vistaActual === "chat"}
       {#if cargandoContacto}

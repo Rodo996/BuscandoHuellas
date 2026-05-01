@@ -7,7 +7,9 @@ const router = Router();
 router.get("/", async (req, res) => {
     try {
         const sql = `
-            SELECT 
+            SELECT
+                post.post_id AS post_id,
+                u.user_id AS dueno_id, 
                 p.pet_id AS id, 
                 p.name,
                 sp.species_name AS especie,
@@ -68,6 +70,7 @@ router.get("/", async (req, res) => {
             LEFT JOIN Images    pi   ON post.post_id     = pi.post_id
             WHERE post.post_id IS NOT NULL
             GROUP BY
+                post.post_id, u.user_id,
                 p.pet_id, p.name, sp.species_name, b.breed_name,
                 p.is_mixed_breed, p.has_tail, p.distinctive_features,
                 p.sex, p.size, post.type, post.date,
@@ -103,6 +106,8 @@ router.get("/:id", async (req, res) => {
         const { id } = req.params;
         const sql = `
             SELECT 
+                post.post_id AS post_id,
+                u.user_id AS dueno_id,
                 p.pet_id AS id, 
                 p.name,
                 sp.species_name AS especie,
@@ -137,7 +142,7 @@ router.get("/:id", async (req, res) => {
             WHERE p.pet_id = ?
             GROUP BY p.pet_id, p.name, sp.species_name, b.breed_name, p.is_mixed_breed,
                      p.has_tail, p.distinctive_features, p.sex, p.size, post.type,
-                     post.date, loc.street, loc.lat, loc.lng, u.name;
+                     post.date, loc.street, loc.lat, loc.lng, u.name, post.post_id, u.user_id;
         `;
 
         const [results] = await pool.query(sql, [id]);

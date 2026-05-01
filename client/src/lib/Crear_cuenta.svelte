@@ -3,7 +3,18 @@
   const dispatch = createEventDispatcher();
 
   const volver = () => dispatch('volver');
+  
+  let email = '';
+  let name = '';
+  let password = '';
+  
+  // Variable para controlar la alerta visual
+  let mensajeAlerta = '';
+
   const registrar = async () => {
+    // Limpiamos mensajes anteriores por si acaso
+    mensajeAlerta = '';
+
     // Asegúrate de usar el puerto correcto de tu backend si no usas proxy en Vite
     const res = await fetch('http://localhost:3000/api/crear-cuenta', {
       method: 'POST',
@@ -14,13 +25,22 @@
     });
 
     if (res.ok) {
-      dispatch('registroExitoso');
+      // 1. Borramos los inputs visualmente
+      email = '';
+      name = '';
+      password = '';
+      
+      // 2. Mostramos la alerta roja
+      mensajeAlerta = 'Te hemos enviado un correo para verificar tu cuenta. Verifícalo para poder iniciar sesión.';
+      
+      // Opcional: si quieres que el usuario se quede viendo el mensaje, no hacemos el dispatch inmediatamente. 
+      // Si tu App.svelte usa 'registroExitoso' para cambiar de pantalla, puedes comentarlo o ponerle un retraso.
+      // setTimeout(() => dispatch('registroExitoso'), 5000); 
+    } else {
+      const data = await res.json();
+      alert(data.error || "Error al crear la cuenta");
     }
   };
-
-  let email;
-  let name;
-  let password;
 </script>
 
 <div class="mobile-container">
@@ -81,6 +101,12 @@
       </button>
     </div>
 
+    {#if mensajeAlerta}
+      <div class="alert-error">
+        {mensajeAlerta}
+      </div>
+    {/if}
+
     <form class="form" on:submit|preventDefault={registrar}>
       
       <div class="input-group">
@@ -121,7 +147,7 @@
 
       <div class="login-prompt-section">
         <p>¿Ya tienes una cuenta?</p>
-        <button type="button" class="btn-primary" on:click={volver}>Inicia sesión</button>
+        <button type="button" class="btn-primary" style="background-color: transparent; border: 2px solid #0D3B66; color: #0D3B66;" on:click={volver}>Inicia sesión</button>
       </div>
 
       <div class="image-box">
@@ -147,7 +173,7 @@
     display: flex;
     flex-direction: column;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    font-family: 'Poppins', sans-serif; /* Poppins en toda la pestaña */
+    font-family: 'Poppins', sans-serif;
     overflow-x: hidden;
   }
 
@@ -193,7 +219,7 @@
     margin: 0;
     flex-grow: 1;
     text-align: center;
-    padding-left: 32px; /* Alineación visual compensando la X */
+    padding-left: 32px;
   }
 
   .close-btn {
@@ -209,6 +235,19 @@
 
   .close-btn:active {
     opacity: 0.6;
+  }
+
+  /* Estilos de la Alerta Roja */
+  .alert-error {
+    color: #721c24; 
+    background-color: #f8d7da; 
+    padding: 14px; 
+    border-radius: 8px; 
+    text-align: center; 
+    font-weight: 700; 
+    font-size: 14px; 
+    margin-bottom: 20px; 
+    border: 1px solid #f5c6cb;
   }
 
   /* Formulario */

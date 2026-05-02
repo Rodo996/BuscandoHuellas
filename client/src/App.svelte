@@ -184,7 +184,7 @@
         <IniciarSesion
           mensajeAlerta="Debes iniciar sesión para publicar"
           on:irACrearCuenta={() => navegar("perfil", "crear_cuenta")}
-          on:loginExitoso={(e) => { sesionActiva = true; user_id = e.detail.user_id; navegar("publicar"); }}
+          on:loginExitoso={(e) => { sesionActiva = true; user_id = e.detail.user_id; sessionStorage.setItem('user_id', user_id); navegar("publicar"); }}
           on:volver={() => navegar(vistaAnterior)}
         />
       {/if}

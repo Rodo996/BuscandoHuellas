@@ -113,8 +113,14 @@
     </div>
 
     {#if mensajeAlerta}
-      <div style="color: #856404; background-color: #fff3cd; padding: 12px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 5px; border: 1px solid #ffeeba;">
+      <div style="color: #721c24; background-color: #f8d7da; padding: 12px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 5px; border: 1px solid #f5c6cb;">
         {mensajeAlerta}
+      </div>
+    {/if}
+
+    {#if mensajeError}
+      <div style="color: #721c24; background-color: #f8d7da; padding: 12px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 5px; border: 1px solid #f5c6cb;">
+        {mensajeError}
       </div>
     {/if}
 

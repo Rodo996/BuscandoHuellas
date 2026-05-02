@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import pool from '../db.js';
+import { notificarAccionChat } from '../services/notifications.js';
 
 const router = Router();
 
@@ -69,7 +70,7 @@ router.get('/:chat_id/messages', async (req, res) => {
             `SELECT 
                 m.message_no, m.chat_id, m.user_id, m.type,
                 m.content, m.sent_at, m.meet_lat, m.meet_lng,
-                m.meet_date, m.meet_time,
+                m.meet_date, m.meet_time, m.proof_status,
                 i.storage_url AS photo_url
              FROM Messages m
              LEFT JOIN Images i ON i.image_id = m.image_id
@@ -86,7 +87,7 @@ router.get('/:chat_id/messages', async (req, res) => {
 
 // ── Enviar un mensaje ────────────────────────────────────────
 router.post('/:chat_id/messages', async (req, res) => {
-    const { user_id, type, content, meet_lat, meet_lng, meet_date, meet_time } = req.body;
+    const { user_id, type, content, meet_lat, meet_lng, meet_date, meet_time, proof_status } = req.body;
     const conn = await pool.getConnection();
     try {
         const [[{ next_no }]] = await conn.execute(
@@ -97,29 +98,16 @@ router.post('/:chat_id/messages', async (req, res) => {
 
         await conn.execute(
             `INSERT INTO Messages 
-                (message_no, chat_id, user_id, type, content, meet_lat, meet_lng, meet_date, meet_time)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                (message_no, chat_id, user_id, type, content, meet_lat, meet_lng, meet_date, meet_time, proof_status)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [next_no, req.params.chat_id, user_id, type, content,
-             meet_lat ?? null, meet_lng ?? null, meet_date ?? null, meet_time ?? null]
+             meet_lat ?? null, meet_lng ?? null, meet_date ?? null, meet_time ?? null, proof_status ?? null]
         );
 
-        const mensaje = {
-            message_no: next_no,
-            chat_id: Number(req.params.chat_id),
-            user_id,
-            type,
-            content,
-            sent_at: new Date().toISOString(),
-            meet_lat: meet_lat ?? null,
-            meet_lng: meet_lng ?? null,
-            meet_date: meet_date ?? null,
-            meet_time: meet_time ?? null
-        };
-
-        // Emitir a todos en la sala
-        console.log('Emitiendo a sala:', `chat_${req.params.chat_id}`);
-        const io = getIO();
-        io.to(`chat_${req.params.chat_id}`).emit('nuevo_mensaje', mensaje);
+        if (type === 'Proof of Ownership' || type === 'Arrange Meeting') {
+            notificarAccionChat(req.params.chat_id, user_id, type)
+                .catch(err => console.error('[Mail] Error:', err.message));
+        }
 
         res.status(201).json({ message_no: next_no });
     } catch (err) {

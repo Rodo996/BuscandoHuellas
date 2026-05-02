@@ -39,19 +39,10 @@ function mapearMensaje(m) {
             hora: m.meet_time,
             lat: m.meet_lat,
             lng: m.meet_lng,
-            horaMsg: formatearHora(m.sent_at)
+            horaMsg: formatearHora(m.sent_at),
+            meeting_status: m.proof_status  // reutilizamos proof_status para el encuentro
         };
     }
-    if (m.type === 'Proof of Ownership') {
-        return esMio
-            ? { tipo: 'me', texto: 'Solicité prueba de propiedad', hora: formatearHora(m.sent_at) }
-            : { tipo: 'request_proof', hora: formatearHora(m.sent_at) };
-    }
-    return {
-        tipo: esMio ? 'me' : 'other',
-        texto: m.content,
-        hora: formatearHora(m.sent_at)
-    };
     if (m.type === 'Proof of Ownership') {
     if (m.photo_url) {
         return {
@@ -63,7 +54,20 @@ function mapearMensaje(m) {
     return esMio
         ? { tipo: 'me', texto: 'Solicité prueba de propiedad', hora: formatearHora(m.sent_at) }
         : { tipo: 'request_proof', hora: formatearHora(m.sent_at) };
-}
+    }
+    if (m.type === 'Validate Proof') {
+        const textos = {
+            'proof_accepted':   '✅ Prueba de propiedad confirmada',
+            'proof_rejected':   '❌ Prueba de propiedad rechazada',
+            'meeting_accepted': '✅ Encuentro aceptado',
+            'meeting_rejected': '❌ Encuentro rechazado',
+        };
+        return {
+            tipo: esMio ? 'me' : 'other',
+            texto: textos[m.content] ?? m.content,
+            hora: formatearHora(m.sent_at)
+        };
+    }
 }
 
 
@@ -190,6 +194,44 @@ async function adjuntarEvidencia() {
     };
     input.click();
 }
+async function validarPrueba(msg, status) {
+    try {
+        await fetch(`${API}/chats/${contacto.chat_id}/messages`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                user_id: userIdActual,
+                type: 'Validate Proof',
+                content: status === 'accepted' 
+                ? 'proof_accepted'    
+                : 'proof_rejected',
+                proof_status: status
+            })
+        });
+        await cargarMensajes();
+    } catch (e) {
+        console.error('Error validando prueba:', e);
+    }
+}
+async function validarEncuentro(msg, status) {
+    try {
+        await fetch(`${API}/chats/${contacto.chat_id}/messages`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                user_id: userIdActual,
+                type: 'Validate Proof',
+                content: status === 'accepted'
+                    ? 'Encuentro aceptado'
+                    : 'Encuentro rechazado',
+                proof_status: status
+            })
+        });
+        await cargarMensajes();
+    } catch (e) {
+        console.error('Error validando encuentro:', e);
+    }
+}
 onMount(async () => {
     if (!contacto?.chat_id) return;
     await cargarMensajes();
@@ -261,12 +303,30 @@ onDestroy(() => {
               </div>
 
           {:else if msg.tipo === 'map'}
-              <div class="message-row other">
-                  <div class="msg-bubble light-yellow">
-                      <p>{msg.texto}</p>
-                      <span class="time">{msg.hora}</span>
-                  </div>
-              </div>
+    <div class="message-row other">
+        <div class="msg-avatar" style="border-color: {infoContacto.color}">
+            <span>{infoContacto.nombre.charAt(0)}</span>
+        </div>
+        <div class="msg-bubble light-yellow meeting-bubble">
+            <p>📍 <strong>Propuesta de encuentro</strong></p>
+            <p class="meeting-dir">{msg.direccion}</p>
+            <div class="meeting-details">
+                <span>📅 {msg.fecha}</span>
+                <span>🕐 {msg.hora}</span>
+            </div>
+            {#if !msg.meeting_status}
+                <div class="proof-actions">
+                    <button class="btn-confirmar" on:click={() => validarEncuentro(msg, 'accepted')}>
+                        ✅ Aceptar
+                    </button>
+                    <button class="btn-rechazar" on:click={() => validarEncuentro(msg, 'rejected')}>
+                        ❌ Rechazar
+                    </button>
+                </div>
+            {/if}
+            <span class="time">{msg.horaMsg}</span>
+        </div>
+    </div>
             {:else if msg.tipo === 'meeting'}
                 <div class="message-row me">
                     <div class="msg-bubble dark-yellow meeting-bubble">
@@ -306,6 +366,14 @@ onDestroy(() => {
         </div>
         <div class="msg-bubble light-yellow">
             <img src={msg.foto} alt="Evidencia" style="max-width:200px; border-radius:8px;"/>
+            <div class="proof-actions">
+                <button class="btn-confirmar" on:click={() => validarPrueba(msg, 'accepted')}>
+                    ✅ Confirmar
+                </button>
+                <button class="btn-rechazar" on:click={() => validarPrueba(msg, 'rejected')}>
+                    ❌ Rechazar
+                </button>
+            </div>
             <span class="time">{msg.hora}</span>
         </div>
     </div>
@@ -855,5 +923,34 @@ onDestroy(() => {
 .modal-btn.confirmar {
     background: #0D3B66;
     color: white;
+}
+.proof-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.btn-confirmar {
+    background: #D1FAE5;
+    color: #065F46;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.btn-rechazar {
+    background: #FEE2E2;
+    color: #991B1B;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
 }
 </style>

@@ -1,8 +1,10 @@
 <script>
-    import { createEventDispatcher } from 'svelte';
+    import { createEventDispatcher, onMount, onDestroy } from 'svelte';
     import NavBar from './Navbar.svelte';
     import MapPicker from './MapPicker.svelte';
+
     const dispatch = createEventDispatcher();
+    let intervalo;
 
     // 1. Recibimos la información del contacto desde App.svelte
     export let contacto = null;
@@ -15,89 +17,119 @@
     export let user_id = null;
   // Aseguramos que haya un contacto por defecto por si acaso
     $: infoContacto = contacto ?? null;
-
-  // 2. Base de datos simulada de mensajes dinámicos
-  const baseMensajes = {
-      "Laura García": [
-          { tipo: 'other', img: '/Img-Buscar/bernesbuscar.jpg', texto: 'Envío de prueba de propiedad', hora: '10:36 AM' },
-          { tipo: 'me', texto: 'Prueba de propiedad validada', hora: '10:37 AM' },
-          { tipo: 'other', texto: 'Proceso de "acordar encuentro" iniciado', hora: '10:35 AM' },
-          { tipo: 'map', texto: 'Acordar encuentro - Ubicación compartida', cita: '11/02- 18:00', hora: '10:38 AM' },
-          { tipo: 'system' }
-      ],
-      "Rodolfo": [
-          { tipo: 'other', texto: 'Hola, ¿aún buscas a tu perrito? Vi uno similar cerca del centro.', hora: '09:15 AM' },
-          { tipo: 'me', texto: '¡Hola Rodolfo! Sí, sigo buscando. ¿Podrías mandarme alguna foto por favor?', hora: '09:20 AM' }
-      ],
-      "Christian": [
-          { tipo: 'me', texto: 'Christian, muchas gracias por compartir mi publicación.', hora: 'Ayer' },
-          { tipo: 'other', texto: 'De nada, espero de corazón que regrese pronto a casa. ¡Mucha suerte!', hora: 'Ayer' }
-      ]
-  };
-
-  // Mensaje por defecto si el usuario no está en nuestra mini base de datos
-  const msgsDefault = [
-      { tipo: 'other', texto: '¡Hola! Me gustaría platicar sobre la publicación de la mascota.', hora: 'Ahora' }
-  ];
+    const API = 'http://localhost:3000/api'
+    let userIdActual = user_id ?? Number(sessionStorage.getItem('user_id'));
+    $: userIdActual = user_id ?? Number(sessionStorage.getItem('user_id'));
 
   // Cargar la conversación dependiendo del nombre del contacto
   let mensajes = [];
-
- $: {
-    mensajes = infoContacto
-        ? [...(baseMensajes[infoContacto.nombre] || msgsDefault)]
-        : [];
+  let cargandoMensajes = false;
+  function formatearHora(fecha) {
+        return new Date(fecha).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+    }
+    // Mapear formato BD → formato template
+function mapearMensaje(m) {
+    console.log('mapeando mensaje:', m.type, 'photo_url:', m.photo_url);
+    const esMio = m.user_id === userIdActual;
+    if (m.type === 'Arrange Meeting') {
+        return {
+            tipo: esMio ? 'meeting' : 'map',
+            direccion: m.content,
+            fecha: m.meet_date,
+            hora: m.meet_time,
+            lat: m.meet_lat,
+            lng: m.meet_lng,
+            horaMsg: formatearHora(m.sent_at)
+        };
+    }
+    if (m.type === 'Proof of Ownership') {
+        return esMio
+            ? { tipo: 'me', texto: 'Solicité prueba de propiedad', hora: formatearHora(m.sent_at) }
+            : { tipo: 'request_proof', hora: formatearHora(m.sent_at) };
+    }
+    return {
+        tipo: esMio ? 'me' : 'other',
+        texto: m.content,
+        hora: formatearHora(m.sent_at)
+    };
+    if (m.type === 'Proof of Ownership') {
+    if (m.photo_url) {
+        return {
+            tipo: esMio ? 'me_foto' : 'other_foto',
+            foto: m.photo_url,
+            hora: formatearHora(m.sent_at)
+        };
+    }
+    return esMio
+        ? { tipo: 'me', texto: 'Solicité prueba de propiedad', hora: formatearHora(m.sent_at) }
+        : { tipo: 'request_proof', hora: formatearHora(m.sent_at) };
 }
+}
+
+
 
     function volver() { dispatch('volver'); }
-    function accion(tipoAccion) {
-    if (tipoAccion === 'Prueba de propiedad') {
-        mensajes = [...mensajes, {
-            tipo: 'me',
-            texto: 'Solicité prueba de propiedad',
-            hora: horaActual()
-        }];
-        setTimeout(() => {
-            mensajes = [...mensajes, {
-                tipo: 'request_proof',
-                from: 'other',
-                hora: horaActual()
-            }];
-        }, 800);
-    }
+    async function accion(tipoAccion) {
+        console.log('user_id al enviar:', user_id, 'userIdActual:', userIdActual);
+        if (!contacto?.chat_id) return;
 
-    if (tipoAccion === 'Acordar encuentro') {
-        // Abre el modal en lugar de mandar mensaje directo
-        mostrarModalEncuentro = true;
+        if (tipoAccion === 'Prueba de propiedad') {
+    try {
+        await fetch(`${API}/chats/${contacto.chat_id}/messages`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                user_id: userIdActual,
+                type: 'Proof of Ownership',
+                content: 'Solicitud de prueba de propiedad'
+            })
+        });
+        await cargarMensajes(); // ← recargar inmediatamente
+    } catch (e) {
+        console.error('Error enviando mensaje:', e);
     }
 }
+
+        if (tipoAccion === 'Acordar encuentro') {
+            mostrarModalEncuentro = true;
+        }
+    }
     // Hora formateada para los mensajes
-function horaActual() {
-    return new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
-}
+    function horaActual() {
+        return new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+    }
 
-// Confirmar el encuentro desde el modal
-function confirmarEncuentro() {
-    if (!encuentroFecha || !encuentroHora || !encuentroUbicacion) return;
+    // Confirmar el encuentro desde el modal
+    async function confirmarEncuentro() {
+        if (!encuentroFecha || !encuentroHora || !encuentroUbicacion) return;
+        if (!contacto?.chat_id) return;
 
-    mensajes = [...mensajes, {
-        tipo: 'meeting',
-        texto: `📍 Encuentro acordado`,
-        direccion: encuentroDireccion,
-        fecha: encuentroFecha,
-        hora: encuentroHora,
-        lat: encuentroUbicacion.lat,
-        lng: encuentroUbicacion.lng,
-        horaMsg: horaActual()
-    }];
+        try {
+            await fetch(`${API}/chats/${contacto.chat_id}/messages`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id,
+                    type: 'Arrange Meeting',
+                    content: encuentroDireccion,
+                    meet_lat: encuentroUbicacion.lat,
+                    meet_lng: encuentroUbicacion.lng,
+                    meet_date: encuentroFecha,
+                    meet_time: encuentroHora
+                })
+            });
 
-    // Resetear y cerrar modal
-    mostrarModalEncuentro = false;
-    encuentroFecha = '';
-    encuentroHora = '';
-    encuentroUbicacion = null;
-    encuentroDireccion = '';
-}
+            await cargarMensajes();
+
+            mostrarModalEncuentro = false;
+            encuentroFecha = '';
+            encuentroHora = '';
+            encuentroUbicacion = null;
+            encuentroDireccion = '';
+        } catch (e) {
+            console.error('Error guardando encuentro:', e);
+        }
+    }
     // 🤖 Respuestas simuladas
     function generarRespuesta(tipo) {
         if (tipo === 'Prueba de propiedad') {
@@ -111,10 +143,62 @@ function confirmarEncuentro() {
         return 'Ok 👍';
     }
 
-function confirmarCierreCaso() {
-    mostrarConfirmacion = false;
-    dispatch('cerrarCaso', { contactoId: contacto.id });
+    async function confirmarCierreCaso() {
+        mostrarConfirmacion = false;
+        try {
+            await fetch(`${API}/chats/${contacto.chat_id}/close`, {
+                method: 'PATCH'
+            });
+        } catch (e) {
+            console.error('Error cerrando caso:', e);
+        }
+        dispatch('cerrarCaso', { contactoId: contacto.id });
+    }
+    async function cargarMensajes() {
+    if (!contacto?.chat_id) return;
+    try {
+        const res = await fetch(`${API}/chats/${contacto.chat_id}/messages`);
+        if (!res.ok) return;
+        const data = await res.json();
+        mensajes = data.map(m => mapearMensaje(m));
+    } catch (e) {
+        console.error('Error cargando mensajes:', e);
+    }
 }
+async function adjuntarEvidencia() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('image', file);
+        formData.append('user_id', userIdActual);
+
+        try {
+            const res = await fetch(`${API}/images/upload/chat/${contacto.chat_id}`, {
+                method: 'POST',
+                body: formData
+            });
+            if (!res.ok) throw new Error();
+            await cargarMensajes(); // recargar para mostrar la imagen
+        } catch (e) {
+            console.error('Error subiendo imagen:', e);
+        }
+    };
+    input.click();
+}
+onMount(async () => {
+    if (!contacto?.chat_id) return;
+    await cargarMensajes();
+    intervalo = setInterval(cargarMensajes, 3000);
+});
+
+onDestroy(() => {
+    clearInterval(intervalo);
+});
 </script>
 
 <div class="app-container">
@@ -152,6 +236,7 @@ function confirmarCierreCaso() {
       <div class="date-pill">Hoy</div>
 
       {#each mensajes as msg}
+        
           {#if msg.tipo === 'other'}
               <div class="message-row other">
                   <div class="msg-avatar" style="border-color: {infoContacto.color}">
@@ -162,7 +247,11 @@ function confirmarCierreCaso() {
                       <span class="time">{msg.hora}</span>
                   </div>
               </div>
-
+            {#if cargandoMensajes}
+                <p style="text-align:center; padding:24px; font-family:Poppins; color:#0D3B66;">
+                    Cargando mensajes...
+                </p>
+            {/if}
           {:else if msg.tipo === 'me'}
               <div class="message-row me">
                   <div class="msg-bubble dark-yellow">
@@ -195,14 +284,31 @@ function confirmarCierreCaso() {
             <div class="msg-bubble light-yellow proof-card">
                 <p><strong>Se te ha solicitado una prueba de propiedad</strong></p>
                 
-                <button class="btn-evidencia">
+                <button class="btn-evidencia" on:click={adjuntarEvidencia}>
                     Adjuntar evidencia
                 </button>
 
                 <span class="time">{msg.hora}</span>
             </div>
     </div>
+        {:else if msg.tipo === 'me_foto'}
+    <div class="message-row me">
+        <div class="msg-bubble dark-yellow">
+            <img src={msg.foto} alt="Evidencia" style="max-width:200px; border-radius:8px;"/>
+            <span class="time">{msg.hora}</span>
+        </div>
+    </div>
 
+{:else if msg.tipo === 'other_foto'}
+    <div class="message-row other">
+        <div class="msg-avatar" style="border-color: {infoContacto.color}">
+            <span>{infoContacto.nombre.charAt(0)}</span>
+        </div>
+        <div class="msg-bubble light-yellow">
+            <img src={msg.foto} alt="Evidencia" style="max-width:200px; border-radius:8px;"/>
+            <span class="time">{msg.hora}</span>
+        </div>
+    </div>
           {/if}
       {/each}
   </div>

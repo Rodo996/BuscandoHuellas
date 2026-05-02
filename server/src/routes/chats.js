@@ -3,23 +3,18 @@ import pool from '../db.js';
 
 const router = Router();
 
-// ── Obtener o crear un chat entre dos usuarios para un post ──
-// POST /api/chats
+// ── Obtener o crear un chat ──────────────────────────────────
 router.post('/', async (req, res) => {
     const { post_id, user_sender, user_receiver } = req.body;
     const conn = await pool.getConnection();
     try {
-        // Si ya existe un chat para este post entre estos usuarios, lo devuelve
         const [[existing]] = await conn.execute(
             `SELECT chat_id FROM Chats 
              WHERE post_id = ? AND user_sender = ? AND user_receiver = ?`,
             [post_id, user_sender, user_receiver]
         );
-        if (existing) {
-            return res.json({ chat_id: existing.chat_id });
-        }
+        if (existing) return res.json({ chat_id: existing.chat_id });
 
-        // Si no existe, lo crea
         const [result] = await conn.execute(
             `INSERT INTO Chats (post_id, user_sender, user_receiver) VALUES (?, ?, ?)`,
             [post_id, user_sender, user_receiver]
@@ -34,22 +29,16 @@ router.post('/', async (req, res) => {
 });
 
 // ── Obtener todos los chats de un usuario ────────────────────
-// GET /api/chats/:user_id
 router.get('/:user_id', async (req, res) => {
     try {
         const [rows] = await pool.execute(
             `SELECT 
-                c.chat_id,
-                c.post_id,
-                c.status,
-                c.created_at,
-                -- Info del otro usuario
+                c.chat_id, c.post_id, c.status, c.created_at,
                 CASE 
                     WHEN c.user_sender = ? THEN c.user_receiver
                     ELSE c.user_sender
                 END AS other_user_id,
                 u.name AS other_user_name,
-                -- Último mensaje
                 (SELECT content FROM Messages m 
                  WHERE m.chat_id = c.chat_id 
                  ORDER BY m.sent_at DESC LIMIT 1) AS last_message,
@@ -63,7 +52,7 @@ router.get('/:user_id', async (req, res) => {
              END
              WHERE c.user_sender = ? OR c.user_receiver = ?
              ORDER BY last_message_at DESC`,
-            [req.params.user_id, req.params.user_id, 
+            [req.params.user_id, req.params.user_id,
              req.params.user_id, req.params.user_id]
         );
         res.json(rows);
@@ -74,21 +63,13 @@ router.get('/:user_id', async (req, res) => {
 });
 
 // ── Obtener mensajes de un chat ──────────────────────────────
-// GET /api/chats/:chat_id/messages
 router.get('/:chat_id/messages', async (req, res) => {
     try {
         const [rows] = await pool.execute(
             `SELECT 
-                m.message_no,
-                m.chat_id,
-                m.user_id,
-                m.type,
-                m.content,
-                m.sent_at,
-                m.meet_lat,
-                m.meet_lng,
-                m.meet_date,
-                m.meet_time,
+                m.message_no, m.chat_id, m.user_id, m.type,
+                m.content, m.sent_at, m.meet_lat, m.meet_lng,
+                m.meet_date, m.meet_time,
                 i.storage_url AS photo_url
              FROM Messages m
              LEFT JOIN Images i ON i.image_id = m.image_id
@@ -104,12 +85,10 @@ router.get('/:chat_id/messages', async (req, res) => {
 });
 
 // ── Enviar un mensaje ────────────────────────────────────────
-// POST /api/chats/:chat_id/messages
 router.post('/:chat_id/messages', async (req, res) => {
     const { user_id, type, content, meet_lat, meet_lng, meet_date, meet_time } = req.body;
     const conn = await pool.getConnection();
     try {
-        // message_no es secuencial por chat
         const [[{ next_no }]] = await conn.execute(
             `SELECT COALESCE(MAX(message_no), 0) + 1 AS next_no 
              FROM Messages WHERE chat_id = ?`,
@@ -124,6 +103,24 @@ router.post('/:chat_id/messages', async (req, res) => {
              meet_lat ?? null, meet_lng ?? null, meet_date ?? null, meet_time ?? null]
         );
 
+        const mensaje = {
+            message_no: next_no,
+            chat_id: Number(req.params.chat_id),
+            user_id,
+            type,
+            content,
+            sent_at: new Date().toISOString(),
+            meet_lat: meet_lat ?? null,
+            meet_lng: meet_lng ?? null,
+            meet_date: meet_date ?? null,
+            meet_time: meet_time ?? null
+        };
+
+        // Emitir a todos en la sala
+        console.log('Emitiendo a sala:', `chat_${req.params.chat_id}`);
+        const io = getIO();
+        io.to(`chat_${req.params.chat_id}`).emit('nuevo_mensaje', mensaje);
+
         res.status(201).json({ message_no: next_no });
     } catch (err) {
         console.error(err);
@@ -134,7 +131,6 @@ router.post('/:chat_id/messages', async (req, res) => {
 });
 
 // ── Cerrar un chat ───────────────────────────────────────────
-// PATCH /api/chats/:chat_id/close
 router.patch('/:chat_id/close', async (req, res) => {
     try {
         await pool.execute(

@@ -47,14 +47,18 @@
     if (sesionActiva) navegar("perfil", "editar_perfil");
     else navegar("perfil", "iniciar_sesion");
   };
-  const irAChats = () => navegar("chats");
+  
+  // Guardamos la vista anterior por si el usuario cancela el login de chats
+  const irAChats = () => { vistaAnterior = vistaActual; navegar("chats"); };
+  
   const irAChat = (event) => {
+    vistaAnterior = vistaActual;
+    // Guardamos vista por si requiere login
     if (event && event.detail) contactoActivo = event.detail;
     else contactoActivo = { nombre: "Dueño", color: "#F4D35E" };
     navegar("chat", contactoActivo.id);
   };
 
-  // ← CAMBIO 1: incluye el ID en la URL
   const irAPublicacion = (event) => {
     mascotaSeleccionada = event.detail;
     navegar("publicacion", mascotaSeleccionada.id);
@@ -79,7 +83,6 @@
     (async () => {
       cargarNotificaciones();
 
-      // ← CAMBIO 2: carga mascota directamente si entran por URL /publicacion/:id
       if (vistaActual === "publicacion" && subVista) {
         try {
           const res = await fetch(`${API}/mascotas/${subVista}`);
@@ -157,7 +160,6 @@
     {:else if vistaActual === "ficha_exito"}
       <FichaExito caso={casoSeleccionado} on:volver={() => navegar("casos_exito")} />
 
-    <!-- ← CAMBIO 3: muestra loading si entra por URL directa -->
     {:else if vistaActual === "publicacion"}
       {#if mascotaSeleccionada}
         <Publicacion
@@ -190,15 +192,33 @@
       {/if}
 
     {:else if vistaActual === "chats"}
-      <Chats {user_id} on:volver={irAInicio} on:abrirChat={irAChat} />
+      {#if sesionActiva && user_id}
+        <Chats {user_id} on:volver={irAInicio} on:abrirChat={irAChat} />
+      {:else}
+        <IniciarSesion
+          mensajeAlerta="Debes iniciar sesión para acceder a chats"
+          on:irACrearCuenta={() => navegar("perfil", "crear_cuenta")}
+          on:loginExitoso={(e) => { sesionActiva = true; user_id = e.detail.user_id; navegar("chats"); }}
+          on:volver={() => navegar(vistaAnterior)}
+        />
+      {/if}
 
     {:else if vistaActual === "chat"}
-      {#if cargandoContacto}
-        <div style="display:flex; justify-content:center; align-items:center; height:100vh;">
-          <p style="font-family:Poppins; color:#0D3B66; font-weight:600;">Cargando...</p>
-        </div>
+      {#if sesionActiva && user_id}
+        {#if cargandoContacto}
+          <div style="display:flex; justify-content:center; align-items:center; height:100vh;">
+            <p style="font-family:Poppins; color:#0D3B66; font-weight:600;">Cargando...</p>
+          </div>
+        {:else}
+          <Chat contacto={contactoActivo} {user_id} on:volver={irAChats} on:cerrarCaso={() => navegar("caso_cerrado")} />
+        {/if}
       {:else}
-        <Chat contacto={contactoActivo} {user_id} on:volver={irAChats} on:cerrarCaso={() => navegar("caso_cerrado")} />
+        <IniciarSesion
+          mensajeAlerta="Debes iniciar sesión para acceder a chats"
+          on:irACrearCuenta={() => navegar("perfil", "crear_cuenta")}
+          on:loginExitoso={(e) => { sesionActiva = true; user_id = e.detail.user_id; navegar("chat", subVista); }}
+          on:volver={() => navegar(vistaAnterior)}
+        />
       {/if}
 
     {:else if vistaActual === "perfil"}
@@ -251,6 +271,7 @@
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
     overflow-x: clip;
   }
+
   @media (max-width: 400px) {
     :global(.app-container) { box-shadow: none; }
   }

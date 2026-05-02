@@ -12,6 +12,7 @@ import imagesRouter from './routes/images.js';
 import notificationsRouter from './routes/notifications.js';
 import casosExitoRouter from './routes/casosExito.js';
 import chatsRouter from './routes/chats.js';
+import { enviarRecordatorios } from './services/chatReminder.js';
 
 const app = express();
 
@@ -33,6 +34,9 @@ app.use('/api/notifications', notificationsRouter);
 app.use('/api/casos-exito', casosExitoRouter);
 app.use('/api/chats', chatsRouter);
 
+setInterval(() => {
+    enviarRecordatorios().catch(err => console.error('[Cron]', err.message));
+}, 60 * 1000);
 app.listen(process.env.PORT, () =>
     console.log(`Server corriendo en http://localhost:${process.env.PORT}`)
 );

@@ -66,14 +66,74 @@ const confirmarPublicacion = async () => {
 </script>
 
 <div class="app-container">
-  <header class="top-brand-header">
-    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-      <polyline points="2,17 18,4 34,17" stroke="#F4D35E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-      <rect x="7" y="16" width="22" height="16" rx="1" stroke="#F4D35E" stroke-width="2.5" fill="none"/>
+  <div class="top-brand-header">
+    <svg
+      width="36"
+      height="36"
+      viewBox="0 0 36 36"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <!-- Tejado -->
+      <polyline
+        points="2,17 18,4 34,17"
+        stroke="#F4D35E"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        fill="none"
+      />
+      <!-- Paredes -->
+      <rect
+        x="7"
+        y="16"
+        width="22"
+        height="16"
+        rx="1"
+        stroke="#F4D35E"
+        stroke-width="2.5"
+        fill="none"
+      />
+      <!-- Huella: 4 dedos (ovalados, inclinados) -->
+      <ellipse
+        cx="12.5"
+        cy="21"
+        rx="1.3"
+        ry="1.8"
+        transform="rotate(-20 12.5 21)"
+        fill="#F4D35E"
+      />
+      <ellipse
+        cx="15.8"
+        cy="19.5"
+        rx="1.3"
+        ry="1.8"
+        transform="rotate(-6 15.8 19.5)"
+        fill="#F4D35E"
+      />
+      <ellipse
+        cx="19.2"
+        cy="19.5"
+        rx="1.3"
+        ry="1.8"
+        transform="rotate(6 19.2 19.5)"
+        fill="#F4D35E"
+      />
+      <ellipse
+        cx="22.5"
+        cy="21"
+        rx="1.3"
+        ry="1.8"
+        transform="rotate(20 22.5 21)"
+        fill="#F4D35E"
+      />
+      <!-- Almohadilla central (ovalada horizontal) -->
       <ellipse cx="17.5" cy="25.5" rx="3.2" ry="2.4" fill="#F4D35E" />
     </svg>
-    <span class="text-white">Buscando</span><span class="text-yellow">Huellas</span>
-  </header>
+    <span class="text-white">Buscando</span><span class="text-yellow"
+      >Huellas</span
+    >
+  </div>
 
   <div class="page-header">
     <h1 class="page-title">Cerrar caso</h1>

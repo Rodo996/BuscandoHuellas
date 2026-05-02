@@ -107,14 +107,6 @@
         <button type="button" class="btn-primary" style="background-color: transparent; border: 2px solid #0D3B66; color: #0D3B66;" on:click={volver}>Inicia sesión</button>
       </div>
       <div class="navbar-spacer"></div>
-
-      <div class="login-prompt-section">
-        <p>¿Ya tienes una cuenta?</p>
-        <button type="button" class="btn-primary" on:click={volver}>Inicia sesión</button>
-      </div>
-
-      <button type="submit" class="btn-primary">Continuar</button>
-
     </form>
   </main>
 </div>
@@ -239,7 +231,7 @@
 
   /* ESPACIO PARA EL NAVBAR */
   .navbar-spacer {
-    height: 120px;
+    height: 50px;
     width: 100%;
   }
 </style>

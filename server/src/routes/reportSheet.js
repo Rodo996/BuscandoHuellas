@@ -57,6 +57,7 @@ router.get("/", async (req, res) => {
                 SELECT post_id FROM Posts
                 WHERE pet_id = p.pet_id
                   AND type != 'Success Story'
+                  AND status = 'Active'
                 ORDER BY date DESC
                 LIMIT 1
             )
@@ -134,6 +135,7 @@ router.get("/:id", async (req, res) => {
                 SELECT post_id FROM Posts
                 WHERE pet_id = p.pet_id
                   AND type != 'Success Story'
+                  AND status = 'Active'
                 ORDER BY date DESC
                 LIMIT 1
             )

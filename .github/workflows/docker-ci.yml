@@ -43,7 +43,7 @@ jobs:
         run: sleep 10
 
       - name: Verificar que el servidor Express responde
-        run: curl --fail http://localhost:3000 || exit 1
+        run: curl --fail http://localhost:3000/health || exit 1
 
       - name: Apagar contenedores
         if: always()

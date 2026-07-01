@@ -23,6 +23,10 @@ pool.getConnection()
     .then(conn => { console.log('Conectado a MySQL'); conn.release(); })
     .catch(err => console.error('Error de conexión:', err.message));
 
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'OK' });
+});
+
 app.use('/api/posts', postsRouter);
 app.use('/api/catalogs', catalogsRouter);
 app.use('/api/mascotas', reportSheetRouter);

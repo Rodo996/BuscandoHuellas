@@ -1,0 +1,29 @@
+# Dependencias
+node_modules
+**/node_modules
+
+# Git
+.git
+.gitignore
+
+# Variables de entorno
+.env
+.env.*
+**/.env
+
+# Archivos del IDE
+.idea
+.vscode
+**/.DS_Store
+
+# Código compilado
+dist
+build
+
+# Logs
+*.log
+logs/
+
+# Documentación
+*.md
+README*

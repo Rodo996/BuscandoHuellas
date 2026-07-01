@@ -1,0 +1,38 @@
+# Lista de todos los contenedores que Docker va a crear
+services:
+  server:
+    # Construye la imagen desde el Dockerfile en la carpeta indicada
+    build:
+      ./server
+    # Si Express se detiene, Docker reinicia automáticamente el contenedor
+    # Ignorado si se corre docker compose down
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./server/.env
+    volumes:
+      # Busca sincronizar la carpeta local /server con /app, con los ":" dices que esa carpeta está en local
+      - ./server:/app
+      - /app/node_modules
+  client:
+    build:
+      ./client
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./client/src:/app/src
+      - ./client/public:/app/public
+      - ./client/Img-Buscar:/app/Img-Buscar
+      - ./client/Img-Inicio:/app/Img-Inicio
+      - /app/node_modules
+    environment:
+      # Le dice a Vite y a las librerías que el entorno es de desarrollo
+      # por lo que mostrará más logs, source maps, etc. Para debugging
+      - NODE_ENV=development
+      # Vite usa Chokidar para detectar cambios de archivos.
+      # En Docker sobre macOS, el filesystem no emite eventos nativos,
+      # por lo que polling activo es necesario para el hot-reload.
+      - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - server

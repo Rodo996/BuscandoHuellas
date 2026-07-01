@@ -1,0 +1,20 @@
+version: 2
+updates:
+  # Le dice a Dependabot que revise el package.json
+  - package-ecosystem: npm
+    directory: "/client"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: npm
+    directory: "/server"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  # Dependabot revisa el FROM y abre un PR actualizando dicha línea
+  - package-ecosystem: docker
+    directory: "/"
+    schedule:
+      interval: weekly

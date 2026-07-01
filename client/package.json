@@ -16,5 +16,8 @@
   "dependencies": {
     "leaflet": "^1.9.4",
     "socket.io-client": "^4.8.3"
+  },
+  "allowScripts": {
+    "fsevents@2.3.3": true
   }
 }

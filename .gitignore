@@ -2,14 +2,36 @@
 .env
 .env.local
 .env.*.local
+.env.production
+.env.development
 
 # Dependencias
 node_modules/
+**/node_modules/
 
 # Logs
 *.log
 npm-debug.log*
+logs/
 
 # Sistema operativo
 .DS_Store
 Thumbs.db
+**/.DS_Store
+
+# Vite / build
+dist/
+dist-ssr/
+*.local
+
+# IDE
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Coverage / testing
+coverage/
+.nyc_output/

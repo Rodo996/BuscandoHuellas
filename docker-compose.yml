@@ -2,8 +2,7 @@
 services:
   server:
     # Construye la imagen desde el Dockerfile en la carpeta indicada
-    build:
-      ./server
+    build: ./server
     # Si Express se detiene, Docker reinicia automáticamente el contenedor
     # Ignorado si se corre docker compose down
     restart: unless-stopped
@@ -16,8 +15,7 @@ services:
       - ./server:/app
       - /app/node_modules
   client:
-    build:
-      ./client
+    build: ./client
     ports:
       - "5173:5173"
     volumes:
